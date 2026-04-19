@@ -88,7 +88,10 @@ export function DemoPanel() {
             <MemoryGraph.Title>
               Memory <em>Graph</em>
             </MemoryGraph.Title>
-            <MemoryGraph.CloseButton />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <MemoryGraph.AnnotationsTrackToggle />
+              <MemoryGraph.CloseButton />
+            </div>
           </MemoryGraph.TitleRow>
           <MemoryGraph.Stats />
         </MemoryGraph.Head>
@@ -107,7 +110,9 @@ export function DemoPanel() {
           </MemoryGraph.FooterGroup>
         </MemoryGraph.Footer>
       </MemoryGraph.Panel>
+      <MemoryGraph.AnnotationsTrack />
       <MemoryGraph.SelectionToolbar />
+      <MemoryGraph.LinkReveal />
       <MemoryGraph.PinToast />
       <MemoryGraph.Tooltip />
       <MemoryGraph.KeyboardShortcuts />

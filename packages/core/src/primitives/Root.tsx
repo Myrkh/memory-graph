@@ -7,13 +7,19 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react';
-import { DEFAULT_CONFIG, type MemoryGraphConfig, type ParagraphId } from '../types.js';
+import {
+  DEFAULT_CONFIG,
+  type AnnotationId,
+  type MemoryGraphConfig,
+  type ParagraphId,
+} from '../types.js';
 import { useMemoryGraphState } from '../hooks/useMemoryGraphState.js';
 import { usePersistence } from '../hooks/usePersistence.js';
 import { useAttentionTracker } from '../hooks/useAttentionTracker.js';
 import {
   MemoryGraphContext,
   type HoverState,
+  type LinkingMode,
   type MemoryGraphContextValue,
 } from './context.js';
 
@@ -138,6 +144,53 @@ export function Root(props: RootProps) {
 
   const [hover, setHover] = useState<HoverState | null>(null);
 
+  /* -- Linking mode (Innovation 04) ------------------------------------ */
+
+  const [linkingMode, setLinkingMode] = useState<LinkingMode | null>(null);
+
+  /* -- Hovered annotation (Innovation 04 · link reveal) --------------- */
+
+  const [hoveredAnnotationId, setHoveredAnnotation] =
+    useState<AnnotationId | null>(null);
+
+  /* -- Annotations Track (side column) -------------------------------- */
+
+  const [trackOpen, setTrackOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) setTrackOpen(false);
+  }, [open]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const body = document.body;
+    if (linkingMode) body.setAttribute('data-mg-linking', '');
+    else body.removeAttribute('data-mg-linking');
+    return () => body.removeAttribute('data-mg-linking');
+  }, [linkingMode]);
+
+  useEffect(() => {
+    if (!linkingMode) return;
+    const onKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setLinkingMode(null);
+      }
+    };
+    const onClickOutside = (e: MouseEvent): void => {
+      if (!(e.target instanceof Element)) return;
+      // Keep mode active if the click lands on an annotation or a satellite.
+      if (e.target.closest('[data-mg-annotation-id]')) return;
+      setLinkingMode(null);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('mousedown', onClickOutside);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('mousedown', onClickOutside);
+    };
+  }, [linkingMode]);
+
   /* -- Bidirectional hover (paragraph ↔ node) -------------------------- */
 
   const [hoveredNodeId, setHoveredNodeState] = useState<ParagraphId | null>(null);
@@ -180,6 +233,12 @@ export function Root(props: RootProps) {
       setHover,
       hoveredNodeId,
       setHoveredNode,
+      linkingMode,
+      setLinkingMode,
+      hoveredAnnotationId,
+      setHoveredAnnotation,
+      trackOpen,
+      setTrackOpen,
     }),
     [
       config,
@@ -202,10 +261,16 @@ export function Root(props: RootProps) {
       hover,
       hoveredNodeId,
       setHoveredNode,
+      linkingMode,
+      hoveredAnnotationId,
+      trackOpen,
     ],
   );
 
-  const rootDataProps = open ? { 'data-mg-open': '' } : {};
+  const rootDataProps = {
+    ...(open ? { 'data-mg-open': '' } : {}),
+    ...(trackOpen ? { 'data-mg-track-open': '' } : {}),
+  };
 
   return (
     <MemoryGraphContext.Provider value={value}>

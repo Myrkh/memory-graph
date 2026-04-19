@@ -1,16 +1,14 @@
 /* ============================================================================
- * Annotations (Innovation 03) — coral underline in-text, micro selection
- * toolbar, inline note editor, and satellite diamonds on the graph.
+ * Annotation span (in-text coral underline + subtle tint) and its tooltip
+ * note extension. Toolbar + editor + graph satellites + linking mode each
+ * live in their own focused files alongside this one.
+ *
+ * Visually distinct from a live selection (which is themed separately in
+ * stit-claude.css via ::selection): annotation = underline + low-opacity
+ * tint; selection = filled background with inverted color. The reader can
+ * tell "this was annotated" vs. "this is selected right now" at a glance.
  * ==========================================================================*/
 
-/* -- In-text underline ------------------------------------------------- */
-
-/**
- * Annotation span. Visually distinct from a live selection (which is
- * themed separately in stit-claude.css via ::selection) by the combination
- * of a persistent underline AND a subtle background tint — so the reader
- * can tell at rest "this was annotated" vs. "this is selected right now".
- */
 .mg-annotation {
   background: color-mix(in oklch, var(--mg-accent) 5%, transparent);
   color: inherit;
@@ -28,187 +26,56 @@
   background: color-mix(in oklch, var(--mg-accent) 14%, transparent);
 }
 
-/* -- Selection toolbar ------------------------------------------------- */
-
-.mg-selection-toolbar-anchor {
-  position: fixed;
-  z-index: 70;
-  opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity 180ms var(--mg-ease-spring-smooth, ease-out),
-              transform 220ms var(--mg-ease-spring-smooth, ease-out);
-}
-.mg-selection-toolbar-anchor[data-mg-visible] {
-  opacity: 1;
-  transform: translateY(0);
-}
-.mg-selection-toolbar-anchor[data-mg-flipped] {
-  transform: translateY(6px);
-}
-.mg-selection-toolbar-anchor[data-mg-visible][data-mg-flipped] {
-  transform: translateY(0);
-}
-
-.mg-selection-toolbar {
-  background: var(--mg-bg);
-  color: var(--mg-fg);
-  border: 1px solid var(--mg-border);
-  border-radius: var(--mg-radius-md, 10px);
-  box-shadow: 0 10px 28px color-mix(in oklch, var(--mg-fg) 18%, transparent);
-  padding: 6px;
-  font-family: var(--mg-font-mono);
-  user-select: none;
-}
-
-.mg-selection-toolbar__actions {
-  display: flex;
-  gap: 2px;
-}
-
-.mg-selection-toolbar__btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  background: transparent;
-  border: 0;
-  border-radius: 6px;
-  color: var(--mg-fg-muted);
-  font-family: inherit;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
-              color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
-}
-.mg-selection-toolbar__btn:hover,
-.mg-selection-toolbar__btn:focus-visible {
-  background: color-mix(in oklch, var(--mg-accent) 10%, transparent);
-  color: var(--mg-accent);
-  outline: none;
-}
-
-.mg-selection-toolbar__glyph {
-  color: var(--mg-accent);
-  font-size: 12px;
-}
-
-/* -- Note editor ------------------------------------------------------- */
-
-.mg-note-editor {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 4px 6px 6px;
-  min-width: 280px;
-  max-width: 420px;
-}
-
-.mg-note-editor__input {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 56px;
-  max-height: 180px;
-  background: var(--mg-surface);
-  color: var(--mg-fg);
-  border: 1px solid var(--mg-border);
-  border-radius: 6px;
-  padding: 8px 10px;
-  font-family: var(--mg-font-mono);
-  font-size: 11px;
-  line-height: 1.55;
-  letter-spacing: 0.02em;
-  resize: none;
-  outline: none;
-  transition: border-color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
-}
-.mg-note-editor__input::placeholder {
-  color: var(--mg-fg-subtle);
-}
-.mg-note-editor__input:focus {
-  border-color: var(--mg-accent);
-}
-
-/* Preview: tinted background + rounded corners — no border-left to avoid
- * the coral bar sticking out of the toolbar's rounded corners. */
-.mg-note-editor__preview {
-  padding: 8px 12px;
-  font-family: var(--mg-font-serif);
-  font-style: italic;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--mg-fg);
-  background: color-mix(in oklch, var(--mg-accent) 7%, transparent);
-  border-radius: 6px;
-}
-.mg-note-editor__preview em { font-style: italic; }
-.mg-note-editor__preview strong { font-weight: 700; font-style: normal; color: var(--mg-accent); }
-
-.mg-note-editor__hint {
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--mg-fg-subtle);
-  padding: 0 2px;
-}
-.mg-note-editor__hint kbd {
+/**
+ * Linked annotation (Innovation 04) — a subtle chevron after the underline
+ * signals that this passage points elsewhere. The graph shows the arc; the
+ * text shows the outgoing intent. Same coral as the underline, no extra
+ * color, no extra glyph elsewhere. `text-decoration: none` on the pseudo
+ * element prevents the chevron from inheriting the parent's underline.
+ */
+.mg-annotation[data-mg-has-link]::after {
+  content: '›';
   display: inline-block;
-  padding: 1px 5px;
-  margin: 0 1px;
-  background: var(--mg-surface);
-  border: 1px solid var(--mg-border);
-  border-radius: 3px;
-  font-family: inherit;
-  font-size: 9px;
-  letter-spacing: 0;
-  color: var(--mg-fg-muted);
-}
-
-/* -- Satellites on the graph ------------------------------------------ */
-
-.mg-annotation-satellites { pointer-events: auto; }
-
-/* No transition on the <g>: it carries the positioning SVG attr
- * `transform="translate(x,y) rotate(45)"`; animating that via CSS would
- * fight React re-renders on every mousemove and cause a jitter. */
-.mg-annotation-satellite {
-  cursor: pointer;
-}
-
-.mg-annotation-satellite__shape {
-  fill: var(--mg-accent);
-  stroke: var(--mg-bg);
-  stroke-width: 1;
-  transition: fill-opacity var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
-}
-.mg-annotation-satellite:hover .mg-annotation-satellite__shape {
-  fill-opacity: 0.82;
-}
-
-.mg-annotation-satellite__bg {
-  fill: var(--mg-accent);
-  stroke: var(--mg-bg);
-  stroke-width: 1;
-  transition: fill-opacity var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
-}
-.mg-annotation-satellite:hover .mg-annotation-satellite__bg {
-  fill-opacity: 0.82;
-}
-
-.mg-annotation-satellite__badge-text {
-  font-family: var(--mg-font-mono);
-  font-size: 6px;
+  color: var(--mg-accent);
+  font-size: 10px;
   font-weight: 700;
-  fill: var(--mg-bg);
-  text-anchor: middle;
-  dominant-baseline: middle;
-  pointer-events: none;
+  padding-left: 2px;
+  text-decoration: none;
+  vertical-align: baseline;
+  line-height: 1;
+  opacity: 0.55;
+  transition: opacity 180ms var(--mg-ease-standard, ease-out);
+}
+.mg-annotation[data-mg-has-link]:hover::after {
+  opacity: 1;
 }
 
-/* -- Tooltip note extension ------------------------------------------- */
+/**
+ * Counterpart highlight — when the reader hovers annotation A, every
+ * annotation B linked from A gets a subtle outline. Delayed fade-in so
+ * the outline lands right as the reveal line reaches it (phase 3 of the
+ * 600ms narrative). Quiet at rest, quiet at mouse-out.
+ */
+.mg-annotation[data-mg-link-counterpart] {
+  outline: 1px dashed color-mix(in oklch, var(--mg-accent) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: 2px;
+  animation: mg-counterpart-appear 260ms var(--mg-ease-standard, ease-out) 200ms both;
+}
 
+@keyframes mg-counterpart-appear {
+  from { outline-color: transparent; }
+  to { outline-color: color-mix(in oklch, var(--mg-accent) 55%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-annotation[data-mg-link-counterpart] {
+    animation: none;
+  }
+}
+
+/* Tooltip note variant — italic serif extension of the generic tooltip,
+ * rendered when the hover payload carries an annotation instead of a node. */
 .mg-tooltip__note {
   font-family: var(--mg-font-serif);
   font-style: italic;
@@ -221,19 +88,3 @@
 }
 .mg-tooltip__note em { font-style: italic; }
 .mg-tooltip__note strong { font-weight: 700; font-style: normal; }
-
-/* -- Reduced motion --------------------------------------------------- */
-
-@media (prefers-reduced-motion: reduce) {
-  .mg-selection-toolbar-anchor {
-    transition: opacity 180ms linear;
-    transform: none;
-  }
-  .mg-selection-toolbar-anchor[data-mg-visible],
-  .mg-selection-toolbar-anchor[data-mg-flipped],
-  .mg-selection-toolbar-anchor[data-mg-visible][data-mg-flipped] {
-    transform: none;
-  }
-  .mg-annotation-satellite__shape,
-  .mg-annotation-satellite__bg { transition: none; }
-}

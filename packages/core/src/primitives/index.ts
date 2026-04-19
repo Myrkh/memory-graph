@@ -50,6 +50,15 @@ export type { KeyboardShortcutsProps } from './KeyboardShortcuts.js';
 export { Tooltip } from './Tooltip.js';
 export type { TooltipProps } from './Tooltip.js';
 
+export { LinkReveal } from './LinkReveal.js';
+export type { LinkRevealProps } from './LinkReveal.js';
+
+export { AnnotationsTrack } from './AnnotationsTrack.js';
+export type { AnnotationsTrackProps } from './AnnotationsTrack.js';
+
+export { AnnotationsTrackToggle } from './AnnotationsTrackToggle.js';
+export type { AnnotationsTrackToggleProps } from './AnnotationsTrackToggle.js';
+
 export { SelectionToolbar } from './SelectionToolbar.js';
 export type { SelectionToolbarProps } from './SelectionToolbar.js';
 

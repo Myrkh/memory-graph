@@ -1,0 +1,60 @@
+/* ============================================================================
+ * Linking mode (Innovation 04) — global UI state activated while the
+ * reader is picking the target of a link. Triggered by the Root primitive
+ * setting `data-mg-linking` on `<body>`; cleared on target click, Escape,
+ * or click-outside.
+ * ==========================================================================*/
+
+/**
+ * Global crosshair while picking a link target. Scoped to body so the cue
+ * appears wherever the reader's mouse lands — the text, the panel, empty
+ * space — consistent with the "linking" intent.
+ */
+body[data-mg-linking] { cursor: crosshair; }
+
+/* Existing annotations pulse once (600ms) when linking mode enters so the
+ * reader can see the available link targets at a glance. */
+body[data-mg-linking] .mg-annotation {
+  animation: mg-annotation-link-pulse 600ms var(--mg-ease-decelerate, ease-out);
+}
+body[data-mg-linking] .mg-annotation-satellite__shape,
+body[data-mg-linking] .mg-annotation-satellite__bg {
+  animation: mg-satellite-link-pulse 600ms var(--mg-ease-decelerate, ease-out);
+}
+
+@keyframes mg-annotation-link-pulse {
+  0% {
+    background: color-mix(in oklch, var(--mg-accent) 40%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in oklch, var(--mg-accent) 24%, transparent);
+  }
+  100% {
+    background: color-mix(in oklch, var(--mg-accent) 5%, transparent);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@keyframes mg-satellite-link-pulse {
+  0%   { fill-opacity: 1; }
+  50%  { fill-opacity: 0.5; }
+  100% { fill-opacity: 1; }
+}
+
+/* Target ring on hover during linking mode — makes the click target
+ * unambiguous on both in-text marks and graph satellites. */
+body[data-mg-linking] .mg-annotation:hover {
+  outline: 2px dashed var(--mg-accent);
+  outline-offset: 2px;
+  background: color-mix(in oklch, var(--mg-accent) 18%, transparent);
+}
+body[data-mg-linking] .mg-annotation-satellite:hover .mg-annotation-satellite__shape,
+body[data-mg-linking] .mg-annotation-satellite:hover .mg-annotation-satellite__bg {
+  stroke-width: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-mg-linking] .mg-annotation,
+  body[data-mg-linking] .mg-annotation-satellite__shape,
+  body[data-mg-linking] .mg-annotation-satellite__bg {
+    animation: none;
+  }
+}

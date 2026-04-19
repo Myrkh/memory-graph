@@ -18,6 +18,7 @@ import type {
   Passage,
   SerializedGraph,
 } from '../types.js';
+import { applyAnnotationAction, type AnnotationAction } from './annotations-reducer.js';
 
 /* -- Constants ------------------------------------------------------------ */
 
@@ -82,9 +83,7 @@ export type Action =
   | { type: 'clear' }
   | { type: 'restore'; data: SerializedGraph }
   | { type: 'toggleShowPassages' }
-  | { type: 'addAnnotation'; annotation: Annotation }
-  | { type: 'updateAnnotation'; id: AnnotationId; patch: Partial<Pick<Annotation, 'note'>> }
-  | { type: 'removeAnnotation'; id: AnnotationId };
+  | AnnotationAction;
 
 /* -- Reducer -------------------------------------------------------------- */
 
@@ -104,52 +103,9 @@ export function reducer(
       return restoreCase(state, action.data);
     case 'toggleShowPassages':
       return { ...state, showPassages: !state.showPassages };
-    case 'addAnnotation':
-      return addAnnotationCase(state, action.annotation);
-    case 'updateAnnotation':
-      return updateAnnotationCase(state, action.id, action.patch);
-    case 'removeAnnotation':
-      return removeAnnotationCase(state, action.id);
+    default:
+      return applyAnnotationAction(state, action);
   }
-}
-
-function addAnnotationCase(state: ReducerState, annotation: Annotation): ReducerState {
-  const annotations = new Map(state.graph.annotations);
-  annotations.set(annotation.id, annotation);
-  return { ...state, graph: { ...state.graph, annotations } };
-}
-
-function updateAnnotationCase(
-  state: ReducerState,
-  id: AnnotationId,
-  patch: Partial<Pick<Annotation, 'note'>>,
-): ReducerState {
-  const existing = state.graph.annotations.get(id);
-  if (!existing) return state;
-  const annotations = new Map(state.graph.annotations);
-  annotations.set(id, { ...existing, ...patch });
-  return { ...state, graph: { ...state.graph, annotations } };
-}
-
-function removeAnnotationCase(state: ReducerState, id: AnnotationId): ReducerState {
-  if (!state.graph.annotations.has(id)) return state;
-  const annotations = new Map(state.graph.annotations);
-  annotations.delete(id);
-  // Also drop any outbound links pointing at this id (future-proofing for Innovation 04).
-  let linksTouched = false;
-  for (const [otherId, other] of annotations) {
-    if (other.links.includes(id)) {
-      annotations.set(otherId, {
-        ...other,
-        links: other.links.filter((linkId) => linkId !== id),
-      });
-      linksTouched = true;
-    }
-  }
-  if (!linksTouched) {
-    /* no-op branch kept explicit for readability */
-  }
-  return { ...state, graph: { ...state.graph, annotations } };
 }
 
 function commitCase(

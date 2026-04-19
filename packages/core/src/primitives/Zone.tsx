@@ -30,8 +30,19 @@ export const Zone = forwardRef<HTMLElement, ZoneProps>(function Zone(
   forwardedRef,
 ) {
   const { as: Tag = 'article', className, children } = props;
-  const { zoneRef, currentParaId, hoveredNodeId, setHoveredNode, open } =
-    useMemoryGraphContext();
+  const {
+    zoneRef,
+    currentParaId,
+    hoveredNodeId,
+    setHoveredNode,
+    hoveredAnnotationId,
+    setHoveredAnnotation,
+    state,
+    open,
+    linkingMode,
+    setLinkingMode,
+    actions,
+  } = useMemoryGraphContext();
 
   const localRef = useRef<HTMLElement | null>(null);
   const setRef = (node: HTMLElement | null): void => {
@@ -102,6 +113,106 @@ export const Zone = forwardRef<HTMLElement, ZoneProps>(function Zone(
       next?.setAttribute('data-mg-highlight', '');
     }
   }, [hoveredNodeId]);
+
+  /* -- Annotation hover (link reveal, Innovation 04 polish) ---------- */
+
+  const setHoveredAnnotationRef = useRef(setHoveredAnnotation);
+  setHoveredAnnotationRef.current = setHoveredAnnotation;
+
+  useEffect(() => {
+    const zone = localRef.current;
+    if (!zone) return;
+
+    const resolve = (target: EventTarget | null): string | null => {
+      if (!(target instanceof Element)) return null;
+      const mark = target.closest('[data-mg-annotation-id]');
+      if (!mark || !zone.contains(mark)) return null;
+      return mark instanceof HTMLElement ? mark.dataset.mgAnnotationId ?? null : null;
+    };
+
+    const onOver = (e: MouseEvent): void => {
+      const id = resolve(e.target);
+      if (id) setHoveredAnnotationRef.current(id);
+    };
+    const onOut = (e: MouseEvent): void => {
+      const from = resolve(e.target);
+      if (!from) return;
+      const related = e.relatedTarget;
+      if (related instanceof Node) {
+        const toId = resolve(related);
+        if (toId === from) return;
+      }
+      setHoveredAnnotationRef.current(null);
+    };
+
+    zone.addEventListener('mouseover', onOver);
+    zone.addEventListener('mouseout', onOut);
+    return () => {
+      zone.removeEventListener('mouseover', onOver);
+      zone.removeEventListener('mouseout', onOut);
+    };
+  }, []);
+
+  /* -- Counterpart mark marking via imperative DOM (same pattern as
+   * data-mg-highlight for bidirectional node hover). */
+  useEffect(() => {
+    const zone = localRef.current;
+    if (!zone) return;
+    const previous = zone.querySelectorAll<HTMLElement>(
+      '[data-mg-annotation-id][data-mg-link-counterpart]',
+    );
+    previous.forEach((el) => el.removeAttribute('data-mg-link-counterpart'));
+    if (!hoveredAnnotationId) return;
+    const ann = state.annotations.get(hoveredAnnotationId);
+    if (!ann) return;
+    for (const linkedId of ann.links) {
+      const el = zone.querySelector<HTMLElement>(
+        `[data-mg-annotation-id="${CSS.escape(linkedId)}"]`,
+      );
+      el?.setAttribute('data-mg-link-counterpart', '');
+    }
+  }, [hoveredAnnotationId, state.annotations]);
+
+  /* -- Linking mode · click annotation to complete the link ----------- */
+
+  const linkingModeRef = useRef(linkingMode);
+  linkingModeRef.current = linkingMode;
+  const actionsRef = useRef(actions);
+  actionsRef.current = actions;
+  const setLinkingModeRef = useRef(setLinkingMode);
+  setLinkingModeRef.current = setLinkingMode;
+
+  useEffect(() => {
+    const zone = localRef.current;
+    if (!zone) return;
+
+    const onClick = (e: MouseEvent): void => {
+      const active = linkingModeRef.current;
+      if (!active) return;
+      if (!(e.target instanceof Element)) return;
+      const mark = e.target.closest<HTMLElement>('[data-mg-annotation-id]');
+      if (!mark || !zone.contains(mark)) return;
+      const targetId = mark.dataset['mgAnnotationId'];
+      if (!targetId) return;
+      e.preventDefault();
+      e.stopPropagation();
+      actionsRef.current.addAnnotationWithLink(
+        {
+          paraId: active.pendingSelection.paraId,
+          selection: {
+            text: active.pendingSelection.text,
+            offsetStart: active.pendingSelection.offsetStart,
+            offsetEnd: active.pendingSelection.offsetEnd,
+          },
+        },
+        targetId,
+      );
+      setLinkingModeRef.current(null);
+    };
+
+    zone.addEventListener('click', onClick, true);
+    return () => zone.removeEventListener('click', onClick, true);
+  }, []);
 
   const currentAttr = currentParaId ? { 'data-mg-current': currentParaId } : {};
 

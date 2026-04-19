@@ -20,9 +20,9 @@ export interface SelectionToolbarProps {
    */
   minChars?: number;
   /**
-   * Message shown when the user clicks "Link" before Innovation 04 ships.
+   * Message shown when the user clicks "Link" with no annotations to link to.
    */
-  linkingUnavailableMessage?: string;
+  linkingEmptyMessage?: string;
 }
 
 type Mode = 'idle' | 'editing';
@@ -41,9 +41,16 @@ export function SelectionToolbar(props: SelectionToolbarProps) {
     className,
     style,
     minChars = 4,
-    linkingUnavailableMessage = 'Linking arrives in Innovation 04 · stay tuned.',
+    linkingEmptyMessage = 'Create an annotation first — then you can link to it.',
   } = props;
-  const { zoneRef, actions, showToast } = useMemoryGraphContext();
+  const {
+    zoneRef,
+    actions,
+    showToast,
+    state,
+    linkingMode,
+    setLinkingMode,
+  } = useMemoryGraphContext();
 
   const [selection, setSelection] = useState<ResolvedSelection | null>(null);
   const [mode, setMode] = useState<Mode>('idle');
@@ -83,8 +90,15 @@ export function SelectionToolbar(props: SelectionToolbarProps) {
   }, [actions, selection, showToast]);
 
   const handleLinkClick = useCallback(() => {
-    showToast(linkingUnavailableMessage);
-  }, [linkingUnavailableMessage, showToast]);
+    if (!selection) return;
+    if (state.annotations.size === 0) {
+      showToast(linkingEmptyMessage);
+      return;
+    }
+    setLinkingMode({ pendingSelection: selection });
+    setSelection(null);
+    clearLiveSelection();
+  }, [linkingEmptyMessage, selection, setLinkingMode, showToast, state.annotations.size]);
 
   const handleSave = useCallback(
     (note: string | null) => {
@@ -112,6 +126,8 @@ export function SelectionToolbar(props: SelectionToolbarProps) {
   }, []);
 
   if (!active) return null;
+  // Hide the idle toolbar while the user is picking a link target.
+  if (linkingMode && mode !== 'editing') return null;
 
   return (
     <Positioner rect={active.rect}>
@@ -126,7 +142,9 @@ export function SelectionToolbar(props: SelectionToolbarProps) {
           <div className="mg-selection-toolbar__actions">
             <ToolbarButton glyph="◇" label="Note" onClick={handleNoteClick} />
             <ToolbarButton glyph="⬤" label="Pin" onClick={handlePinClick} />
-            <ToolbarButton glyph="→" label="Link" onClick={handleLinkClick} />
+            {state.annotations.size > 0 ? (
+              <ToolbarButton glyph="→" label="Link" onClick={handleLinkClick} />
+            ) : null}
           </div>
         ) : (
           <NoteEditor onSave={handleSave} onCancel={handleCancel} />

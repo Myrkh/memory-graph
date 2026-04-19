@@ -6,7 +6,7 @@ import {
   useState,
   type CSSProperties,
 } from 'react';
-import type { Annotation, GraphItem, ParagraphId } from '../types.js';
+import type { Annotation, AnnotationId, GraphItem, ParagraphId } from '../types.js';
 import {
   buildItems,
   layoutGraph,
@@ -15,7 +15,25 @@ import {
 } from '../internal/graph-layout.js';
 import { AxisMarks, Edges, Nodes } from '../internal/graph-svg.js';
 import { AnnotationSatellites } from '../internal/annotation-satellites.js';
+import { AnnotationLinks } from '../internal/annotation-links.js';
+import { computeSatellitePositions } from '../internal/annotation-layout.js';
 import { useMemoryGraphContext } from './context.js';
+
+/**
+ * Strict ego set for chain-highlight. Given a hovered node id:
+ * - `nodes` = { hoveredId, ...endpoints of edges TOUCHING hoveredId }
+ * - `annotations` = { annotations of hoveredId } ∪
+ *                   { annotations linked from hoveredId's annotations }
+ *
+ * An edge is considered "in-chain" iff one of its endpoints IS hoveredId —
+ * not simply "both endpoints happen to be in the set". This answers
+ * "where does THIS node go", not "the neighborhood around it".
+ */
+export interface ChainSet {
+  hoveredId: ParagraphId;
+  nodes: Set<ParagraphId>;
+  annotations: Set<AnnotationId>;
+}
 
 export interface GraphProps {
   className?: string;
@@ -47,6 +65,9 @@ export function Graph(props: GraphProps) {
     setHover,
     hoveredNodeId,
     setHoveredNode,
+    linkingMode,
+    setLinkingMode,
+    actions,
   } = useMemoryGraphContext();
 
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -109,9 +130,59 @@ export function Graph(props: GraphProps) {
   );
 
   const handleSatelliteClick = useCallback(
-    (annotation: Annotation) => jumpToParagraph(annotation.paraId),
-    [jumpToParagraph],
+    (annotation: Annotation) => {
+      if (linkingMode) {
+        actions.addAnnotationWithLink(
+          {
+            paraId: linkingMode.pendingSelection.paraId,
+            selection: {
+              text: linkingMode.pendingSelection.text,
+              offsetStart: linkingMode.pendingSelection.offsetStart,
+              offsetEnd: linkingMode.pendingSelection.offsetEnd,
+            },
+          },
+          annotation.id,
+        );
+        setLinkingMode(null);
+        return;
+      }
+      jumpToParagraph(annotation.paraId);
+    },
+    [actions, jumpToParagraph, linkingMode, setLinkingMode],
   );
+
+  const satellitePositions = useMemo(
+    () => (layout ? computeSatellitePositions(layout.positions, state.annotations, nodeRadiusFor) : new Map()),
+    [layout, nodeRadiusFor, state.annotations],
+  );
+
+  const chain = useMemo<ChainSet | null>(() => {
+    if (!hoveredNodeId || !state.nodes.has(hoveredNodeId)) return null;
+
+    // Nodes reached directly by an edge touching hoveredId.
+    const nodes = new Set<ParagraphId>([hoveredNodeId]);
+    for (const e of state.edges) {
+      if (e.from === hoveredNodeId) nodes.add(e.to);
+      if (e.to === hoveredNodeId) nodes.add(e.from);
+    }
+
+    // Annotations owned by hoveredId + annotations those link to
+    // (semantic paths OUT of this node, not incidental neighborhood notes).
+    const hoveredAnnotations = new Set<AnnotationId>();
+    for (const a of state.annotations.values()) {
+      if (a.paraId === hoveredNodeId) hoveredAnnotations.add(a.id);
+    }
+    const annotations = new Set<AnnotationId>(hoveredAnnotations);
+    for (const annId of hoveredAnnotations) {
+      const ann = state.annotations.get(annId);
+      if (!ann) continue;
+      for (const linkedId of ann.links) {
+        if (state.annotations.has(linkedId)) annotations.add(linkedId);
+      }
+    }
+
+    return { hoveredId: hoveredNodeId, nodes, annotations };
+  }, [hoveredNodeId, state.edges, state.annotations, state.nodes]);
 
   const base = className ? `mg-graph-wrap ${className}` : 'mg-graph-wrap';
 
@@ -125,14 +196,21 @@ export function Graph(props: GraphProps) {
           style={{ width: svgWidth }}
           role="img"
           aria-label="Reading memory graph"
+          data-mg-chain-active={chain ? '' : undefined}
         >
           <AxisMarks layout={layout} svgWidth={svgWidth} paddingTop={config.GRAPH_PADDING_TOP} />
-          <Edges edges={state.edges} layout={layout} returnBend={config.RETURN_BEND} />
+          <Edges
+            edges={state.edges}
+            layout={layout}
+            returnBend={config.RETURN_BEND}
+            chain={chain}
+          />
           <Nodes
             layout={layout}
             maxMs={maxMs}
             currentParaId={currentParaId}
             hoveredNodeId={hoveredNodeId}
+            chain={chain}
             passageR={config.PASSAGE_R}
             minR={config.NODE_R_MIN}
             maxR={config.NODE_R_MAX}
@@ -140,10 +218,15 @@ export function Graph(props: GraphProps) {
             onHover={setHover}
             onHoverNode={setHoveredNode}
           />
-          <AnnotationSatellites
-            positions={layout.positions}
+          <AnnotationLinks
             annotations={state.annotations}
-            nodeRadiusFor={nodeRadiusFor}
+            satellitePositions={satellitePositions}
+            chain={chain}
+          />
+          <AnnotationSatellites
+            annotations={state.annotations}
+            satellitePositions={satellitePositions}
+            chain={chain}
             onHover={setHover}
             onClick={handleSatelliteClick}
           />

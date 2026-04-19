@@ -1,0 +1,66 @@
+/* ============================================================================
+ * Link reveal overlay (Innovation 04 polish · Stit'Claude signature).
+ *
+ * A narrative moment of 600ms total, orchestrated in 3 phases so the
+ * motion *means* something: the line DRAWS itself (phase 1), then SETTLES
+ * into the shared dashed vocabulary (phase 2), and the counterpart lands
+ * (phase 3) right when the line reaches it.
+ *
+ * Tokens reused · duration ≤ 600ms (within Stit'Claude narrative envelope).
+ * Reduced motion: all animations off, final state shown instantly.
+ * ==========================================================================*/
+
+.mg-link-reveal {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 65;
+  overflow: visible;
+}
+
+/**
+ * Phase 1 (0-400ms) — the line draws itself from source to target.
+ * Phase 2 (400-600ms) — the stroke dasharray shifts from one full-length
+ * dash to the shared 3/2 pattern, so the line "settles" into the same
+ * vocabulary as the graph's link arcs.
+ * Concurrent opacity fade-in over 200ms so phase 1 already feels present.
+ *
+ * `--mg-pl` is set inline by the React primitive via getTotalLength().
+ */
+.mg-link-reveal-path {
+  fill: none;
+  stroke: var(--mg-accent);
+  stroke-width: 1;
+  stroke-linecap: round;
+  opacity: 0;
+  stroke-dasharray: var(--mg-pl, 100);
+  stroke-dashoffset: var(--mg-pl, 100);
+  animation:
+    mg-reveal-fade 200ms var(--mg-ease-standard, ease-out) forwards,
+    mg-reveal-draw 400ms var(--mg-ease-expo-out, cubic-bezier(0.16, 1, 0.3, 1)) forwards,
+    mg-reveal-texture 200ms var(--mg-ease-standard, ease-out) 400ms forwards;
+}
+
+@keyframes mg-reveal-fade {
+  to { opacity: 0.85; }
+}
+
+@keyframes mg-reveal-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes mg-reveal-texture {
+  from { stroke-dasharray: var(--mg-pl, 100) 0; }
+  to { stroke-dasharray: 3 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-link-reveal-path {
+    animation: none;
+    opacity: 0.85;
+    stroke-dasharray: 3 2;
+    stroke-dashoffset: 0;
+  }
+}

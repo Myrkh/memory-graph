@@ -1,0 +1,67 @@
+/* ============================================================================
+ * Annotation satellites (Innovation 03) + link arcs (Innovation 04).
+ * Both draw on top of the graph's main layer (nodes + edges), with
+ * satellites above link arcs so clicks always target the dot.
+ * ==========================================================================*/
+
+.mg-annotation-satellites { pointer-events: auto; }
+
+/* No transition on the <g>: it carries the positioning SVG attr
+ * `transform="translate(x,y) rotate(45)"`; animating via CSS would fight
+ * React re-renders on every mousemove and cause jitter. The enter/leave
+ * feedback lives on the child `<rect>` via fill-opacity. */
+.mg-annotation-satellite {
+  cursor: pointer;
+}
+
+.mg-annotation-satellite__shape {
+  fill: var(--mg-accent);
+  stroke: var(--mg-bg);
+  stroke-width: 1;
+  transition: fill-opacity var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+.mg-annotation-satellite:hover .mg-annotation-satellite__shape {
+  fill-opacity: 0.82;
+}
+
+.mg-annotation-satellite__bg {
+  fill: var(--mg-accent);
+  stroke: var(--mg-bg);
+  stroke-width: 1;
+  transition: fill-opacity var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+.mg-annotation-satellite:hover .mg-annotation-satellite__bg {
+  fill-opacity: 0.82;
+}
+
+.mg-annotation-satellite__badge-text {
+  font-family: var(--mg-font-mono);
+  font-size: 6px;
+  font-weight: 700;
+  fill: var(--mg-bg);
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+/* -- Link arcs between satellites (Innovation 04) -------------------- */
+
+/**
+ * Dashed stroke differentiates annotation links from return-edges (solid
+ * coral). Texture = semantic connection · solid = temporal trajectory.
+ */
+.mg-svg .mg-link-arc {
+  fill: none;
+  stroke: var(--mg-accent);
+  stroke-width: 0.8;
+  opacity: 0.65;
+  stroke-linecap: round;
+  stroke-dasharray: 3 2;
+  pointer-events: none;
+  transition: opacity var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-annotation-satellite__shape,
+  .mg-annotation-satellite__bg { transition: none; }
+}

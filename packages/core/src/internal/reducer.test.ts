@@ -221,4 +221,39 @@ describe('reducer · annotations', () => {
     expect(ann?.note).toBe('edited');
     expect(ann?.selection).toEqual(original.selection);
   });
+
+  it('addAnnotationLink is bidirectional and idempotent', () => {
+    let s = apply(initialReducerState(), { type: 'addAnnotation', annotation: makeAnnotation('ann-1') });
+    s = apply(s, { type: 'addAnnotation', annotation: makeAnnotation('ann-2') });
+
+    s = apply(s, { type: 'addAnnotationLink', from: 'ann-1', to: 'ann-2' });
+    expect(s.graph.annotations.get('ann-1')?.links).toEqual(['ann-2']);
+    expect(s.graph.annotations.get('ann-2')?.links).toEqual(['ann-1']);
+
+    // Same link twice → no duplicate.
+    s = apply(s, { type: 'addAnnotationLink', from: 'ann-1', to: 'ann-2' });
+    expect(s.graph.annotations.get('ann-1')?.links).toEqual(['ann-2']);
+    expect(s.graph.annotations.get('ann-2')?.links).toEqual(['ann-1']);
+  });
+
+  it('removeAnnotationLink strips the link from both sides', () => {
+    let s = apply(initialReducerState(), { type: 'addAnnotation', annotation: makeAnnotation('ann-1') });
+    s = apply(s, { type: 'addAnnotation', annotation: makeAnnotation('ann-2') });
+    s = apply(s, { type: 'addAnnotationLink', from: 'ann-1', to: 'ann-2' });
+
+    s = apply(s, { type: 'removeAnnotationLink', from: 'ann-1', to: 'ann-2' });
+    expect(s.graph.annotations.get('ann-1')?.links).toEqual([]);
+    expect(s.graph.annotations.get('ann-2')?.links).toEqual([]);
+  });
+
+  it('addAnnotationWithLink creates a new annotation linked both ways to the target', () => {
+    let s = apply(initialReducerState(), { type: 'addAnnotation', annotation: makeAnnotation('ann-A') });
+    const newAnn = makeAnnotation('ann-B');
+
+    s = apply(s, { type: 'addAnnotationWithLink', annotation: newAnn, linkTo: 'ann-A' });
+
+    expect(s.graph.annotations.size).toBe(2);
+    expect(s.graph.annotations.get('ann-B')?.links).toEqual(['ann-A']);
+    expect(s.graph.annotations.get('ann-A')?.links).toEqual(['ann-B']);
+  });
 });

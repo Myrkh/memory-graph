@@ -2,6 +2,7 @@ import type { Edge, ParagraphId } from '../types.js';
 import type { GraphLayout, Position } from './graph-layout.js';
 import { stationRadius } from './graph-layout.js';
 import type { HoverState } from '../primitives/context.js';
+import type { ChainSet } from '../primitives/Graph.js';
 
 const TIME_HEIGHT_PX = 600;
 const AXIS_X_INSET = 24;
@@ -41,16 +42,23 @@ export interface EdgesProps {
   edges: Edge[];
   layout: GraphLayout;
   returnBend: number;
+  chain?: ChainSet | null;
 }
 
 export function Edges(props: EdgesProps) {
-  const { edges, layout, returnBend } = props;
+  const { edges, layout, returnBend, chain } = props;
   return (
     <g>
       {edges.map((e, i) => {
         const from = layout.positions.get(e.from);
         const to = layout.positions.get(e.to);
         if (!from || !to) return null;
+        // Strict chain: edge highlights iff it TOUCHES the hovered node,
+        // not merely because both its endpoints are in the 1-hop set.
+        const inChain = chain
+          ? e.from === chain.hoveredId || e.to === chain.hoveredId
+          : false;
+        const chainAttr = inChain ? { 'data-mg-chain-connected': '' } : {};
         if (e.kind === 'return') {
           const midY = (from.y + to.y) / 2;
           const ctrlX = Math.max(from.x, to.x) + returnBend;
@@ -59,6 +67,7 @@ export function Edges(props: EdgesProps) {
               key={i}
               className="mg-return-edge"
               d={`M ${from.x} ${from.y} Q ${ctrlX} ${midY} ${to.x} ${to.y}`}
+              {...chainAttr}
             />
           );
         }
@@ -70,6 +79,7 @@ export function Edges(props: EdgesProps) {
             y1={from.y}
             x2={to.x}
             y2={to.y}
+            {...chainAttr}
           />
         );
       })}
@@ -84,6 +94,7 @@ export interface NodesProps {
   maxMs: number;
   currentParaId: ParagraphId | null;
   hoveredNodeId: ParagraphId | null;
+  chain?: ChainSet | null;
   passageR: number;
   minR: number;
   maxR: number;
@@ -98,6 +109,7 @@ export function Nodes(props: NodesProps) {
     maxMs,
     currentParaId,
     hoveredNodeId,
+    chain,
     passageR,
     minR,
     maxR,
@@ -115,6 +127,7 @@ export function Nodes(props: NodesProps) {
           maxMs={maxMs}
           isCurrent={id === currentParaId}
           isHighlighted={id === hoveredNodeId}
+          inChain={chain ? chain.nodes.has(id) : false}
           passageR={passageR}
           minR={minR}
           maxR={maxR}
@@ -133,6 +146,7 @@ interface NodeProps {
   maxMs: number;
   isCurrent: boolean;
   isHighlighted: boolean;
+  inChain: boolean;
   passageR: number;
   minR: number;
   maxR: number;
@@ -148,6 +162,7 @@ function Node(props: NodeProps) {
     maxMs,
     isCurrent,
     isHighlighted,
+    inChain,
     passageR,
     minR,
     maxR,
@@ -161,6 +176,7 @@ function Node(props: NodeProps) {
   const pinnedAttr = item.pinned ? { 'data-mg-pinned': '' } : {};
   const currentAttr = isCurrent && isStation ? { 'data-mg-current': '' } : {};
   const highlightAttr = isHighlighted ? { 'data-mg-highlight': '' } : {};
+  const chainAttr = inChain ? { 'data-mg-chain-connected': '' } : {};
   const typeAttr = { 'data-mg-type': item.type };
 
   return (
@@ -183,6 +199,7 @@ function Node(props: NodeProps) {
       {...pinnedAttr}
       {...currentAttr}
       {...highlightAttr}
+      {...chainAttr}
     >
       {isCurrent && isStation ? (
         <circle className="mg-node-pulse" cx={0} cy={0} r={5} />

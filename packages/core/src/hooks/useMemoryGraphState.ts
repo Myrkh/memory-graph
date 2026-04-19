@@ -44,10 +44,19 @@ export interface MemoryGraphActions {
   toggleShowPassages(): void;
   /** Create an annotation. Returns the generated id. */
   addAnnotation(input: NewAnnotationInput): AnnotationId;
+  /**
+   * Create an annotation AND symmetrically link it to an existing one.
+   * Returns the generated id of the new annotation.
+   */
+  addAnnotationWithLink(input: NewAnnotationInput, linkTo: AnnotationId): AnnotationId;
   /** Patch an existing annotation's note. Returns true if the annotation existed. */
   updateAnnotationNote(id: AnnotationId, note: string | null): boolean;
   /** Delete an annotation and strip incoming links from other annotations. */
   removeAnnotation(id: AnnotationId): void;
+  /** Add a bidirectional link between two existing annotations. Idempotent. */
+  addAnnotationLink(from: AnnotationId, to: AnnotationId): void;
+  /** Remove a bidirectional link between two annotations. Idempotent. */
+  removeAnnotationLink(from: AnnotationId, to: AnnotationId): void;
 }
 
 export interface MemoryGraphDerived {
@@ -97,18 +106,29 @@ export function useMemoryGraphState(config: MemoryGraphConfig): UseMemoryGraphSt
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  const buildAnnotation = useCallback((input: NewAnnotationInput): Annotation => ({
+    id: generateAnnotationId(),
+    paraId: input.paraId,
+    selection: input.selection,
+    note: input.note ?? null,
+    createdAt: Date.now(),
+    links: [],
+  }), []);
+
   const addAnnotation = useCallback((input: NewAnnotationInput): AnnotationId => {
-    const annotation: Annotation = {
-      id: generateAnnotationId(),
-      paraId: input.paraId,
-      selection: input.selection,
-      note: input.note ?? null,
-      createdAt: Date.now(),
-      links: [],
-    };
+    const annotation = buildAnnotation(input);
     dispatch({ type: 'addAnnotation', annotation });
     return annotation.id;
-  }, []);
+  }, [buildAnnotation]);
+
+  const addAnnotationWithLink = useCallback(
+    (input: NewAnnotationInput, linkTo: AnnotationId): AnnotationId => {
+      const annotation = buildAnnotation(input);
+      dispatch({ type: 'addAnnotationWithLink', annotation, linkTo });
+      return annotation.id;
+    },
+    [buildAnnotation],
+  );
 
   const updateAnnotationNote = useCallback((id: AnnotationId, note: string | null): boolean => {
     const existed = stateRef.current.graph.annotations.has(id);
@@ -120,6 +140,14 @@ export function useMemoryGraphState(config: MemoryGraphConfig): UseMemoryGraphSt
     dispatch({ type: 'removeAnnotation', id });
   }, []);
 
+  const addAnnotationLink = useCallback((from: AnnotationId, to: AnnotationId): void => {
+    dispatch({ type: 'addAnnotationLink', from, to });
+  }, []);
+
+  const removeAnnotationLink = useCallback((from: AnnotationId, to: AnnotationId): void => {
+    dispatch({ type: 'removeAnnotationLink', from, to });
+  }, []);
+
   const actions = useMemo<MemoryGraphActions>(
     () => ({
       commit,
@@ -128,8 +156,11 @@ export function useMemoryGraphState(config: MemoryGraphConfig): UseMemoryGraphSt
       restore,
       toggleShowPassages,
       addAnnotation,
+      addAnnotationWithLink,
       updateAnnotationNote,
       removeAnnotation,
+      addAnnotationLink,
+      removeAnnotationLink,
     }),
     [
       commit,
@@ -138,8 +169,11 @@ export function useMemoryGraphState(config: MemoryGraphConfig): UseMemoryGraphSt
       restore,
       toggleShowPassages,
       addAnnotation,
+      addAnnotationWithLink,
       updateAnnotationNote,
       removeAnnotation,
+      addAnnotationLink,
+      removeAnnotationLink,
     ],
   );
 

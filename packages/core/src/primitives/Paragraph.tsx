@@ -56,11 +56,13 @@ function renderWithAnnotations(text: string, annotations: Annotation[]): ReactNo
     const { offsetStart, offsetEnd } = a.selection;
     if (offsetStart < cursor) continue; // overlapping → skip later entry
     if (offsetStart > cursor) parts.push(text.slice(cursor, offsetStart));
+    const linkAttr = a.links.length > 0 ? { 'data-mg-has-link': '' } : {};
     parts.push(
       <mark
         key={a.id}
         className="mg-annotation"
         data-mg-annotation-id={a.id}
+        {...linkAttr}
       >
         {text.slice(offsetStart, offsetEnd)}
       </mark>,

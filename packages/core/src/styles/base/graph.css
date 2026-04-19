@@ -102,3 +102,43 @@
   .mg-svg .mg-node-circle { transition: none; }
   .mg-svg .mg-node[data-mg-current] .mg-node-pulse { animation: none; }
 }
+
+/* ============================================================================
+ * Chain highlighting — when a node is hovered (Innovation 02 · hoveredNodeId),
+ * everything not in the 1-hop ego network fades to a low opacity so the
+ * reader sees "where does this node connect" at a glance. Spatial stability
+ * preserved: nothing moves, only visual weight shifts.
+ * ==========================================================================*/
+
+.mg-svg[data-mg-chain-active] .mg-node,
+.mg-svg[data-mg-chain-active] .mg-forward-edge,
+.mg-svg[data-mg-chain-active] .mg-return-edge,
+.mg-svg[data-mg-chain-active] .mg-annotation-satellite,
+.mg-svg[data-mg-chain-active] .mg-link-arc,
+.mg-svg[data-mg-chain-active] .mg-axis-line,
+.mg-svg[data-mg-chain-active] .mg-axis-label {
+  opacity: 0.15;
+  transition: opacity var(--mg-duration-normal, 200ms) var(--mg-ease-standard, ease-out);
+}
+
+.mg-svg[data-mg-chain-active] [data-mg-chain-connected] {
+  opacity: 1;
+}
+
+/* Passage dots keep their inherent 0.35 dimming even inside the chain —
+ * they're always context, never the feature being inspected. */
+.mg-svg[data-mg-chain-active] .mg-node[data-mg-type='passage'][data-mg-chain-connected] {
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-svg[data-mg-chain-active] .mg-node,
+  .mg-svg[data-mg-chain-active] .mg-forward-edge,
+  .mg-svg[data-mg-chain-active] .mg-return-edge,
+  .mg-svg[data-mg-chain-active] .mg-annotation-satellite,
+  .mg-svg[data-mg-chain-active] .mg-link-arc,
+  .mg-svg[data-mg-chain-active] .mg-axis-line,
+  .mg-svg[data-mg-chain-active] .mg-axis-label {
+    transition: none;
+  }
+}

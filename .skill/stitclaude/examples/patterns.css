@@ -1,0 +1,676 @@
+/* ============================================================
+   STIT'CLAUDE — patterns.css
+
+   Collection de patterns CSS modernes (2024-2026) à utiliser
+   dans les livrables Stit'Claude. Chaque snippet est documenté,
+   browser-support indiqué, et à copier-coller-adapter.
+
+   Ordre : du plus universel au plus expérimental.
+   ============================================================ */
+
+
+/* ============================================================
+   1. CONTAINER QUERIES — responsive basé sur le parent
+   Support : Chrome 105+, Safari 16+, Firefox 110+ (universel 2024+)
+   ============================================================ */
+
+.card-container {
+  container-type: inline-size;
+  container-name: card;
+}
+
+.card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+@container card (min-width: 400px) {
+  .card {
+    grid-template-columns: auto 1fr;
+    gap: var(--space-6);
+    padding: var(--space-6);
+  }
+
+  .card-title {
+    font-size: var(--text-h4);
+  }
+}
+
+@container card (min-width: 640px) {
+  .card-title {
+    font-size: var(--text-h3);
+  }
+}
+
+/* Unités container-relative : cqw, cqh, cqi, cqb */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, 20cqi), 1fr)
+  );
+  gap: var(--space-4);
+}
+
+
+/* ============================================================
+   2. VIEW TRANSITIONS — same-document
+   Support : Chrome 111+, Safari 18+, Firefox 135+ (2025)
+   ============================================================ */
+
+/* Activation globale */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-moderate);
+  animation-timing-function: var(--ease-emphasized);
+}
+
+/* Transition nommée sur un élément qui persiste à travers une nav */
+.hero-image {
+  view-transition-name: hero-image;
+}
+
+::view-transition-group(hero-image) {
+  animation-duration: var(--duration-slow);
+  animation-timing-function: var(--ease-expo-out);
+}
+
+/* Cross-document (MPA) — Chrome 126+ */
+@view-transition {
+  navigation: auto;
+}
+
+/* JS pour déclencher same-document */
+/*
+  if (document.startViewTransition) {
+    document.startViewTransition(() => updateContent());
+  } else {
+    updateContent();
+  }
+*/
+
+
+/* ============================================================
+   3. @PROPERTY — gradients et transforms animables
+   Support : Chrome 85+, Safari 16.4+, Firefox 128+ (2024+)
+   ============================================================ */
+
+@property --hue {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 250deg;
+}
+
+@property --chroma {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.12;
+}
+
+.gradient-hover {
+  background: linear-gradient(
+    in oklch var(--hue),
+    oklch(0.6 var(--chroma) 0),
+    oklch(0.6 var(--chroma) 180)
+  );
+  transition:
+    --hue var(--duration-slow) var(--ease-emphasized),
+    --chroma var(--duration-slow) var(--ease-emphasized);
+}
+
+.gradient-hover:hover {
+  --hue: 310deg;
+  --chroma: 0.18;
+}
+
+
+/* ============================================================
+   4. @STARTING-STYLE — enter animations sans JS
+   Support : Chrome 117+, Safari 17.5+, Firefox 129+
+   ============================================================ */
+
+.toast {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--duration-normal) var(--ease-decelerate),
+    transform var(--duration-normal) var(--ease-decelerate);
+}
+
+@starting-style {
+  .toast {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+/* Pour popover et dialog, avec allow-discrete pour display/overlay */
+.menu {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity var(--duration-normal) var(--ease-standard),
+    transform var(--duration-normal) var(--ease-standard),
+    display var(--duration-normal) allow-discrete,
+    overlay var(--duration-normal) allow-discrete;
+}
+
+.menu:popover-open {
+  opacity: 1;
+  transform: translateY(0);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+
+/* ============================================================
+   5. ANCHOR POSITIONING — tooltips et popovers sans JS
+   Support : Chrome 125+, Safari 17.4+, Firefox polyfill (2026+)
+   ============================================================ */
+
+.menu-trigger {
+  anchor-name: --menu-trigger;
+}
+
+.menu-popup {
+  position-anchor: --menu-trigger;
+  position: absolute;
+  position-area: bottom span-right;
+
+  /* Fallback si pas assez de place en bas */
+  position-try-fallbacks:
+    flip-block,
+    flip-inline,
+    flip-block flip-inline;
+
+  /* Offset depuis l'anchor */
+  margin-top: var(--space-2);
+}
+
+
+/* ============================================================
+   6. COLOR-MIX() EN OKLCH — interpolation perceptuelle
+   Support : universel 2024+
+   ============================================================ */
+
+.button {
+  background: var(--accent);
+  color: var(--accent-fg);
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.button:hover {
+  background: color-mix(in oklch, var(--accent) 90%, black);
+}
+
+.button:active {
+  background: color-mix(in oklch, var(--accent) 80%, black);
+}
+
+/* Surface teintée (tonal elevation) */
+.card-tinted {
+  background: color-mix(in oklch, var(--accent) 6%, var(--bg));
+}
+
+/* Transparence propre (vs rgba hardcodé) */
+.overlay {
+  background: color-mix(in oklch, var(--bg) 80%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+
+/* ============================================================
+   7. RELATIVE COLOR SYNTAX — dériver des couleurs
+   Support : Chrome 119+, Safari 16.4+, Firefox 128+ (2024+)
+   ============================================================ */
+
+:root {
+  /* Dériver une version plus claire du brand sans la hardcoder */
+  --brand-lighter: oklch(from var(--accent) calc(l + 0.15) c h);
+  --brand-darker:  oklch(from var(--accent) calc(l - 0.15) c h);
+  --brand-muted:   oklch(from var(--accent) l calc(c * 0.5) h);
+
+  /* Alpha variant */
+  --accent-20: oklch(from var(--accent) l c h / 0.2);
+}
+
+
+/* ============================================================
+   8. SCROLL-DRIVEN ANIMATIONS
+   Support : Chrome 115+ (Safari/Firefox : polyfill scroll-timeline-polyfill)
+   ============================================================ */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-on-scroll {
+  animation: fade-in-up linear both;
+  animation-timeline: view();
+  animation-range: entry 10% cover 30%;
+}
+
+/* Timeline basée sur scroll du container */
+.progress-bar {
+  animation: fill-bar linear;
+  animation-timeline: scroll(root);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+@keyframes fill-bar {
+  to { transform: scaleX(1); }
+}
+
+/* Parallax via scroll timeline */
+.parallax-image {
+  animation: parallax linear;
+  animation-timeline: view();
+}
+
+@keyframes parallax {
+  from { translate: 0 -10%; }
+  to { translate: 0 10%; }
+}
+
+
+/* ============================================================
+   9. HAS() — parent-selection
+   Support : Chrome 105+, Safari 15.4+, Firefox 121+ (universel 2024+)
+   ============================================================ */
+
+/* Form avec état : le container sait si un input est invalide */
+.form-field:has(input:invalid:not(:placeholder-shown)) {
+  --border: var(--danger);
+}
+
+/* Card qui a une image devient différente */
+.card:has(> img) {
+  padding-top: 0;
+}
+
+/* Layout qui s'adapte selon contenu */
+.nav:has(.search) {
+  grid-template-columns: auto 1fr auto;
+}
+
+
+/* ============================================================
+   10. :FOCUS-VISIBLE + :FOCUS-WITHIN — accessibilité fine
+   Support : universel
+   ============================================================ */
+
+.button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.card:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Pas de outline au mouse, mais au keyboard */
+.button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+
+/* ============================================================
+   11. LOGICAL PROPERTIES — RTL-ready
+   Support : universel
+   ============================================================ */
+
+.panel {
+  margin-inline-start: var(--space-4);   /* au lieu de margin-left */
+  padding-block: var(--space-4);          /* top + bottom */
+  border-inline-end: 1px solid var(--border);
+  inset-inline-end: var(--space-2);      /* au lieu de right */
+}
+
+
+/* ============================================================
+   12. SUBGRID — layouts grid alignés entre parents et enfants
+   Support : universel 2023+
+   ============================================================ */
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: subgrid;
+  gap: var(--space-6);
+}
+
+.card {
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 3;   /* title, body, footer sur 3 rows */
+}
+
+
+/* ============================================================
+   13. TEXT-WRAP — balance, pretty
+   Support : universel 2024+
+   ============================================================ */
+
+h1, h2, h3, h4 {
+  text-wrap: balance;
+}
+
+p, li, dd {
+  text-wrap: pretty;
+}
+
+
+/* ============================================================
+   14. CSS NESTING — natif sans préprocesseur
+   Support : Chrome 112+, Safari 16.5+, Firefox 117+ (universel 2024+)
+   ============================================================ */
+
+.button {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--accent-fg);
+
+  &:hover {
+    background: var(--accent-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  &[data-variant="ghost"] {
+    background: transparent;
+    color: var(--fg);
+
+    &:hover {
+      background: var(--bg-subtle);
+    }
+  }
+
+  & .icon {
+    width: 1em;
+    height: 1em;
+  }
+}
+
+
+/* ============================================================
+   15. ACCENT-COLOR — natif pour form controls
+   Support : universel 2022+
+   ============================================================ */
+
+:root {
+  accent-color: var(--accent);
+}
+
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+progress {
+  accent-color: var(--accent);
+}
+
+
+/* ============================================================
+   16. SQUIRCLE — Apple-Craft corner shape
+   CSS `corner-shape: squircle` : expérimental (spec 2025+)
+   Fallback : SVG mask ou haute valeur border-radius
+   ============================================================ */
+
+.apple-squircle {
+  /* Spec future 2026+ */
+  /* corner-shape: squircle; */
+  /* border-radius: 20px; */
+
+  /* Fallback : SVG mask path (n≈5 superellipse) */
+  border-radius: 20px;
+  /* Ou mieux : utiliser lib figma-squircle (JS) ou paint API */
+}
+
+
+/* ============================================================
+   17. FIELD-SIZING — inputs qui s'adaptent au contenu
+   Support : Chrome 123+, Firefox 140+ (2026)
+   ============================================================ */
+
+textarea,
+.auto-size-input {
+  field-sizing: content;
+  min-block-size: 3lh;
+}
+
+
+/* ============================================================
+   18. PRINT STYLES — pour PDF/impression
+   Support : universel
+   ============================================================ */
+
+@media print {
+  :root {
+    --bg: white;
+    --fg: black;
+    --accent: black;
+  }
+
+  body {
+    font-size: 10.5pt;
+    line-height: 1.55;
+  }
+
+  h1, h2, h3 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  h1 {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  table, figure, .no-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #555;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
+
+/* ============================================================
+   19. FORCED COLORS — Windows High Contrast
+   Support : universel 2022+
+   ============================================================ */
+
+@media (forced-colors: active) {
+  .button {
+    border: 1px solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  .button:hover {
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .button:focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+
+
+/* ============================================================
+   20. PAGE TRANSITIONS AVEC VIEW TRANSITIONS (MPA)
+   Support : Chrome 126+ (2024)
+   ============================================================ */
+
+@view-transition {
+  navigation: auto;
+}
+
+/* Slide horizontal entre pages */
+::view-transition-old(root) {
+  animation:
+    slide-out-left var(--duration-slow) var(--ease-accelerate) forwards;
+}
+
+::view-transition-new(root) {
+  animation:
+    slide-in-right var(--duration-slow) var(--ease-decelerate) forwards;
+}
+
+@keyframes slide-out-left {
+  to { transform: translateX(-30%); opacity: 0; }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(30%); opacity: 0; }
+}
+
+
+/* ============================================================
+   21. BACKDROP-FILTER — à utiliser AVEC DISCERNEMENT
+   Seulement si il y a vraiment du contenu à flouter derrière.
+   Pas sur nav sur fond blanc.
+   ============================================================ */
+
+.glass-panel {
+  background: color-mix(in oklch, var(--bg) 70%, transparent);
+  backdrop-filter: blur(12px) saturate(1.5);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  border: 1px solid color-mix(in oklch, var(--fg) 8%, transparent);
+}
+
+
+/* ============================================================
+   22. GRID UTILITY — auto-fit avec min largeur fluide
+   ============================================================ */
+
+.auto-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, 16rem), 1fr)
+  );
+  gap: var(--space-4);
+}
+
+
+/* ============================================================
+   23. CENTER - the dead-simple modern way
+   ============================================================ */
+
+.center {
+  display: grid;
+  place-items: center;
+}
+
+.stack > * + * {
+  margin-top: var(--space-4);
+}
+
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+
+/* ============================================================
+   24. PROSE — bloc de texte long-form éditorial
+   ============================================================ */
+
+.prose {
+  max-width: var(--content-default);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--fg);
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  text-wrap: pretty;
+  hyphens: auto;
+  hanging-punctuation: first last allow-end;
+}
+
+.prose > * + * {
+  margin-top: 1em;
+}
+
+.prose h2 {
+  font-size: var(--text-h3);
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+.prose h3 {
+  font-size: var(--text-h4);
+  margin-top: 1.5em;
+  margin-bottom: 0.3em;
+  font-weight: 600;
+}
+
+.prose blockquote {
+  border-inline-start: 3px solid var(--accent);
+  padding-inline-start: var(--space-4);
+  font-style: italic;
+  color: var(--fg-muted);
+}
+
+.prose code {
+  background: var(--bg-subtle);
+  padding: 0.2em 0.4em;
+  border-radius: var(--radius-xs);
+  font-size: 0.9em;
+}
+
+.prose pre {
+  background: var(--gray-12);
+  color: var(--gray-1);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+.prose a {
+  color: var(--accent);
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in oklch, var(--accent) 40%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--duration-fast);
+}
+
+.prose a:hover {
+  text-decoration-color: var(--accent);
+}

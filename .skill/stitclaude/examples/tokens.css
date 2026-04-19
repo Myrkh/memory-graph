@@ -1,0 +1,436 @@
+/* ============================================================
+   STIT'CLAUDE — tokens.css (starter kit)
+
+   Fork ce fichier au début d'un projet. Adapte les valeurs à
+   la house déclarée dans le brief d'intention. Ne supprime pas
+   les catégories : chaque slot correspond à une décision de
+   design qui doit être prise consciemment, pas par défaut.
+
+   La structure est inspirée de Radix Colors + Material 3 +
+   Apple HIG, traduite en OKLCH et en propriétés custom CSS.
+   ============================================================ */
+
+:root {
+
+  /* ============================================================
+     1. TYPOGRAPHIE — 2 polices max
+     ============================================================ */
+
+  --font-sans:
+    "Inter",
+    "Inter Fallback",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI Variable",
+    sans-serif;
+
+  --font-mono:
+    "JetBrains Mono",
+    "SF Mono",
+    "Cascadia Code",
+    ui-monospace,
+    Menlo,
+    monospace;
+
+  /* Si house = Editorial : décommenter */
+  /* --font-serif: "Tiempos Text", "Source Serif 4", "IBM Plex Serif", Georgia, serif; */
+
+  /* ============================================================
+     2. TYPE SCALE — ratio major third (1.25) fluide
+     Générée via utopia.fyi : 320px → 1440px
+     ============================================================ */
+
+  --step--2: clamp(0.7813rem, 0.7747rem + 0.0330vw, 0.8000rem);
+  --step--1: clamp(0.9375rem, 0.9119rem + 0.1136vw, 1.0000rem);
+  --step-0:  clamp(1.1250rem, 1.0739rem + 0.2273vw, 1.2500rem);
+  --step-1:  clamp(1.3500rem, 1.2608rem + 0.3967vw, 1.5625rem);
+  --step-2:  clamp(1.6200rem, 1.4772rem + 0.6359vw, 1.9531rem);
+  --step-3:  clamp(1.9440rem, 1.7269rem + 0.9672vw, 2.4414rem);
+  --step-4:  clamp(2.3328rem, 2.0117rem + 1.4309vw, 3.0518rem);
+  --step-5:  clamp(2.7994rem, 2.3389rem + 2.0524vw, 3.8147rem);
+
+  /* Rôles typographiques sémantiques */
+  --text-caption: var(--step--2);
+  --text-small:   var(--step--1);
+  --text-body:    var(--step-0);
+  --text-lead:    var(--step-1);
+  --text-h4:      var(--step-2);
+  --text-h3:      var(--step-3);
+  --text-h2:      var(--step-4);
+  --text-h1:      var(--step-5);
+
+  /* Line heights */
+  --leading-tight:   1.15;   /* display, grand titres */
+  --leading-snug:    1.3;    /* titres, labels */
+  --leading-normal:  1.5;    /* corps, défaut */
+  --leading-relaxed: 1.65;   /* éditorial long-form */
+
+  /* Letter-spacing (tracking) */
+  --tracking-tight:  -0.02em;   /* headlines 48px+ */
+  --tracking-normal: 0;
+  --tracking-wide:   0.06em;    /* all-caps, small-caps labels */
+
+  /* Measure (longueur de ligne) */
+  --measure-narrow:  45ch;
+  --measure-default: 65ch;
+  --measure-wide:    80ch;
+
+  /* ============================================================
+     3. COULEURS — OKLCH, échelle Radix 12-step
+     ============================================================ */
+
+  /* Neutral (gray avec bias bleu subtil — change `260` à 0 pour
+     neutre pur, à 80 pour bias chaud) */
+  --gray-1:  oklch(0.992 0.001 260);
+  --gray-2:  oklch(0.977 0.002 260);
+  --gray-3:  oklch(0.946 0.003 260);
+  --gray-4:  oklch(0.916 0.004 260);
+  --gray-5:  oklch(0.879 0.005 260);
+  --gray-6:  oklch(0.835 0.006 260);
+  --gray-7:  oklch(0.782 0.008 260);
+  --gray-8:  oklch(0.695 0.011 260);
+  --gray-9:  oklch(0.558 0.014 260);
+  --gray-10: oklch(0.497 0.013 260);
+  --gray-11: oklch(0.392 0.011 260);
+  --gray-12: oklch(0.200 0.009 260);
+
+  /* Brand — ajuster la hue (270 = indigo ; 185 = teal ; 25 = red) */
+  --brand-1:  oklch(0.990 0.004 270);
+  --brand-2:  oklch(0.975 0.010 270);
+  --brand-3:  oklch(0.945 0.030 270);
+  --brand-4:  oklch(0.905 0.055 270);
+  --brand-5:  oklch(0.860 0.085 270);
+  --brand-6:  oklch(0.810 0.110 270);
+  --brand-7:  oklch(0.745 0.135 270);
+  --brand-8:  oklch(0.680 0.160 270);
+  --brand-9:  oklch(0.555 0.165 270);   /* ← le brand core */
+  --brand-10: oklch(0.500 0.170 270);
+  --brand-11: oklch(0.450 0.160 270);
+  --brand-12: oklch(0.270 0.100 270);
+
+  /* Signal colors — RÉSERVÉES aux états métier, jamais décoratif */
+  --success:     oklch(0.70 0.17 152);
+  --success-bg:  oklch(0.96 0.05 152);
+  --success-fg:  oklch(0.30 0.12 152);
+
+  --warning:     oklch(0.78 0.16 85);
+  --warning-bg:  oklch(0.97 0.06 85);
+  --warning-fg:  oklch(0.35 0.10 65);
+
+  --danger:      oklch(0.62 0.22 25);
+  --danger-bg:   oklch(0.96 0.05 25);
+  --danger-fg:   oklch(0.35 0.15 25);
+
+  --info:        oklch(0.68 0.12 232);
+  --info-bg:     oklch(0.96 0.04 232);
+  --info-fg:     oklch(0.32 0.10 232);
+
+  /* ============================================================
+     4. SEMANTIC TOKENS — toujours référencer ces noms dans le code
+     ============================================================ */
+
+  --bg:             var(--gray-1);
+  --bg-subtle:      var(--gray-2);
+  --bg-muted:       var(--gray-3);
+
+  --card:           var(--gray-1);
+  --card-elevated:  var(--gray-1);    /* en light, même bg + ombre */
+  --popover:        var(--gray-1);
+
+  --fg:             var(--gray-12);
+  --fg-muted:       var(--gray-11);
+  --fg-subtle:      var(--gray-10);
+  --fg-on-accent:   oklch(1 0 0);
+
+  --border:         var(--gray-6);
+  --border-strong:  var(--gray-7);
+  --border-focus:   var(--brand-8);
+
+  --accent:         var(--brand-9);
+  --accent-hover:   var(--brand-10);
+  --accent-active:  var(--brand-11);
+  --accent-subtle:  var(--brand-3);
+  --accent-fg:      var(--fg-on-accent);
+
+  --ring:           var(--brand-8);
+  --ring-offset:    var(--bg);
+
+  /* ============================================================
+     5. SPACING — grille 4px (multiplier par 4 pour équivalent px)
+     ============================================================ */
+
+  --space-0:  0;
+  --space-1:  0.25rem;   /* 4px  */
+  --space-2:  0.5rem;    /* 8px  */
+  --space-3:  0.75rem;   /* 12px */
+  --space-4:  1rem;      /* 16px */
+  --space-5:  1.25rem;   /* 20px */
+  --space-6:  1.5rem;    /* 24px */
+  --space-8:  2rem;      /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-20: 5rem;      /* 80px */
+  --space-24: 6rem;      /* 96px */
+  --space-32: 8rem;      /* 128px */
+
+  /* ============================================================
+     6. RADII — 5 steps, concentriques
+     Si house = Apple-Craft : multiplier par 1.2 et utiliser squircle
+     ============================================================ */
+
+  --radius-none: 0;
+  --radius-xs:   2px;
+  --radius-sm:   4px;
+  --radius-md:   6px;    /* cartes défaut Linear-like */
+  --radius-lg:   8px;    /* cartes hero */
+  --radius-xl:   12px;   /* modals, sheets */
+  --radius-2xl:  16px;
+  --radius-3xl:  24px;   /* Apple-Craft territory */
+  --radius-pill: 9999px; /* pills, rounded buttons */
+
+  /* ============================================================
+     7. BORDERS — hairline par défaut
+     ============================================================ */
+
+  --border-width-hairline: 0.5px;  /* HiDPI */
+  --border-width-default:  1px;
+  --border-width-strong:   2px;
+
+  /* ============================================================
+     8. SHADOWS — subtilissimes, optionnelles
+     Préférer surface tonal (teinte) au lieu d'ombres.
+     Utiliser SEULEMENT pour overlays flottants (dropdown, modal).
+     ============================================================ */
+
+  --shadow-xs:   0 1px 2px 0 oklch(0 0 0 / 0.05);
+  --shadow-sm:   0 1px 3px 0 oklch(0 0 0 / 0.07), 0 1px 2px -1px oklch(0 0 0 / 0.05);
+  --shadow-md:   0 4px 6px -1px oklch(0 0 0 / 0.08), 0 2px 4px -2px oklch(0 0 0 / 0.06);
+  --shadow-lg:   0 10px 15px -3px oklch(0 0 0 / 0.10), 0 4px 6px -4px oklch(0 0 0 / 0.08);
+  --shadow-xl:   0 20px 25px -5px oklch(0 0 0 / 0.12), 0 8px 10px -6px oklch(0 0 0 / 0.08);
+
+  /* ============================================================
+     9. MOTION — durations et easings nommés
+     ============================================================ */
+
+  --duration-instant:  50ms;
+  --duration-fast:     120ms;
+  --duration-normal:   200ms;
+  --duration-moderate: 300ms;
+  --duration-slow:     500ms;
+  --duration-long:     800ms;
+
+  --ease-linear:      linear;
+  --ease-standard:    cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized:  cubic-bezier(0.2, 0, 0, 1);
+  --ease-decelerate:  cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-accelerate:  cubic-bezier(0.3, 0, 0.8, 0.15);
+  --ease-expo-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-productive:  cubic-bezier(0.2, 0, 0.38, 0.9);
+  --ease-expressive:  cubic-bezier(0.4, 0.14, 0.3, 1);
+  --ease-bounce:      cubic-bezier(0.5, 1.5, 0.5, 1);
+
+  /* ============================================================
+     10. Z-INDEX — ladder explicite
+     ============================================================ */
+
+  --z-base:      0;
+  --z-dropdown:  100;
+  --z-sticky:    200;
+  --z-banner:    300;
+  --z-overlay:   400;
+  --z-modal:     500;
+  --z-popover:   600;
+  --z-toast:     700;
+  --z-tooltip:   800;
+
+  /* ============================================================
+     11. LAYOUT — max-widths, breakpoints
+     ============================================================ */
+
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+
+  --content-narrow: 45ch;
+  --content-default: 65ch;
+  --content-wide: 80ch;
+
+  /* ============================================================
+     12. FOCUS RING — accessibilité
+     ============================================================ */
+
+  --focus-ring: 0 0 0 2px var(--ring-offset), 0 0 0 4px var(--ring);
+  --focus-ring-offset: 2px;
+}
+
+
+/* ============================================================
+   DARK MODE — peer, pas invert
+   ============================================================ */
+
+[data-theme="dark"],
+.dark {
+  /* Neutrals — base plus sombre, bias teinte subtil */
+  --gray-1:  oklch(0.145 0.005 260);
+  --gray-2:  oklch(0.178 0.006 260);
+  --gray-3:  oklch(0.213 0.007 260);
+  --gray-4:  oklch(0.244 0.008 260);
+  --gray-5:  oklch(0.275 0.009 260);
+  --gray-6:  oklch(0.310 0.010 260);
+  --gray-7:  oklch(0.359 0.012 260);
+  --gray-8:  oklch(0.438 0.014 260);
+  --gray-9:  oklch(0.546 0.014 260);
+  --gray-10: oklch(0.602 0.014 260);
+  --gray-11: oklch(0.724 0.010 260);
+  --gray-12: oklch(0.923 0.003 260);
+
+  /* Brand — désaturé ~15% en dark (évite la vibration) */
+  --brand-1:  oklch(0.165 0.020 270);
+  --brand-2:  oklch(0.195 0.035 270);
+  --brand-3:  oklch(0.225 0.055 270);
+  --brand-4:  oklch(0.260 0.075 270);
+  --brand-5:  oklch(0.305 0.095 270);
+  --brand-6:  oklch(0.360 0.115 270);
+  --brand-7:  oklch(0.420 0.130 270);
+  --brand-8:  oklch(0.485 0.140 270);
+  --brand-9:  oklch(0.620 0.140 270);   /* ← brand core en dark */
+  --brand-10: oklch(0.680 0.135 270);
+  --brand-11: oklch(0.760 0.115 270);
+  --brand-12: oklch(0.920 0.045 270);
+
+  /* Surface elevation via tint (Material 3 style) */
+  --card:           var(--gray-2);
+  --card-elevated:  var(--gray-3);
+  --popover:        var(--gray-4);
+
+  --border:         var(--gray-6);
+  --border-strong:  var(--gray-7);
+
+  /* Shadows plus prononcées en dark (toujours utile pour modals) */
+  --shadow-lg: 0 10px 15px -3px oklch(0 0 0 / 0.35), 0 4px 6px -4px oklch(0 0 0 / 0.25);
+  --shadow-xl: 0 20px 25px -5px oklch(0 0 0 / 0.45), 0 8px 10px -6px oklch(0 0 0 / 0.30);
+
+  /* Ring offset suit le nouveau bg */
+  --ring-offset: var(--bg);
+}
+
+/* Respecte le choix système si pas de préférence explicite user */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    /* Recopie les tokens dark ci-dessus — en pratique dupliqué ici
+       ou géré via [data-theme] toggle en JS */
+  }
+}
+
+
+/* ============================================================
+   FALLBACK FONT METRICS — évite CLS
+   (générer via fontpie.com ou capsize avec ta vraie font)
+   ============================================================ */
+
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial");
+  size-adjust: 107.5%;
+  ascent-override: 90%;
+  descent-override: 22.5%;
+  line-gap-override: 0%;
+}
+
+
+/* ============================================================
+   COLOR SCHEME HINT — active les UI browser natifs dark
+   ============================================================ */
+
+:root { color-scheme: light dark; }
+
+
+/* ============================================================
+   RESET TYPOGRAPHIQUE DE BASE (optionnel, extrait d'un reset)
+   ============================================================ */
+
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: var(--leading-normal);
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-optical-sizing: auto;
+  font-synthesis: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+/* Headlines — balance wrap, tight leading, tracking négatif */
+h1, h2, h3, h4 {
+  font-family: var(--font-sans);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+  margin: 0;
+}
+
+h1 { font-size: var(--text-h1); font-weight: 700; line-height: var(--leading-tight); }
+h2 { font-size: var(--text-h2); font-weight: 600; }
+h3 { font-size: var(--text-h3); font-weight: 600; }
+h4 { font-size: var(--text-h4); font-weight: 600; }
+
+/* Paragraphes — pretty wrap, hyphenation */
+p {
+  margin: 0;
+  max-width: var(--content-default);
+  text-wrap: pretty;
+  hyphens: auto;
+}
+
+/* Monospace partout (code, kbd, samp) */
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+/* Tabular nums sur data */
+[data-numeric],
+.data,
+td.num,
+.metric {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Focus visible — obligatoire */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Reduced motion — obligatoire */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Règles FR */
+html[lang="fr"] {
+  hyphens: auto;
+}
