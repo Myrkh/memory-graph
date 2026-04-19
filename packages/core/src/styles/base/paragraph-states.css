@@ -1,0 +1,69 @@
+/* ============================================================================
+ * Paragraph states — state markers applied by the library to the consumer's
+ * paragraph elements. Data attributes (not class names) to avoid any
+ * collision with the host app's styles.
+ *
+ * [data-mg-id]          — marks an observed paragraph (consumer-authored)
+ * [data-mg-pinned]      — the paragraph is pinned (coral dot in margin)
+ * [data-mg-flash]       — transient flash animation (e.g. on scroll-to)
+ * ==========================================================================*/
+
+[data-mg-id] {
+  position: relative;
+  scroll-margin-top: 80px;
+  transition: background-color 280ms var(--mg-ease-standard, ease-out);
+}
+
+/* Innovation 02 · bidirectional hover — soft tint when the corresponding
+ * node is hovered in the graph. Fade-in 200ms, fade-out 280ms (spec §02). */
+[data-mg-id][data-mg-highlight] {
+  background-color: color-mix(in oklch, var(--mg-accent) 6%, transparent);
+  transition-duration: 200ms;
+}
+
+[data-mg-id][data-mg-pinned]::after {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mg-accent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--mg-accent) 15%, transparent);
+}
+
+[data-mg-id][data-mg-flash] {
+  animation: mg-flash 1800ms ease-out forwards;
+}
+[data-mg-id][data-mg-flash]::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--mg-accent);
+  animation: mg-flash-bar 1800ms ease-out forwards;
+}
+
+@keyframes mg-flash {
+  0%   { background: color-mix(in oklch, var(--mg-accent) 0%, transparent); }
+  15%  { background: color-mix(in oklch, var(--mg-accent) 14%, transparent); }
+  100% { background: color-mix(in oklch, var(--mg-accent) 0%, transparent); }
+}
+@keyframes mg-flash-bar {
+  0%   { opacity: 0; transform: scaleY(0); }
+  15%  { opacity: 1; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-mg-id][data-mg-flash],
+  [data-mg-id][data-mg-flash]::before {
+    animation: none;
+  }
+  [data-mg-id] {
+    transition-duration: 0ms;
+  }
+}

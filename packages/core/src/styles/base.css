@@ -1,0 +1,29 @@
+/* ============================================================================
+ * @stitclaude/memory-graph · base styles
+ *
+ * Structural + behavioral rules that ship with every install. Theme-agnostic:
+ * reads only --mg-* custom properties. Tokens come from two sources, both
+ * overridable by consumers:
+ *
+ *   1. `./base/_defaults.css` — neutral fallbacks declared at :where(:root)
+ *      (zero specificity) so the component works without any theme file.
+ *   2. Opt-in themes (e.g. `./themes/stit-claude.css`) loaded separately
+ *      by the consumer. They override via a higher-specificity selector
+ *      like `[data-mg-theme='stit-claude']`.
+ *
+ * The build step (packages/core/scripts/build-styles.mjs) concatenates the
+ * modules below into a single `dist/styles/base.css` so consumers import
+ * one file.
+ * ==========================================================================*/
+
+@import url('./base/_defaults.css');
+@import url('./base/paragraph-states.css');
+@import url('./base/handle.css');
+@import url('./base/panel.css');
+@import url('./base/graph.css');
+@import url('./base/tooltip.css');
+@import url('./base/footer.css');
+@import url('./base/intensity.css');
+@import url('./base/backdrop.css');
+@import url('./base/pin-toast.css');
+@import url('./base/annotation.css');

@@ -1,0 +1,54 @@
+/* ============================================================================
+ * Token defaults — sensible neutral values so the component renders correctly
+ * with NO theme file loaded. Any theme (stit-claude, or a consumer's own)
+ * overrides these via a higher-specificity selector like
+ * [data-mg-theme='stit-claude'] or [data-mg-theme='my-brand'].
+ *
+ * Defined on :where(:root) so specificity is zero — even a bare :root
+ * rule from the consumer wins trivially. Pattern aligned with shadcn/ui,
+ * Radix Colors, and the modern design-system playbook.
+ *
+ * Contract: every --mg-* custom property referenced by base/*.css must be
+ * declared here. Forward-compatible tokens (accent-hover, radius-pill, …)
+ * are included too so plugins / consumer themes can rely on them.
+ * ==========================================================================*/
+
+:where(:root) {
+  color-scheme: light;
+
+  /* -- Palette (neutral warm, Stit'Claude-adjacent coral accent) -- */
+  --mg-bg: #fafaf8;
+  --mg-surface: #f2efe9;
+  --mg-border: #e4dfd5;
+  --mg-fg: #1c1a17;
+  --mg-fg-muted: #55534e;
+  --mg-fg-subtle: #8a8881;
+
+  --mg-accent: #cf5036;
+  --mg-accent-hover: #b84629;
+  --mg-accent-subtle: #fce7e0;
+  --mg-ring: #d97f6b;
+
+  /* -- Typography (system stacks, no network load) -- */
+  --mg-font-display: ui-serif, Georgia, 'Times New Roman', serif;
+  --mg-font-serif: Georgia, 'Times New Roman', serif;
+  --mg-font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mg-font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* -- Motion -- */
+  --mg-duration-fast: 120ms;
+  --mg-duration-normal: 200ms;
+  --mg-duration-moderate: 340ms;
+  --mg-duration-slow: 520ms;
+  --mg-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --mg-ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --mg-ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --mg-ease-spring-smooth: cubic-bezier(0.45, 1.4, 0.55, 1);
+  --mg-ease-spring-snappy: cubic-bezier(0.3, 1.6, 0.5, 1);
+
+  /* -- Radii -- */
+  --mg-radius-sm: 6px;
+  --mg-radius-md: 10px;
+  --mg-radius-lg: 14px;
+  --mg-radius-pill: 9999px;
+}

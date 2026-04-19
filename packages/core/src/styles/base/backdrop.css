@@ -1,0 +1,26 @@
+/* ============================================================================
+ * Backdrop — click-dismiss overlay behind the panel. Visible whenever the
+ * root carries [data-mg-open].
+ * ==========================================================================*/
+
+.mg-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: color-mix(in oklch, var(--mg-bg) 40%, transparent);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms ease-out;
+  border: 0;
+}
+
+[data-mg-open] .mg-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-backdrop { transition: none; }
+}

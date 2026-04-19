@@ -1,0 +1,49 @@
+/* ============================================================================
+ * Tooltip — hover card that floats at the body level, so panel scroll
+ * doesn't displace it.
+ * ==========================================================================*/
+
+.mg-tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: var(--mg-fg);
+  color: var(--mg-bg);
+  font-family: var(--mg-font-mono);
+  font-size: 10px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  line-height: 1.5;
+  max-width: 240px;
+  z-index: 60;
+  opacity: 0;
+  transition: opacity 180ms;
+  letter-spacing: 0.04em;
+  box-shadow: 0 6px 18px color-mix(in oklch, var(--mg-fg) 25%, transparent);
+}
+.mg-tooltip[data-mg-visible] { opacity: 1; }
+
+.mg-tooltip__num {
+  color: var(--mg-accent);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+.mg-tooltip__extract {
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: 12px;
+  letter-spacing: -0.005em;
+  margin: 4px 0;
+  color: var(--mg-bg);
+  opacity: 0.92;
+}
+.mg-tooltip__meta {
+  display: flex;
+  gap: 10px;
+  opacity: 0.7;
+  font-size: 9px;
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-tooltip { transition: none; }
+}

@@ -1,0 +1,119 @@
+/* ============================================================================
+ * @stitclaude/memory-graph · "stit-claude" theme
+ *
+ * Opt-in palette + typography + motion. Applied to anything inside an element
+ * carrying `[data-mg-theme="stit-claude"]`. Default scheme is light; add
+ * `[data-mg-scheme="dark"]` to switch.
+ *
+ * Values are faithfully lifted from the Stit'Claude design system
+ * (tokens.css — oklch-based). All tokens are namespaced `--mg-*` so this
+ * theme never collides with the host app's own tokens.
+ * ==========================================================================*/
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* -- Light scheme (default) --------------------------------------------- */
+
+[data-mg-theme='stit-claude'] {
+  color-scheme: light;
+
+  /* Ink scale — warm near-white to warm near-black, 12 stops. */
+  --mg-ink-1:  oklch(0.988 0.006 85);
+  --mg-ink-2:  oklch(0.971 0.010 82);
+  --mg-ink-3:  oklch(0.946 0.014 80);
+  --mg-ink-4:  oklch(0.905 0.016 78);
+  --mg-ink-5:  oklch(0.860 0.018 75);
+  --mg-ink-6:  oklch(0.720 0.014 55);
+  --mg-ink-7:  oklch(0.580 0.014 50);
+  --mg-ink-8:  oklch(0.460 0.014 45);
+  --mg-ink-9:  oklch(0.360 0.012 42);
+  --mg-ink-10: oklch(0.265 0.012 40);
+  --mg-ink-11: oklch(0.195 0.014 38);
+  --mg-ink-12: oklch(0.145 0.015 36);
+
+  /* Coral accent — signature warm red, 6 stops. */
+  --mg-coral-3:  oklch(0.965 0.028 35);
+  --mg-coral-6:  oklch(0.820 0.105 35);
+  --mg-coral-8:  oklch(0.725 0.160 35);
+  --mg-coral-9:  oklch(0.645 0.190 35);
+  --mg-coral-10: oklch(0.580 0.185 33);
+  --mg-coral-11: oklch(0.505 0.160 32);
+
+  /* Semantic mapping — what the component actually reads. */
+  --mg-bg: var(--mg-ink-1);
+  --mg-surface: var(--mg-ink-3);
+  --mg-border: var(--mg-ink-5);
+  --mg-fg: var(--mg-ink-12);
+  --mg-fg-muted: var(--mg-ink-10);
+  --mg-fg-subtle: var(--mg-ink-8);
+  --mg-accent: var(--mg-coral-9);
+  --mg-accent-hover: var(--mg-coral-10);
+  --mg-accent-subtle: var(--mg-coral-3);
+  --mg-ring: var(--mg-coral-8);
+
+  /* Typography. */
+  --mg-font-display: 'Fraunces', 'Times New Roman', serif;
+  --mg-font-serif: 'Instrument Serif', Georgia, serif;
+  --mg-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --mg-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Motion — Stit'Claude tokens. */
+  --mg-duration-fast: 120ms;
+  --mg-duration-normal: 200ms;
+  --mg-duration-moderate: 340ms;
+  --mg-duration-slow: 520ms;
+  --mg-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --mg-ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --mg-ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --mg-ease-spring-smooth: cubic-bezier(0.45, 1.4, 0.55, 1);
+  --mg-ease-spring-snappy: cubic-bezier(0.3, 1.6, 0.5, 1);
+
+  /* Radii. */
+  --mg-radius-sm: 6px;
+  --mg-radius-md: 10px;
+  --mg-radius-lg: 14px;
+  --mg-radius-pill: 9999px;
+}
+
+/**
+ * Live text selection — distinctly different from an annotation span
+ * (coral underline + subtle tint). Selection uses a filled background
+ * with inverted color, so the two states never visually collide.
+ */
+[data-mg-theme='stit-claude'] ::selection {
+  background: color-mix(in oklch, var(--mg-accent) 42%, transparent);
+  color: var(--mg-ink-1);
+}
+
+[data-mg-theme='stit-claude'][data-mg-scheme='dark'] ::selection,
+[data-mg-theme='stit-claude'] [data-mg-scheme='dark'] ::selection {
+  background: color-mix(in oklch, var(--mg-accent) 48%, transparent);
+  color: var(--mg-ink-12);
+}
+
+/* -- Dark scheme (opt-in) ------------------------------------------------ */
+
+[data-mg-theme='stit-claude'][data-mg-scheme='dark'],
+[data-mg-theme='stit-claude'] [data-mg-scheme='dark'] {
+  color-scheme: dark;
+
+  --mg-ink-1:  oklch(0.145 0.012 40);
+  --mg-ink-2:  oklch(0.180 0.013 40);
+  --mg-ink-3:  oklch(0.215 0.014 40);
+  --mg-ink-4:  oklch(0.250 0.014 40);
+  --mg-ink-5:  oklch(0.295 0.014 40);
+  --mg-ink-6:  oklch(0.345 0.013 45);
+  --mg-ink-7:  oklch(0.420 0.012 48);
+  --mg-ink-8:  oklch(0.540 0.010 52);
+  --mg-ink-9:  oklch(0.660 0.008 58);
+  --mg-ink-10: oklch(0.775 0.008 65);
+  --mg-ink-11: oklch(0.875 0.007 70);
+  --mg-ink-12: oklch(0.965 0.006 80);
+
+  --mg-coral-3:  oklch(0.265 0.055 35);
+  --mg-coral-6:  oklch(0.435 0.130 35);
+  --mg-coral-8:  oklch(0.580 0.170 35);
+  --mg-coral-9:  oklch(0.685 0.165 35);
+  --mg-coral-10: oklch(0.745 0.155 35);
+  --mg-coral-11: oklch(0.820 0.120 33);
+}

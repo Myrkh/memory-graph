@@ -1,0 +1,77 @@
+/* ============================================================================
+ * Invocation handle — the thin accent bar at the left edge of the viewport
+ * that opens the panel. "Armed" when there is at least one station.
+ * ==========================================================================*/
+
+.mg-handle {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 100dvh;
+  z-index: 40;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 240ms ease-out;
+  padding-right: 16px;
+  box-sizing: content-box;
+  border: 0;
+  background: transparent;
+}
+
+.mg-handle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 3px;
+  height: clamp(80px, 12vh, 140px);
+  background: var(--mg-accent);
+  border-radius: 0 2px 2px 0;
+  transition: width 240ms cubic-bezier(0.3, 1.4, 0.4, 1);
+}
+
+.mg-handle:hover { opacity: 1; }
+.mg-handle:hover::before { width: 5px; }
+.mg-handle:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--mg-accent);
+  outline-offset: 4px;
+}
+
+.mg-handle__label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mg-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mg-accent);
+  white-space: nowrap;
+  padding: 4px 10px;
+  background: var(--mg-bg);
+  border: 1px solid color-mix(in oklch, var(--mg-accent) 30%, var(--mg-border));
+  border-radius: 4px;
+  font-weight: 600;
+}
+.mg-handle__label::after { content: ' ›'; opacity: 0.6; }
+
+[data-mg-open] .mg-handle { opacity: 0; pointer-events: none; }
+
+/* variant="permanent" (default) — armed state visible at 32%, full on hover. */
+.mg-handle[data-mg-variant='permanent'][data-mg-armed] { opacity: 0.32; }
+.mg-handle[data-mg-variant='permanent'][data-mg-armed]:hover,
+.mg-handle[data-mg-variant='permanent'][data-mg-armed]:focus-visible { opacity: 1; }
+
+/* variant="ghost" — always invisible at rest, revealed only on hover/focus. */
+.mg-handle[data-mg-variant='ghost'] { opacity: 0; }
+.mg-handle[data-mg-variant='ghost']:hover,
+.mg-handle[data-mg-variant='ghost']:focus-visible { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-handle,
+  .mg-handle::before { transition: none; }
+}

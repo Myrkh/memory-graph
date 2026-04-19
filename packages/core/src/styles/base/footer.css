@@ -1,0 +1,55 @@
+/* ============================================================================
+ * Panel footer — action buttons row (clear, export, toggle passages).
+ * ==========================================================================*/
+
+.mg-foot {
+  padding: 12px 20px;
+  border-top: 1px solid var(--mg-border);
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-family: var(--mg-font-mono);
+  font-size: 10px;
+  color: var(--mg-fg-subtle);
+  letter-spacing: 0.06em;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.mg-foot__group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.mg-foot__btn {
+  background: transparent;
+  border: 1px solid var(--mg-border);
+  color: var(--mg-fg-muted);
+  font-family: inherit;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 140ms, border-color 140ms, background 140ms;
+  font-weight: 600;
+}
+.mg-foot__btn:hover,
+.mg-foot__btn:focus-visible {
+  color: var(--mg-accent);
+  border-color: var(--mg-accent);
+  outline: none;
+}
+
+.mg-foot__btn[data-mg-active] {
+  background: color-mix(in oklch, var(--mg-accent) 12%, transparent);
+  border-color: var(--mg-accent);
+  color: var(--mg-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-foot__btn { transition: none; }
+}

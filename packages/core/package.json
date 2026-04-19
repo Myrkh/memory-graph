@@ -1,0 +1,54 @@
+{
+  "name": "@stitclaude/memory-graph",
+  "version": "0.1.0",
+  "description": "Visualize reading trails as a node-link graph — React + TypeScript port of the vanilla memory-graph component",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles": "./dist/styles/base.css",
+    "./themes/stit-claude": "./dist/styles/themes/stit-claude.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "tsup && node scripts/build-styles.mjs",
+    "build:styles": "node scripts/build-styles.mjs",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.1.0"
+  },
+  "keywords": [
+    "react",
+    "graph",
+    "visualization",
+    "reading",
+    "trails",
+    "memory"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,42 @@
+/* ============================================================================
+ * Reading-intensity sparkline — last-60-minutes dwell totals as vertical bars.
+ * ==========================================================================*/
+
+.mg-intensity {
+  padding: 10px 20px 12px;
+  border-top: 1px solid var(--mg-border);
+  background: var(--mg-bg);
+}
+
+.mg-intensity__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.mg-intensity__k {
+  font-family: var(--mg-font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  color: var(--mg-fg-subtle);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.mg-intensity__range {
+  font-family: var(--mg-font-mono);
+  font-size: 9.5px;
+  color: var(--mg-fg-muted);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.mg-sparkline {
+  display: block;
+  width: 100%;
+  height: 28px;
+}
+.mg-sparkline__bar {
+  fill: var(--mg-accent);
+}
