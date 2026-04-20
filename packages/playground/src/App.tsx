@@ -1,15 +1,21 @@
-import { useSyncExternalStore } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { MemoryGraph } from '@myrkh/memory-graph';
-import { PLAYGROUND_PAGES, PlaygroundNav } from './components/PlaygroundNav.js';
-import { ThemeToggle } from './components/ThemeToggle.js';
 import { DemoPanel } from './components/DemoPanel.js';
-import { PermanentPage } from './pages/01-permanent.js';
-import { GhostPage } from './pages/02-ghost.js';
-import { NonePage } from './pages/03-none.js';
+import { ThemeToggle } from './components/ThemeToggle.js';
+import { ScrollProgress } from './sections/ScrollProgress.js';
+import { TopNav } from './sections/TopNav.js';
+import { HomePage } from './pages/00-home.js';
+import { DemoPage } from './pages/10-demo.js';
+import { DocsPage } from './pages/20-docs.js';
+import { PhilosophyPage } from './pages/30-philosophy.js';
 
-const DEFAULT_HASH = '01-permanent';
-const VALID_HASHES = new Set(PLAYGROUND_PAGES.map((p) => p.hash));
+const DEFAULT_HASH = 'home';
 const GLOBAL_STORAGE_KEY = 'mg-playground:global';
+
+const ROUTES = new Set(['home', 'demo', 'docs', 'philosophy']);
+
+/** Legacy hashes from the pre-site playground — redirect gracefully. */
+const LEGACY_TO_DEMO = new Set(['01-permanent', '02-ghost', '03-none']);
 
 function subscribe(cb: () => void): () => void {
   window.addEventListener('hashchange', cb);
@@ -18,7 +24,9 @@ function subscribe(cb: () => void): () => void {
 
 function getSnapshot(): string {
   const raw = window.location.hash.slice(1);
-  return VALID_HASHES.has(raw) ? raw : DEFAULT_HASH;
+  if (ROUTES.has(raw)) return raw;
+  if (LEGACY_TO_DEMO.has(raw)) return 'demo';
+  return DEFAULT_HASH;
 }
 
 function getServerSnapshot(): string {
@@ -30,19 +38,30 @@ function useHash(): string {
 }
 
 /**
- * Provider-at-root pattern (canonical for stateful libs: cf. Radix,
- * TanStack Query, shadcn theme). `<MemoryGraph.Root>` wraps the whole
- * app once; pages only declare their essay content + their Handle variant.
- * The panel and all its siblings live here as singletons, so panel open
- * state + graph data persist as the user navigates between variants.
+ * Site shell. A single `<MemoryGraph.Root>` owns the reading-graph state
+ * and lives at the top of the app — Provider-at-root pattern (same idea
+ * as `<QueryClientProvider>`). The `<DemoPanel>` + all floating chrome
+ * render as singletons at shell level, so their state is stable across
+ * route changes (the panel stays open when you hop from Demo to Docs,
+ * the graph data persists, annotations survive navigation).
  */
 export function App() {
   const hash = useHash();
+
+  // Scroll back to the top on every route change. The actual view
+  // transition (directional slide) is set up in `utils/navigation.ts` at
+  // click time — by the time this effect runs, the DOM has already
+  // committed, so all we do here is restore scroll position.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [hash]);
+
   return (
     <MemoryGraph.Root storageKey={GLOBAL_STORAGE_KEY}>
+      <ScrollProgress />
+      <TopNav current={hash} />
       {renderPage(hash)}
       <ThemeToggle />
-      <PlaygroundNav current={hash} />
       <DemoPanel />
     </MemoryGraph.Root>
   );
@@ -50,11 +69,13 @@ export function App() {
 
 function renderPage(hash: string) {
   switch (hash) {
-    case '02-ghost':
-      return <GhostPage key="02-ghost" />;
-    case '03-none':
-      return <NonePage key="03-none" />;
+    case 'demo':
+      return <DemoPage key="demo" />;
+    case 'docs':
+      return <DocsPage key="docs" />;
+    case 'philosophy':
+      return <PhilosophyPage key="philosophy" />;
     default:
-      return <PermanentPage key="01-permanent" />;
+      return <HomePage key="home" />;
   }
 }

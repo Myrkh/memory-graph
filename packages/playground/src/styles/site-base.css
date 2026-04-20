@@ -1,0 +1,152 @@
+/* ============================================================================
+ * Site shell — page base + top navigation.
+ * House: Editorial · typography-first · hairlines · zero decoration.
+ * Every selector is token-driven; no hardcoded colors or motion.
+ * ==========================================================================*/
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+.site-page {
+  display: block;
+  padding-top: 72px; /* top nav clearance */
+}
+
+.site-page--home,
+.site-page--docs,
+.site-page--philosophy {
+  background: var(--mg-bg);
+}
+
+/* -- Top navigation · sticky, blurred, hairline bottom border --------- */
+
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: clamp(24px, 4vw, 48px);
+  padding: 14px clamp(20px, 4vw, 56px);
+  background: color-mix(in oklch, var(--mg-bg) 88%, transparent);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  border-bottom: 1px solid var(--mg-border);
+}
+
+.site-nav__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--mg-fg);
+}
+
+.site-nav__brand-text {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.site-nav__brand-version {
+  font-family: var(--mg-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mg-fg-subtle);
+  font-variant-numeric: tabular-nums;
+  padding: 2px 6px;
+  border: 1px solid var(--mg-border);
+  border-radius: 3px;
+}
+
+.site-nav__links {
+  display: flex;
+  justify-content: center;
+  gap: clamp(14px, 2vw, 28px);
+}
+
+.site-nav__link {
+  font-family: var(--mg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mg-fg-muted);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 6px 2px;
+  border-bottom: 1px solid transparent;
+  transition:
+    color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    border-color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+.site-nav__link:hover,
+.site-nav__link:focus-visible {
+  color: var(--mg-accent);
+  border-bottom-color: var(--mg-accent);
+  outline: none;
+}
+
+.site-nav__ctas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.site-nav__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  font-family: var(--mg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--mg-fg);
+  border: 1px solid var(--mg-border);
+  border-radius: var(--mg-radius-pill, 100px);
+  transition:
+    color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    border-color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    background var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+.site-nav__cta:hover,
+.site-nav__cta:focus-visible {
+  color: var(--mg-accent);
+  border-color: var(--mg-accent);
+  outline: none;
+}
+
+.site-nav__cta--accent {
+  background: var(--mg-accent);
+  color: var(--mg-bg);
+  border-color: var(--mg-accent);
+}
+.site-nav__cta--accent:hover,
+.site-nav__cta--accent:focus-visible {
+  color: var(--mg-bg);
+  background: var(--mg-accent-hover, var(--mg-accent));
+  filter: brightness(1.05);
+}
+
+/* -- Mobile: collapse links, keep CTAs -------------------------------- */
+
+@media (max-width: 720px) {
+  .site-nav {
+    grid-template-columns: auto auto;
+    gap: 12px;
+  }
+  .site-nav__links { display: none; }
+}

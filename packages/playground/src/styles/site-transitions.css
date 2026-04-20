@@ -1,0 +1,72 @@
+/* ============================================================================
+ * View Transitions API · directional page slide.
+ *
+ * When `navigate()` (see `utils/navigation.ts`) triggers a route change,
+ * it sets `html[data-site-transition="forward|backward"]` *before* calling
+ * `startViewTransition`. We read that attribute here to pick the slide
+ * direction: the old page exits in the OPPOSITE direction of travel, the
+ * new page enters from the direction of travel. Eased with expo-out so
+ * the slide lands without bouncing. Stit'Claude signature · editorial
+ * page-turn that feels physical without being showy.
+ *
+ * Fallback behaviour:
+ * - No data attr (browser back button, direct hash edit) → cross-fade.
+ * - No View Transitions API support → `navigate()` skips the wrapper,
+ *   hash change is immediate, scrollTop useEffect fires, page mounts
+ *   with `site-page-in` fade (defined in `site-motion.css`).
+ * - `prefers-reduced-motion: reduce` → wrapped in a media query below;
+ *   the transition is untouched, the browser's default snap applies.
+ * ==========================================================================*/
+
+@media not (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 520ms;
+    animation-timing-function: var(--mg-ease-expo-out, cubic-bezier(0.19, 1, 0.22, 1));
+    animation-fill-mode: both;
+  }
+
+  /* Default (no direction attr) · cross-fade. */
+  ::view-transition-old(root) { animation-name: site-vt-fade-out; }
+  ::view-transition-new(root) { animation-name: site-vt-fade-in; }
+
+  /* Forward navigation (e.g. home → demo) · old exits left, new enters right. */
+  html[data-site-transition='forward']::view-transition-old(root) {
+    animation-name: site-vt-slide-out-left;
+  }
+  html[data-site-transition='forward']::view-transition-new(root) {
+    animation-name: site-vt-slide-in-right;
+  }
+
+  /* Backward navigation (e.g. docs → home) · old exits right, new enters left. */
+  html[data-site-transition='backward']::view-transition-old(root) {
+    animation-name: site-vt-slide-out-right;
+  }
+  html[data-site-transition='backward']::view-transition-new(root) {
+    animation-name: site-vt-slide-in-left;
+  }
+
+  @keyframes site-vt-fade-out {
+    to { opacity: 0; }
+  }
+  @keyframes site-vt-fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes site-vt-slide-out-left {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(-8%); }
+  }
+  @keyframes site-vt-slide-out-right {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(8%); }
+  }
+  @keyframes site-vt-slide-in-right {
+    from { opacity: 0; transform: translateX(8%); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes site-vt-slide-in-left {
+    from { opacity: 0; transform: translateX(-8%); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+}

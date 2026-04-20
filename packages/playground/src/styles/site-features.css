@@ -1,0 +1,273 @@
+/* ============================================================================
+ * Features grid + home final CTA.
+ * 3-column grid on desktop, 2 on tablet, 1 on mobile. Every card is a
+ * self-contained editorial unit: numbered mono kicker, display italic
+ * title, serif body, mono code sample at the bottom.
+ * ==========================================================================*/
+
+.site-features {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(72px, 10vw, 128px) clamp(20px, 4vw, 56px);
+}
+
+.site-features__head {
+  max-width: 720px;
+  margin: 0 auto clamp(48px, 7vw, 80px);
+  text-align: center;
+}
+
+.site-features__kicker {
+  font-family: var(--mg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mg-accent);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.site-features__title {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: var(--mg-fg);
+  margin: 0 0 20px;
+  text-wrap: balance;
+}
+.site-features__title em {
+  color: var(--mg-accent);
+  font-style: italic;
+}
+
+.site-features__deck {
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.55;
+  color: var(--mg-fg-muted);
+  max-width: 56ch;
+  margin: 0 auto;
+  text-wrap: pretty;
+}
+
+/* -- Cards grid ------------------------------------------------------- */
+
+.site-features__grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 24px);
+}
+
+@media (max-width: 960px) {
+  .site-features__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .site-features__grid { grid-template-columns: 1fr; }
+}
+
+.site-features__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(22px, 2.5vw, 30px);
+  background: var(--mg-surface);
+  border: 1px solid var(--mg-border);
+  border-radius: var(--mg-radius-md, 10px);
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    border-color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    transform var(--mg-duration-normal, 200ms) var(--mg-ease-spring-smooth, ease-out);
+}
+
+/* Cursor spotlight — radial coral halo that follows `--mx`/`--my` set
+ * by a single delegated pointermove listener on the grid. Invisible at
+ * rest, reveals on hover. Pure CSS consumption of JS-driven vars. */
+.site-features__card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(
+    circle 220px at var(--mx, 50%) var(--my, 50%),
+    color-mix(in oklch, var(--mg-accent) 22%, transparent) 0%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity var(--mg-duration-moderate, 340ms) var(--mg-ease-standard, ease-out);
+  pointer-events: none;
+}
+.site-features__card:hover::before,
+.site-features__card:focus-within::before {
+  opacity: 1;
+}
+
+.site-features__card:hover {
+  border-color: color-mix(in oklch, var(--mg-accent) 35%, var(--mg-border));
+  transform: translateY(-2px);
+}
+
+.site-features__card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.site-features__card-num {
+  font-family: var(--mg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--mg-accent);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: transform var(--mg-duration-normal, 200ms) var(--mg-ease-expo-out, ease-out);
+}
+.site-features__card:hover .site-features__card-num {
+  transform: translateX(4px);
+}
+
+.site-features__card-title {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--mg-fg);
+  margin: 0;
+}
+
+.site-features__card-tagline {
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--mg-accent);
+  margin: 0;
+  text-wrap: balance;
+}
+
+.site-features__card-body {
+  font-family: var(--mg-font-serif);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--mg-fg-muted);
+  margin: 0;
+  text-wrap: pretty;
+  flex-grow: 1;
+}
+
+.site-features__card-sample {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: color-mix(in oklch, var(--mg-accent) 4%, var(--mg-bg));
+  border: 1px solid color-mix(in oklch, var(--mg-accent) 15%, var(--mg-border));
+  border-radius: 6px;
+  font-family: var(--mg-font-mono);
+  font-size: 12px;
+  color: var(--mg-accent);
+  overflow-x: auto;
+  font-weight: 500;
+}
+
+/* -- Home final CTA strip -------------------------------------------- */
+
+.site-home-cta {
+  border-top: 1px solid var(--mg-border);
+  padding: clamp(72px, 10vw, 120px) clamp(20px, 4vw, 56px);
+  background: color-mix(in oklch, var(--mg-accent) 3%, var(--mg-surface));
+}
+
+.site-home-cta__inner {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.site-home-cta__kicker {
+  font-family: var(--mg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mg-accent);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.site-home-cta__title {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+  color: var(--mg-fg);
+  margin: 0 0 20px;
+  text-wrap: balance;
+}
+.site-home-cta__title em { color: var(--mg-accent); font-style: italic; }
+
+.site-home-cta__deck {
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.55;
+  color: var(--mg-fg-muted);
+  max-width: 56ch;
+  margin: 0 auto clamp(28px, 4vw, 40px);
+  text-wrap: pretty;
+}
+
+.site-home-cta__actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.site-home-cta__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  font-family: var(--mg-font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--mg-fg);
+  border: 1px solid var(--mg-border);
+  border-radius: var(--mg-radius-pill, 100px);
+  background: var(--mg-bg);
+  transition:
+    color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    border-color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    transform var(--mg-duration-normal, 200ms) var(--mg-ease-spring-smooth, ease-out);
+}
+.site-home-cta__btn:hover,
+.site-home-cta__btn:focus-visible {
+  color: var(--mg-accent);
+  border-color: var(--mg-accent);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.site-home-cta__btn--primary {
+  background: var(--mg-accent);
+  color: var(--mg-bg);
+  border-color: var(--mg-accent);
+}
+.site-home-cta__btn--primary:hover,
+.site-home-cta__btn--primary:focus-visible {
+  color: var(--mg-bg);
+  filter: brightness(1.05);
+}

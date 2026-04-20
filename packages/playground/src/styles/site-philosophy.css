@@ -1,0 +1,218 @@
+/* ============================================================================
+ * Philosophy page — the five laws, expanded as editorial piece.
+ * Stit'Claude signature at peak: narrow measure, display-italic titles,
+ * serif body, numbered mono kickers, hairline rules.
+ * ==========================================================================*/
+
+.site-page--philosophy {
+  background: var(--mg-bg);
+}
+
+.site-laws {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(64px, 10vw, 128px) clamp(20px, 5vw, 56px) clamp(48px, 7vw, 80px);
+  font-family: var(--mg-font-serif);
+  color: var(--mg-fg);
+}
+
+/* -- Head ------------------------------------------------------------- */
+
+.site-laws__head {
+  text-align: center;
+  margin-bottom: clamp(64px, 10vw, 112px);
+  padding-bottom: clamp(28px, 4vw, 44px);
+  border-bottom: 1px solid var(--mg-border);
+}
+
+.site-laws__kicker {
+  font-family: var(--mg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--mg-accent);
+  font-weight: 600;
+  margin-bottom: 22px;
+}
+
+.site-laws__title {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(44px, 7vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: var(--mg-fg);
+  margin: 0 0 26px;
+  text-wrap: balance;
+  max-width: 14ch;
+  margin-inline: auto;
+}
+.site-laws__title em { color: var(--mg-accent); font-style: italic; }
+
+.site-laws__deck {
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: clamp(17px, 1.7vw, 21px);
+  line-height: 1.55;
+  color: var(--mg-fg-muted);
+  max-width: 56ch;
+  margin: 0 auto;
+  text-wrap: pretty;
+}
+
+/* -- List ------------------------------------------------------------- */
+
+.site-laws__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  counter-reset: site-laws;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(48px, 8vw, 88px);
+}
+
+.site-laws__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: clamp(28px, 4vw, 48px);
+  padding-left: clamp(20px, 3vw, 32px);
+  border-bottom: 1px dashed var(--mg-border);
+}
+.site-laws__item:last-child { border-bottom: 0; }
+
+/* Vertical coral stripe that grows as the reader scrolls past the law —
+ * progressive enhancement via scroll-driven animation-timeline: view().
+ * Visually anchors reading progress to each law, the way a margin ruler
+ * might in an editorial page. */
+.site-laws__item::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--mg-accent);
+  opacity: 0.5;
+  transform-origin: top center;
+  transform: scaleY(0);
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @supports (animation-timeline: view()) {
+    .site-laws__item::before {
+      animation: site-law-stripe-grow linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 60%;
+    }
+    @keyframes site-law-stripe-grow {
+      from { transform: scaleY(0); }
+      to   { transform: scaleY(1); }
+    }
+  }
+}
+
+/* Reduced-motion fallback: show the stripe at full height, no animation. */
+@media (prefers-reduced-motion: reduce), (not (animation-timeline: view())) {
+  .site-laws__item::before { transform: scaleY(1); }
+}
+
+@media (max-width: 620px) {
+  .site-laws__item { padding-left: 18px; }
+}
+
+.site-laws__item-head {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+}
+
+.site-laws__item-num {
+  font-family: var(--mg-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  color: var(--mg-accent);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  padding-top: 6px;
+}
+
+.site-laws__item-title {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(26px, 3.8vw, 38px);
+  line-height: 1.08;
+  letter-spacing: -0.028em;
+  color: var(--mg-fg);
+  margin: 0;
+  text-wrap: balance;
+}
+
+.site-laws__item-lede {
+  padding-left: calc(12px + 12px);
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+  color: var(--mg-accent);
+  margin: 0;
+  text-wrap: balance;
+}
+
+.site-laws__item-body {
+  padding-left: calc(12px + 12px);
+  font-family: var(--mg-font-serif);
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--mg-fg);
+  margin: 0;
+  text-wrap: pretty;
+  max-width: 60ch;
+}
+
+@media (max-width: 620px) {
+  .site-laws__item-lede,
+  .site-laws__item-body {
+    padding-left: 0;
+  }
+}
+
+/* -- Foot ------------------------------------------------------------- */
+
+.site-laws__foot {
+  margin-top: clamp(48px, 7vw, 80px);
+  text-align: center;
+}
+
+.site-laws__rule {
+  border: 0;
+  height: auto;
+  margin: 0 auto 22px;
+  text-align: center;
+  max-width: 40px;
+}
+.site-laws__rule::before {
+  content: '§';
+  display: block;
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-size: 20px;
+  color: var(--mg-accent);
+}
+
+.site-laws__signoff {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--mg-fg-subtle);
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+}

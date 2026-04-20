@@ -1,0 +1,162 @@
+/* ============================================================================
+ * Demo page intro — banner above the essay with handle-variant pills.
+ * Sits between the top nav and the scrollable essay. When the variant
+ * pills are clicked, the Handle re-keys and the new variant slides in.
+ * ==========================================================================*/
+
+.site-page--demo {
+  background: var(--mg-bg);
+}
+
+.site-demo-intro {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: clamp(56px, 8vw, 96px) clamp(20px, 5vw, 56px) clamp(32px, 4vw, 48px);
+  text-align: center;
+  border-bottom: 1px dashed var(--mg-border);
+  margin-bottom: clamp(40px, 6vw, 64px);
+}
+
+.site-demo-intro__kicker {
+  display: inline-block;
+  font-family: var(--mg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mg-accent);
+  font-weight: 600;
+  padding: 5px 12px;
+  border: 1px solid color-mix(in oklch, var(--mg-accent) 30%, var(--mg-border));
+  border-radius: var(--mg-radius-pill, 100px);
+  margin-bottom: 24px;
+  background: color-mix(in oklch, var(--mg-accent) 6%, transparent);
+}
+
+.site-demo-intro__title {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(38px, 6vw, 64px);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--mg-fg);
+  margin: 0 0 18px;
+  max-width: 18ch;
+  margin-inline: auto;
+  text-wrap: balance;
+}
+.site-demo-intro__title em { color: var(--mg-accent); font-style: italic; }
+
+.site-demo-intro__deck {
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.55;
+  color: var(--mg-fg-muted);
+  max-width: 56ch;
+  margin: 0 auto clamp(28px, 4vw, 40px);
+  text-wrap: pretty;
+}
+
+/* -- Variant pills ---------------------------------------------------- */
+
+.site-demo-intro__variants {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.site-demo-intro__variants-kicker {
+  font-family: var(--mg-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mg-fg-subtle);
+  font-weight: 600;
+}
+
+.site-demo-intro__variants-row {
+  display: inline-flex;
+  gap: 6px;
+  padding: 6px;
+  background: var(--mg-surface);
+  border: 1px solid var(--mg-border);
+  border-radius: var(--mg-radius-pill, 100px);
+}
+
+.site-demo-intro__variant {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 18px;
+  border: 1px solid transparent;
+  border-radius: calc(var(--mg-radius-pill, 100px) - 6px);
+  background: transparent;
+  cursor: pointer;
+  color: var(--mg-fg-muted);
+  transition:
+    background var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    border-color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+  font-family: inherit;
+}
+.site-demo-intro__variant:hover {
+  color: var(--mg-fg);
+  background: color-mix(in oklch, var(--mg-accent) 6%, transparent);
+}
+
+.site-demo-intro__variant--active {
+  background: color-mix(in oklch, var(--mg-accent) 14%, var(--mg-bg));
+  border-color: color-mix(in oklch, var(--mg-accent) 40%, var(--mg-border));
+  color: var(--mg-accent);
+}
+
+.site-demo-intro__variant-label {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.015em;
+  line-height: 1;
+}
+
+.site-demo-intro__variant-sub {
+  font-family: var(--mg-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--mg-fg-subtle);
+  line-height: 1.1;
+}
+
+.site-demo-intro__variant--active .site-demo-intro__variant-sub {
+  color: color-mix(in oklch, var(--mg-accent) 70%, var(--mg-fg-muted));
+}
+
+/* -- Scroll hint ------------------------------------------------------ */
+
+.site-demo-intro__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mg-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mg-fg-subtle);
+  font-weight: 500;
+}
+.site-demo-intro__hint-arrow {
+  animation: site-demo-arrow 2s ease-in-out infinite;
+}
+
+@keyframes site-demo-arrow {
+  0%, 100% { transform: translateY(0); opacity: 0.8; }
+  50%      { transform: translateY(4px); opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-demo-intro__hint-arrow { animation: none; }
+}

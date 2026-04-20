@@ -29,18 +29,23 @@
   background: color-mix(in oklch, var(--mg-bg) 96%, transparent);
   backdrop-filter: blur(18px) saturate(1.2);
   -webkit-backdrop-filter: blur(18px) saturate(1.2);
-  border-right: 1px solid var(--mg-border);
+  /* Border + visibility only applied when the track is actually open.
+   * Drawing the border on the resting 0-width element would leave a
+   * phantom 1px vertical line across every page (bug fixed in 0.1.0). */
   transform: translateX(-100%);
   transition:
     transform var(--mg-duration-slow, 520ms) var(--mg-ease-expo-out, ease-out),
     width var(--mg-duration-slow, 520ms) var(--mg-ease-expo-out, ease-out);
   pointer-events: none;
+  visibility: hidden;
 }
 
 .mg-annotations-track[data-mg-visible] {
   width: clamp(280px, 24vw, 360px);
   transform: translateX(0);
   pointer-events: auto;
+  border-right: 1px solid var(--mg-border);
+  visibility: visible;
 }
 
 /* Hide on narrow viewports — shipping Track as desktop-first (v0.3.1).

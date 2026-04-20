@@ -1,0 +1,249 @@
+/* ============================================================================
+ * Site motion — scroll-driven reveals + hero mini-graph draw-in.
+ * CSS-only, progressive enhancement. Browsers that support
+ * `animation-timeline: view()` get the staggered fade-up as elements enter
+ * the viewport; older browsers see the content immediately visible (no JS
+ * fallback needed, no layout shift).
+ *
+ * All timing comes from `--mg-*` motion tokens so consumers can tune the
+ * feel. Every animation is gated by `prefers-reduced-motion: reduce`.
+ * ==========================================================================*/
+
+/* -- Default state: fully visible. Reveal is opt-in via CSS support + class. */
+
+.site-reveal {
+  opacity: 1;
+  transform: none;
+}
+
+/* -- Progressive enhancement: scroll-driven reveal on capable browsers --- */
+
+@media not (prefers-reduced-motion: reduce) {
+  @supports (animation-timeline: view()) {
+    .site-reveal {
+      animation: site-reveal-fade-up linear both;
+      animation-timeline: view();
+      animation-range: entry 8% entry 52%;
+      animation-delay: var(--site-reveal-delay, 0ms);
+    }
+  }
+
+  @keyframes site-reveal-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* -- Hero mini-graph · draw-in the return arc + soft node bloom --------- */
+
+@media not (prefers-reduced-motion: reduce) {
+  .site-hero__return {
+    stroke-dasharray: 320;
+    stroke-dashoffset: 320;
+    animation:
+      site-hero-return-draw 1200ms var(--mg-ease-expo-out, cubic-bezier(0.19, 1, 0.22, 1)) 400ms both,
+      site-hero-return-settle 500ms var(--mg-ease-standard, ease-out) 1600ms both;
+  }
+
+  @keyframes site-hero-return-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes site-hero-return-settle {
+    to {
+      stroke-dasharray: 3 2;
+    }
+  }
+
+  .site-hero__node,
+  .site-hero__node--halo,
+  .site-hero__order,
+  .site-hero__edge {
+    opacity: 0;
+    animation: site-hero-node-in 520ms var(--mg-ease-expo-out, cubic-bezier(0.19, 1, 0.22, 1)) both;
+  }
+
+  .site-hero__axis {
+    opacity: 0;
+    animation: site-hero-axis-in 700ms var(--mg-ease-standard, ease-out) both;
+  }
+
+  .site-hero__axis:nth-of-type(1) { animation-delay: 0ms; }
+  .site-hero__axis:nth-of-type(2) { animation-delay: 80ms; }
+  .site-hero__axis:nth-of-type(3) { animation-delay: 160ms; }
+
+  .site-hero__edge:nth-of-type(1) { animation-delay: 240ms; }
+  .site-hero__edge:nth-of-type(2) { animation-delay: 300ms; }
+
+  /* Nodes and their labels fade in in station order. */
+  .site-hero__node--halo       { animation-delay: 360ms; }
+  .site-hero__graph circle:nth-of-type(3) { animation-delay: 360ms; } /* node 01 disc */
+  .site-hero__graph text:nth-of-type(1)   { animation-delay: 420ms; } /* 01 */
+  .site-hero__graph rect:nth-of-type(1)   { animation-delay: 480ms; } /* node 02 */
+  .site-hero__graph text:nth-of-type(2)   { animation-delay: 540ms; } /* 02 */
+  .site-hero__graph rect:nth-of-type(2)   { animation-delay: 600ms; } /* node 03 (diamond) */
+  .site-hero__graph text:nth-of-type(3)   { animation-delay: 660ms; } /* 03 */
+  .site-hero__graph rect:nth-of-type(3)   { animation-delay: 720ms; } /* node 04 (code) */
+  .site-hero__graph text:nth-of-type(4)   { animation-delay: 780ms; } /* 04 */
+
+  @keyframes site-hero-axis-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes site-hero-node-in {
+    from {
+      opacity: 0;
+      transform: scale(0.7);
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+/* -- Nav link underline slide -------------------------------------------- */
+
+.site-nav__link {
+  position: relative;
+}
+.site-nav__link::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 4px;
+  height: 1px;
+  background: var(--mg-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--mg-duration-normal, 200ms) var(--mg-ease-expo-out, cubic-bezier(0.19, 1, 0.22, 1));
+}
+.site-nav__link:hover::after,
+.site-nav__link:focus-visible::after,
+.site-nav__link--active::after {
+  transform: scaleX(1);
+}
+.site-nav__link--active {
+  color: var(--mg-accent);
+}
+
+/* -- Feature cards · tilt whisper on hover ------------------------------- */
+
+@media not (prefers-reduced-motion: reduce) {
+  .site-features__card {
+    will-change: transform;
+  }
+  .site-features__card:hover {
+    transform: translateY(-3px) scale(1.005);
+  }
+}
+
+/* -- Hero CTA · accent glow pulse (very subtle) -------------------------- */
+
+@media not (prefers-reduced-motion: reduce) {
+  .site-hero__cta--primary {
+    position: relative;
+    overflow: hidden;
+  }
+  .site-hero__cta--primary::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: radial-gradient(
+      circle at 30% 50%,
+      color-mix(in oklch, var(--mg-accent) 40%, transparent) 0%,
+      transparent 60%
+    );
+    opacity: 0;
+    transition: opacity var(--mg-duration-normal, 200ms) var(--mg-ease-standard, ease-out);
+    pointer-events: none;
+  }
+  .site-hero__cta--primary:hover::before,
+  .site-hero__cta--primary:focus-visible::before {
+    opacity: 0.5;
+  }
+}
+
+/* -- Page shell · fade-in on mount --------------------------------------- */
+
+@media not (prefers-reduced-motion: reduce) {
+  .site-page {
+    animation: site-page-in 320ms var(--mg-ease-standard, ease-out) both;
+  }
+
+  @keyframes site-page-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* -- Scroll progress bar · 2px coral hairline, top of viewport ---------- */
+
+.site-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 50;
+  background: var(--mg-accent);
+  transform-origin: left center;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @supports (animation-timeline: scroll()) {
+    .site-scroll-progress {
+      animation: site-scroll-progress-grow linear both;
+      animation-timeline: scroll(root);
+    }
+    @keyframes site-scroll-progress-grow {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+  }
+}
+
+/* View Transitions directional slide lives in `site-transitions.css` to
+ * keep every module ≤300 lines (project convention). */
+
+/* -- Explicit reduced-motion overrides ----------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .site-reveal,
+  .site-page,
+  .site-hero__return,
+  .site-hero__node,
+  .site-hero__edge,
+  .site-hero__axis,
+  .site-hero__order {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    stroke-dashoffset: 0;
+    stroke-dasharray: 3 2;
+  }
+}

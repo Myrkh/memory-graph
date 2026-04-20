@@ -1,0 +1,91 @@
+/* ============================================================================
+ * Brand mark — mini memory-graph logo.
+ * Same visual grammar as the real component: coral stations (circle +
+ * square), hairline forward edge, dashed coral return arc curving right.
+ * Default 24×24 ; consumers override width/height in the host context.
+ * ==========================================================================*/
+
+.site-mark {
+  display: block;
+  width: 26px;
+  height: 26px;
+  color: var(--mg-fg);
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.site-mark__axis {
+  stroke: currentColor;
+  stroke-width: 0.35;
+  stroke-dasharray: 1.5 2;
+  opacity: 0.22;
+}
+
+.site-mark__edge {
+  stroke: currentColor;
+  stroke-width: 0.8;
+  opacity: 0.45;
+}
+
+.site-mark__return {
+  stroke: var(--mg-accent);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-dasharray: 2 1.5;
+  opacity: 0.9;
+}
+
+.site-mark__node {
+  fill: var(--mg-accent);
+  stroke: var(--mg-bg);
+  stroke-width: 1;
+}
+
+/* Hover redraw — the return arc retraces itself once, then settles back
+ * into its dashed pattern. Matches the hero mini-graph narrative, dialed
+ * down for a micro moment. Guarded by prefers-reduced-motion. */
+
+@media not (prefers-reduced-motion: reduce) {
+  .site-nav__brand:hover .site-mark--animated .site-mark__return,
+  .site-footer__brand:hover .site-mark--animated .site-mark__return {
+    animation: site-mark-return-redraw 900ms var(--mg-ease-expo-out, cubic-bezier(0.19, 1, 0.22, 1)) both;
+  }
+
+  @keyframes site-mark-return-redraw {
+    0% {
+      stroke-dasharray: 36;
+      stroke-dashoffset: 36;
+      opacity: 0.6;
+    }
+    55% {
+      stroke-dasharray: 36;
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+    100% {
+      stroke-dasharray: 2 1.5;
+      stroke-dashoffset: 0;
+      opacity: 0.9;
+    }
+  }
+}
+
+/* Nav brand hover · subtle node pulse on the square (KPI-kind station). */
+
+@media not (prefers-reduced-motion: reduce) {
+  .site-nav__brand .site-mark__node,
+  .site-footer__brand .site-mark__node {
+    transition: transform var(--mg-duration-normal, 200ms) var(--mg-ease-spring-smooth, ease-out);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .site-nav__brand:hover rect.site-mark__node,
+  .site-footer__brand:hover rect.site-mark__node {
+    transform: scale(1.12);
+  }
+}
+
+/* Size variants picked up by host context. */
+
+.site-nav__brand .site-mark { width: 26px; height: 26px; }
+.site-footer__brand .site-mark { width: 34px; height: 34px; }

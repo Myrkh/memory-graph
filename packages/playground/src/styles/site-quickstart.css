@@ -1,0 +1,117 @@
+/* ============================================================================
+ * Docs page · Quickstart — three code-block steps with numbered mono kickers.
+ * Mono block on `--mg-bg` so the code reads flat; header band tinted with a
+ * whisper of coral to mark the step.
+ * ==========================================================================*/
+
+.site-quickstart {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: clamp(48px, 7vw, 80px) clamp(20px, 5vw, 56px);
+}
+
+.site-quickstart__head {
+  max-width: 640px;
+  margin: 0 auto clamp(36px, 5vw, 56px);
+  text-align: center;
+}
+
+.site-quickstart__kicker {
+  font-family: var(--mg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mg-accent);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.site-quickstart__title {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(30px, 4.5vw, 44px);
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+  color: var(--mg-fg);
+  margin: 0 0 16px;
+  text-wrap: balance;
+}
+.site-quickstart__title em { color: var(--mg-accent); font-style: italic; }
+
+.site-quickstart__deck {
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--mg-fg-muted);
+  margin: 0;
+  text-wrap: pretty;
+}
+.site-quickstart__deck code {
+  font-family: var(--mg-font-mono);
+  font-size: 13.5px;
+  font-style: normal;
+  background: color-mix(in oklch, var(--mg-fg) 5%, transparent);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--mg-fg);
+}
+
+.site-quickstart__steps {
+  display: grid;
+  gap: clamp(18px, 2.5vw, 28px);
+}
+
+.site-quickstart__step {
+  background: var(--mg-surface);
+  border: 1px solid var(--mg-border);
+  border-radius: var(--mg-radius-md, 10px);
+  overflow: hidden;
+}
+
+.site-quickstart__step-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--mg-border);
+  background: color-mix(in oklch, var(--mg-accent) 2%, var(--mg-surface));
+}
+
+.site-quickstart__step-num {
+  font-family: var(--mg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--mg-accent);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.site-quickstart__step-label {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.015em;
+  color: var(--mg-fg);
+  margin: 0;
+}
+
+.site-quickstart__step-code {
+  margin: 0;
+  padding: 22px;
+  font-family: var(--mg-font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--mg-fg);
+  overflow-x: auto;
+  background: var(--mg-bg);
+  font-variant-numeric: tabular-nums;
+}
+.site-quickstart__step-code code {
+  font-family: inherit;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}

@@ -1,0 +1,204 @@
+/* ============================================================================
+ * Site footer — editorial signoff. Four-ish columns: brand, nav cols, bottom
+ * strip with license + meta. Zero decoration, maximum restraint.
+ * ==========================================================================*/
+
+.site-footer {
+  border-top: 1px solid var(--mg-border);
+  background: var(--mg-bg);
+  padding: clamp(48px, 7vw, 80px) clamp(20px, 4vw, 56px) clamp(24px, 3vw, 32px);
+  margin-top: clamp(48px, 7vw, 80px);
+}
+
+.site-footer__top {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.9fr);
+  gap: clamp(32px, 5vw, 56px);
+  align-items: start;
+  padding-bottom: clamp(32px, 4vw, 48px);
+  border-bottom: 1px dashed var(--mg-border);
+}
+
+@media (max-width: 760px) {
+  .site-footer__top {
+    grid-template-columns: 1fr;
+    gap: clamp(24px, 4vw, 40px);
+  }
+}
+
+.site-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.site-footer__brand-name {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--mg-fg);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.site-footer__brand-tag {
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--mg-fg-muted);
+  max-width: 28ch;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+/* -- Columns ---------------------------------------------------------- */
+
+.site-footer__cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 3vw, 32px);
+}
+
+@media (max-width: 500px) {
+  .site-footer__cols { grid-template-columns: 1fr 1fr; }
+}
+
+.site-footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.site-footer__col-kicker {
+  font-family: var(--mg-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mg-fg-subtle);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.site-footer__link {
+  font-family: var(--mg-font-serif);
+  font-size: 15px;
+  color: var(--mg-fg);
+  text-decoration: none;
+  transition: color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+.site-footer__link:hover,
+.site-footer__link:focus-visible {
+  color: var(--mg-accent);
+  outline: none;
+}
+
+.site-footer__link--static {
+  color: var(--mg-fg-muted);
+  cursor: default;
+}
+
+/* -- Bottom strip ----------------------------------------------------- */
+
+.site-footer__bottom {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-top: clamp(16px, 2vw, 24px);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-family: var(--mg-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--mg-fg-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+.site-footer__legal,
+.site-footer__meta {
+  font-weight: 500;
+}
+
+/* -- Stit'Claude credit · subtle manifesto line at the very bottom ----- */
+
+.site-footer__credit {
+  max-width: 1120px;
+  margin: clamp(24px, 3vw, 36px) auto 0;
+  padding-top: clamp(20px, 2.5vw, 28px);
+  border-top: 1px dashed var(--mg-border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+  text-align: left;
+  flex-wrap: wrap;
+}
+
+.site-footer__credit-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mg-accent);
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+.site-stit-mark {
+  display: block;
+  width: 38px;
+  height: auto;
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--mg-duration-normal, 200ms) var(--mg-ease-spring-smooth, ease-out);
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  .site-footer__credit:hover .site-stit-mark {
+    transform: rotate(-4deg) scale(1.06);
+  }
+}
+
+@media (max-width: 520px) {
+  .site-footer__credit {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+}
+
+.site-footer__credit-text {
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--mg-fg-muted);
+  text-wrap: balance;
+}
+.site-footer__credit-text strong {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  color: var(--mg-accent);
+}
+.site-footer__credit-text em {
+  font-family: var(--mg-font-mono);
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--mg-fg-subtle);
+  padding: 2px 6px;
+  border: 1px solid var(--mg-border);
+  border-radius: 3px;
+  margin: 0 2px;
+  font-variant-numeric: tabular-nums;
+}
+.site-footer__credit-sub {
+  color: var(--mg-fg-subtle);
+  font-style: italic;
+}
