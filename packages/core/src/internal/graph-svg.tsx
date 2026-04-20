@@ -49,10 +49,13 @@ export function Edges(props: EdgesProps) {
   const { edges, layout, returnBend, chain } = props;
   return (
     <g>
-      {edges.map((e, i) => {
+      {edges.map((e) => {
         const from = layout.positions.get(e.from);
         const to = layout.positions.get(e.to);
         if (!from || !to) return null;
+        // Composite key — stable across any future edge reordering.
+        // `(from, to, at)` is unique because re-visits emit distinct timestamps.
+        const key = `${e.from}→${e.to}→${e.kind}→${e.at}`;
         // Strict chain: edge highlights iff it TOUCHES the hovered node,
         // not merely because both its endpoints are in the 1-hop set.
         const inChain = chain
@@ -64,7 +67,7 @@ export function Edges(props: EdgesProps) {
           const ctrlX = Math.max(from.x, to.x) + returnBend;
           return (
             <path
-              key={i}
+              key={key}
               className="mg-return-edge"
               d={`M ${from.x} ${from.y} Q ${ctrlX} ${midY} ${to.x} ${to.y}`}
               {...chainAttr}
@@ -73,7 +76,7 @@ export function Edges(props: EdgesProps) {
         }
         return (
           <line
-            key={i}
+            key={key}
             className="mg-forward-edge"
             x1={from.x}
             y1={from.y}

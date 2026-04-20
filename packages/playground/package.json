@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "$npm_execpath --filter @stitclaude/memory-graph build",
     "dev": "vite",
+    "prebuild": "$npm_execpath --filter @stitclaude/memory-graph build",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"

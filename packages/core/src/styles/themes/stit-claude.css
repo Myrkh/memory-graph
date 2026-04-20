@@ -73,6 +73,11 @@
   --mg-radius-md: 10px;
   --mg-radius-lg: 14px;
   --mg-radius-pill: 9999px;
+
+  /* Variable-font refinement — applies automatically to Fraunces + Inter
+   * (both shipped as variable fonts in this theme). Inert on static fonts. */
+  font-optical-sizing: auto;
+  font-synthesis: none;
 }
 
 /**
@@ -91,7 +96,17 @@
   color: var(--mg-ink-12);
 }
 
-/* -- Dark scheme (opt-in) ------------------------------------------------ */
+/* -- Dark scheme ---------------------------------------------------------
+ *
+ * Two activation paths:
+ * 1. Explicit opt-in via `data-mg-scheme="dark"` on the theme scope or an
+ *    ancestor — always wins, wherever the OS pref is.
+ * 2. Automatic via `@media (prefers-color-scheme: dark)` when the consumer
+ *    hasn't set a scheme at all — respects the OS preference.
+ *
+ * `data-mg-scheme="light"` acts as an opt-out of the OS dark pref. Pattern
+ * aligned with shadcn/ui's light/dark override model.
+ * ----------------------------------------------------------------------- */
 
 [data-mg-theme='stit-claude'][data-mg-scheme='dark'],
 [data-mg-theme='stit-claude'] [data-mg-scheme='dark'] {
@@ -116,4 +131,30 @@
   --mg-coral-9:  oklch(0.685 0.165 35);
   --mg-coral-10: oklch(0.745 0.155 35);
   --mg-coral-11: oklch(0.820 0.120 33);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-mg-theme='stit-claude']:not([data-mg-scheme='light']) {
+    color-scheme: dark;
+
+    --mg-ink-1:  oklch(0.145 0.012 40);
+    --mg-ink-2:  oklch(0.180 0.013 40);
+    --mg-ink-3:  oklch(0.215 0.014 40);
+    --mg-ink-4:  oklch(0.250 0.014 40);
+    --mg-ink-5:  oklch(0.295 0.014 40);
+    --mg-ink-6:  oklch(0.345 0.013 45);
+    --mg-ink-7:  oklch(0.420 0.012 48);
+    --mg-ink-8:  oklch(0.540 0.010 52);
+    --mg-ink-9:  oklch(0.660 0.008 58);
+    --mg-ink-10: oklch(0.775 0.008 65);
+    --mg-ink-11: oklch(0.875 0.007 70);
+    --mg-ink-12: oklch(0.965 0.006 80);
+
+    --mg-coral-3:  oklch(0.265 0.055 35);
+    --mg-coral-6:  oklch(0.435 0.130 35);
+    --mg-coral-8:  oklch(0.580 0.170 35);
+    --mg-coral-9:  oklch(0.685 0.165 35);
+    --mg-coral-10: oklch(0.745 0.155 35);
+    --mg-coral-11: oklch(0.820 0.120 33);
+  }
 }

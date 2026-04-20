@@ -20,7 +20,9 @@
   gap: 8px;
   box-shadow: 0 12px 32px color-mix(in oklch, var(--mg-fg) 25%, transparent);
   opacity: 0;
-  transition: opacity 280ms, transform 320ms cubic-bezier(0.3, 1.4, 0.4, 1);
+  transition:
+    opacity var(--mg-duration-normal) var(--mg-ease-standard),
+    transform var(--mg-duration-moderate) var(--mg-ease-spring-smooth);
   pointer-events: none;
 }
 

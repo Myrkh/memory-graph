@@ -26,7 +26,7 @@ export interface ParagraphProps {
  */
 export function Paragraph(props: ParagraphProps) {
   const { id, as: Tag = 'p', children, className } = props;
-  const { state, flashParaId } = useMemoryGraphContext();
+  const { state, flashParaId, flashAnnotationId } = useMemoryGraphContext();
 
   const node = state.nodes.get(id);
   const annotations = useMemo(() => {
@@ -43,12 +43,16 @@ export function Paragraph(props: ParagraphProps) {
 
   return (
     <Tag className={className} data-mg-id={id} {...pinnedAttr} {...flashAttr}>
-      {renderWithAnnotations(children, annotations)}
+      {renderWithAnnotations(children, annotations, flashAnnotationId)}
     </Tag>
   );
 }
 
-function renderWithAnnotations(text: string, annotations: Annotation[]): ReactNode[] {
+function renderWithAnnotations(
+  text: string,
+  annotations: Annotation[],
+  flashAnnotationId: string | null,
+): ReactNode[] {
   if (annotations.length === 0) return [text];
   const parts: ReactNode[] = [];
   let cursor = 0;
@@ -57,12 +61,14 @@ function renderWithAnnotations(text: string, annotations: Annotation[]): ReactNo
     if (offsetStart < cursor) continue; // overlapping → skip later entry
     if (offsetStart > cursor) parts.push(text.slice(cursor, offsetStart));
     const linkAttr = a.links.length > 0 ? { 'data-mg-has-link': '' } : {};
+    const flashAttr = flashAnnotationId === a.id ? { 'data-mg-flash': '' } : {};
     parts.push(
       <mark
         key={a.id}
         className="mg-annotation"
         data-mg-annotation-id={a.id}
         {...linkAttr}
+        {...flashAttr}
       >
         {text.slice(offsetStart, offsetEnd)}
       </mark>,

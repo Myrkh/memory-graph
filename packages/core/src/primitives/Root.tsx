@@ -16,6 +16,7 @@ import {
 import { useMemoryGraphState } from '../hooks/useMemoryGraphState.js';
 import { usePersistence } from '../hooks/usePersistence.js';
 import { useAttentionTracker } from '../hooks/useAttentionTracker.js';
+import { useLinkingModeEffects } from '../hooks/useLinkingModeEffects.js';
 import {
   MemoryGraphContext,
   type HoverState,
@@ -147,6 +148,7 @@ export function Root(props: RootProps) {
   /* -- Linking mode (Innovation 04) ------------------------------------ */
 
   const [linkingMode, setLinkingMode] = useState<LinkingMode | null>(null);
+  useLinkingModeEffects(linkingMode, setLinkingMode);
 
   /* -- Hovered annotation (Innovation 04 · link reveal) --------------- */
 
@@ -161,35 +163,26 @@ export function Root(props: RootProps) {
     if (!open) setTrackOpen(false);
   }, [open]);
 
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const body = document.body;
-    if (linkingMode) body.setAttribute('data-mg-linking', '');
-    else body.removeAttribute('data-mg-linking');
-    return () => body.removeAttribute('data-mg-linking');
-  }, [linkingMode]);
+  /* -- Annotation range-flash (§Innovation 03) ------------------------ */
 
-  useEffect(() => {
-    if (!linkingMode) return;
-    const onKeyDown = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        setLinkingMode(null);
-      }
-    };
-    const onClickOutside = (e: MouseEvent): void => {
-      if (!(e.target instanceof Element)) return;
-      // Keep mode active if the click lands on an annotation or a satellite.
-      if (e.target.closest('[data-mg-annotation-id]')) return;
-      setLinkingMode(null);
-    };
-    document.addEventListener('keydown', onKeyDown);
-    document.addEventListener('mousedown', onClickOutside);
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      document.removeEventListener('mousedown', onClickOutside);
-    };
-  }, [linkingMode]);
+  const [flashAnnotationId, setFlashAnnotationId] = useState<AnnotationId | null>(null);
+  const annotationFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const triggerAnnotationFlash = useCallback((id: AnnotationId) => {
+    setFlashAnnotationId(id);
+    if (annotationFlashTimerRef.current) clearTimeout(annotationFlashTimerRef.current);
+    annotationFlashTimerRef.current = setTimeout(
+      () => setFlashAnnotationId(null),
+      FLASH_MS,
+    );
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (annotationFlashTimerRef.current) clearTimeout(annotationFlashTimerRef.current);
+    },
+    [],
+  );
 
   /* -- Bidirectional hover (paragraph ↔ node) -------------------------- */
 
@@ -239,6 +232,8 @@ export function Root(props: RootProps) {
       setHoveredAnnotation,
       trackOpen,
       setTrackOpen,
+      flashAnnotationId,
+      triggerAnnotationFlash,
     }),
     [
       config,
@@ -264,6 +259,8 @@ export function Root(props: RootProps) {
       linkingMode,
       hoveredAnnotationId,
       trackOpen,
+      flashAnnotationId,
+      triggerAnnotationFlash,
     ],
   );
 

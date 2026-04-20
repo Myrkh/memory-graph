@@ -35,6 +35,7 @@
   margin: 4px 0;
   color: var(--mg-bg);
   opacity: 0.92;
+  text-wrap: pretty;
 }
 .mg-tooltip__meta {
   display: flex;

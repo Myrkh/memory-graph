@@ -206,6 +206,7 @@
   font-size: 14px;
   line-height: 1.35;
   color: var(--mg-fg);
+  text-wrap: pretty;
 }
 
 .mg-annotations-track__note {
@@ -214,6 +215,7 @@
   line-height: 1.4;
   color: var(--mg-fg-muted);
   letter-spacing: 0.02em;
+  text-wrap: pretty;
 }
 
 .mg-annotations-track__link-count {

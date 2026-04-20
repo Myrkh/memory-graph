@@ -62,6 +62,7 @@ export function Graph(props: GraphProps) {
     zoneRef,
     closePanel,
     triggerFlash,
+    triggerAnnotationFlash,
     setHover,
     hoveredNodeId,
     setHoveredNode,
@@ -146,9 +147,28 @@ export function Graph(props: GraphProps) {
         setLinkingMode(null);
         return;
       }
-      jumpToParagraph(annotation.paraId);
+      // Jump to paragraph + flash the annotated SPAN (not the whole paragraph).
+      onNodeClick?.(annotation.paraId);
+      closePanel();
+      window.setTimeout(() => {
+        const el = zoneRef.current?.querySelector<HTMLElement>(
+          `[data-mg-annotation-id="${CSS.escape(annotation.id)}"]`,
+        );
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.setTimeout(() => triggerAnnotationFlash(annotation.id), jumpDelayMs);
+      }, jumpDelayMs);
     },
-    [actions, jumpToParagraph, linkingMode, setLinkingMode],
+    [
+      actions,
+      closePanel,
+      jumpDelayMs,
+      linkingMode,
+      onNodeClick,
+      setLinkingMode,
+      triggerAnnotationFlash,
+      zoneRef,
+    ],
   );
 
   const satellitePositions = useMemo(

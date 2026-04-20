@@ -106,6 +106,14 @@ export interface MemoryGraphContextValue {
    */
   trackOpen: boolean;
   setTrackOpen: (open: boolean) => void;
+
+  /**
+   * Id of the annotation to transiently flash (span-level flash, not
+   * paragraph-level — §Innovation 03 acceptance criterion). Cleared
+   * automatically after ~1.8s.
+   */
+  flashAnnotationId: AnnotationId | null;
+  triggerAnnotationFlash: (id: AnnotationId) => void;
 }
 
 const MemoryGraphContext = createContext<MemoryGraphContextValue | null>(null);

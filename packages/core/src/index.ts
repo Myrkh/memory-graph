@@ -27,6 +27,8 @@ export type {
   UseTextSelectionOptions,
 } from './hooks/useTextSelection.js';
 
+export { useFocusTrap } from './hooks/useFocusTrap.js';
+
 /* Primitives — named exports + compound namespace ------------------------- */
 import * as MemoryGraph from './primitives/index.js';
 export { MemoryGraph };

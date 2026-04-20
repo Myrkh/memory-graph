@@ -16,18 +16,23 @@
 :where(:root) {
   color-scheme: light;
 
-  /* -- Palette (neutral warm, Stit'Claude-adjacent coral accent) -- */
-  --mg-bg: #fafaf8;
-  --mg-surface: #f2efe9;
-  --mg-border: #e4dfd5;
-  --mg-fg: #1c1a17;
-  --mg-fg-muted: #55534e;
-  --mg-fg-subtle: #8a8881;
+  /* -- Palette (neutral warm, coral accent, full OKLCH) --
+   *
+   * Consistent with the lib's OKLCH-first ambition and with the
+   * `stit-claude` theme's palette vocabulary. Any theme can override
+   * via a higher-specificity selector.
+   */
+  --mg-bg: oklch(0.985 0.005 85);
+  --mg-surface: oklch(0.955 0.008 80);
+  --mg-border: oklch(0.895 0.012 80);
+  --mg-fg: oklch(0.180 0.012 40);
+  --mg-fg-muted: oklch(0.395 0.010 45);
+  --mg-fg-subtle: oklch(0.605 0.008 55);
 
-  --mg-accent: #cf5036;
-  --mg-accent-hover: #b84629;
-  --mg-accent-subtle: #fce7e0;
-  --mg-ring: #d97f6b;
+  --mg-accent: oklch(0.600 0.180 35);
+  --mg-accent-hover: oklch(0.540 0.175 35);
+  --mg-accent-subtle: oklch(0.935 0.030 35);
+  --mg-ring: oklch(0.680 0.130 35);
 
   /* -- Typography (system stacks, no network load) -- */
   --mg-font-display: ui-serif, Georgia, 'Times New Roman', serif;

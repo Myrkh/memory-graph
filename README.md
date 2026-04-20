@@ -76,11 +76,13 @@ export function Article() {
 
       {/* The reading zone — paragraphs must have data-mg-id */}
       <MemoryGraph.Zone>
+        {/* MemoryGraph.Paragraph renders <p data-mg-id="…"> for you;
+            pass plain string children (no nested React elements in v0.1). */}
         <MemoryGraph.Paragraph id="intro">
-          <p>Introduction...</p>
+          Introduction…
         </MemoryGraph.Paragraph>
         <MemoryGraph.Paragraph id="section-1">
-          <p>First section...</p>
+          First section…
         </MemoryGraph.Paragraph>
         {/* ...more paragraphs */}
       </MemoryGraph.Zone>
@@ -93,35 +95,47 @@ export function Article() {
         <MemoryGraph.Head>
           <MemoryGraph.TitleRow>
             <MemoryGraph.Title />
+            <MemoryGraph.AnnotationsTrackToggle />
             <MemoryGraph.CloseButton />
           </MemoryGraph.TitleRow>
           <MemoryGraph.Stats />
           <MemoryGraph.DeepestIndicator />
         </MemoryGraph.Head>
-        <MemoryGraph.Graph />
-        <MemoryGraph.Empty />
+
+        {/* Choose Graph or Empty at the call site — see <GraphOrEmpty /> below. */}
+        <GraphOrEmpty />
+
+        <MemoryGraph.IntensitySparkline />
         <MemoryGraph.Footer>
           <MemoryGraph.FooterGroup>
-            <MemoryGraph.PassagesToggle />
-            <MemoryGraph.AnnotationsTrackToggle />
+            <MemoryGraph.ClearButton />
+            <MemoryGraph.ExportButton />
           </MemoryGraph.FooterGroup>
           <MemoryGraph.FooterGroup>
-            <MemoryGraph.ExportButton />
-            <MemoryGraph.ClearButton />
+            <MemoryGraph.PassagesToggle />
           </MemoryGraph.FooterGroup>
         </MemoryGraph.Footer>
-        <MemoryGraph.AnnotationsTrack />
       </MemoryGraph.Panel>
 
+      {/* Siblings of Panel — never nested inside it */}
+      <MemoryGraph.AnnotationsTrack />
       <MemoryGraph.Backdrop />
       <MemoryGraph.Tooltip />
       <MemoryGraph.PinToast />
-      <MemoryGraph.KeyboardShortcuts />
       <MemoryGraph.SelectionToolbar />
       <MemoryGraph.LinkReveal />
+      <MemoryGraph.KeyboardShortcuts />
 
     </MemoryGraph.Root>
   );
+}
+
+/** Decide between the SVG graph and the empty placeholder. */
+function GraphOrEmpty() {
+  const { derived, showPassages, state } = useMemoryGraphContext();
+  const hasContent =
+    derived.stationCount > 0 || (showPassages && state.passages.size > 0);
+  return hasContent ? <MemoryGraph.Graph /> : <MemoryGraph.Empty />;
 }
 ```
 
@@ -135,29 +149,31 @@ export function Article() {
 |---|---|
 | `MemoryGraph.Root` | Context owner. Manages all state, wires hooks, provides context to descendants. |
 | `MemoryGraph.Zone` | Wraps your readable content. Observes `[data-mg-id]` descendants. |
-| `MemoryGraph.Paragraph` | Convenience wrapper that applies `data-mg-id` to its child. |
-| `MemoryGraph.Handle` | Floating button to open the panel. Shows current station count. |
+| `MemoryGraph.Paragraph` | Renders `<p data-mg-id="…">`, auto-applies pin/flash state attributes, wraps annotation ranges in `<mark>`. String children only in v0.1. |
+| `MemoryGraph.Handle` | Floating left-edge button that opens the panel. Carries `data-mg-armed` when ≥ 1 station exists. Variants: `permanent` · `ghost` · `none`. |
 | `MemoryGraph.Panel` | The slide-out graph panel container. |
 | `MemoryGraph.Head` | Panel header slot. |
-| `MemoryGraph.Title` | Renders the panel title. |
-| `MemoryGraph.Stats` | Station count · loop count · total reading time. |
+| `MemoryGraph.TitleRow` | Horizontal row inside the head — title on the left, controls on the right. |
+| `MemoryGraph.Title` | Renders the panel title (default `Memory <em>Graph</em>`). |
+| `MemoryGraph.CloseButton` | Closes the panel. |
+| `MemoryGraph.Stats` | Four-metric grid — stations · loops · total time · pins. |
 | `MemoryGraph.DeepestIndicator` | Shows the paragraph with the highest cumulative dwell time. |
-| `MemoryGraph.Graph` | The SVG graph: stations, passages, edges, and minute axis. Clickable nodes scroll to paragraphs. |
+| `MemoryGraph.Empty` | Placeholder for when no station exists yet. Render conditionally — the library does not swap automatically. |
+| `MemoryGraph.Graph` | The SVG graph: stations, passages, edges, minute axis, annotation satellites and link arcs. Clicking a node scrolls to its paragraph. |
 | `MemoryGraph.IntensitySparkline` | Bar chart of per-minute reading intensity (last 60 min). |
-| `MemoryGraph.Empty` | Placeholder rendered when the graph has no stations yet. |
 | `MemoryGraph.Footer` / `FooterGroup` | Panel footer layout slots. |
-| `MemoryGraph.PassagesToggle` | Button to show/hide passage dots. |
-| `MemoryGraph.AnnotationsTrack` | Side column listing all annotations. |
-| `MemoryGraph.AnnotationsTrackToggle` | Button to show/hide the annotations track. |
-| `MemoryGraph.SelectionToolbar` | Contextual toolbar shown on text selection — pin or annotate. |
-| `MemoryGraph.NoteEditor` | Inline note editor for an annotation. |
-| `MemoryGraph.LinkReveal` | Visual highlight when hovering annotation links. |
-| `MemoryGraph.Tooltip` | Hover tooltip for graph nodes, showing paragraph excerpt and stats. |
-| `MemoryGraph.ExportButton` | Exports the current graph as JSON. |
 | `MemoryGraph.ClearButton` | Clears all graph data from state and localStorage. |
+| `MemoryGraph.ExportButton` | Exports the current graph + annotations as JSON. |
+| `MemoryGraph.PassagesToggle` | Button to show/hide passage dots. |
+| `MemoryGraph.AnnotationsTrack` | Side column listing annotations git-graph style. **Sibling of Panel, not child.** |
+| `MemoryGraph.AnnotationsTrackToggle` | Button (typically in the head) to show/hide the track. |
+| `MemoryGraph.SelectionToolbar` | Floating toolbar shown on qualifying text selection — Note · Pin · Link. |
+| `MemoryGraph.NoteEditor` | Inline markdown-lite editor. Rendered internally by `SelectionToolbar`; exposed for consumers building a custom toolbar. |
+| `MemoryGraph.LinkReveal` | Overlay that draws an arc between a hovered annotation and its on-screen link targets. |
+| `MemoryGraph.Tooltip` | Hover tooltip for graph nodes and satellites (extract + stats or note). |
 | `MemoryGraph.Backdrop` | Full-screen overlay behind the open panel. |
-| `MemoryGraph.PinToast` | Toast notification when a paragraph is pinned/unpinned. |
-| `MemoryGraph.KeyboardShortcuts` | Registers global keyboard shortcuts. |
+| `MemoryGraph.PinToast` | Transient toast pill (used for pin confirmation and linking hints). |
+| `MemoryGraph.KeyboardShortcuts` | Installs the global shortcut handler. Renders nothing. |
 
 ---
 
@@ -172,6 +188,7 @@ import {
   useAttentionTracker,
   useMemoryGraphHover,
   useTextSelection,
+  useMemoryGraphContext,
 } from '@stitclaude/memory-graph';
 ```
 
@@ -219,6 +236,30 @@ Detects and resolves text selections inside the reading zone, with paragraph-lev
 
 Provides bidirectional hover state between graph nodes and paragraphs in the zone.
 
+```tsx
+const { hoveredNodeId, setHoveredNode } = useMemoryGraphHover();
+```
+
+### `useMemoryGraphContext()`
+
+Access the full root context. Use this when you're composing your own primitives
+(custom footer button, bespoke annotation row, debug overlay) — it gives you
+direct access to every piece of state the library manages: `state`, `derived`,
+`actions`, `open`, `hoveredNodeId`, `hoveredAnnotationId`, `linkingMode`,
+`trackOpen`, and the imperative setters for each. Must be called inside a
+`<MemoryGraph.Root>` tree, otherwise it throws.
+
+```tsx
+function MyCustomButton() {
+  const { open, openPanel, derived } = useMemoryGraphContext();
+  return (
+    <button onClick={openPanel} disabled={derived.stationCount === 0}>
+      {open ? 'Reading' : `Open graph · ${derived.stationCount} stations`}
+    </button>
+  );
+}
+```
+
 ---
 
 ## ⚙️ Configuration
@@ -256,23 +297,35 @@ All available options:
 
 ## 🎨 Theming
 
-`memory-graph` is styled with CSS custom properties. You can import the built-in theme as a starting point and override any variable:
+`memory-graph` is styled with CSS custom properties. Every visual decision in
+the library reads a `--mg-*` token. You can import the built-in theme as a
+starting point and override any token:
 
 ```css
-/* Override after the theme import */
 @import '@stitclaude/memory-graph/themes/stit-claude';
 
-[data-mg-root] {
-  --mg-accent: #6366f1;
-  --mg-bg: #0f172a;
-  --mg-handle-size: 2.75rem;
+/* Override the tokens you want at the canonical theme selector */
+[data-mg-theme='stit-claude'] {
+  --mg-accent: oklch(0.62 0.19 250);        /* swap the coral for an indigo */
+  --mg-bg: #0f172a;                          /* force a dark surface */
+  --mg-font-display: 'Playfair Display', serif;
+  --mg-duration-normal: 240ms;
 }
 ```
 
-Or skip the built-in theme entirely and style from scratch using only the base layer:
+The shipped token contract:
+
+- **Palette** — `--mg-bg`, `--mg-surface`, `--mg-border`, `--mg-fg`, `--mg-fg-muted`, `--mg-fg-subtle`, `--mg-accent`, `--mg-accent-hover`, `--mg-accent-subtle`, `--mg-ring`
+- **Fonts** — `--mg-font-display`, `--mg-font-serif`, `--mg-font-sans`, `--mg-font-mono`
+- **Motion** — `--mg-duration-{fast,normal,moderate,slow}`, `--mg-ease-{standard,decelerate,expo-out,spring-smooth,spring-snappy}`
+- **Radii** — `--mg-radius-{sm,md,lg,pill}`
+
+Or skip the built-in theme entirely — the base stylesheet alone ships neutral
+defaults at `:where(:root)` (zero specificity) so the component renders
+correctly with no theme file loaded:
 
 ```tsx
-import '@stitclaude/memory-graph/styles'; // base layout only, no colors
+import '@stitclaude/memory-graph/styles'; // base layout only, no opinionated palette
 ```
 
 ---
@@ -283,9 +336,12 @@ When `<MemoryGraph.KeyboardShortcuts />` is mounted:
 
 | Shortcut | Action |
 |---|---|
-| `G` | Toggle the graph panel |
-| `P` | Toggle passage dots in the graph |
+| `⌘M` / `Ctrl+M` | Toggle the graph panel |
+| `P` | Toggle pin on the currently centered paragraph |
 | `Escape` | Close the panel / cancel linking mode |
+
+Shortcuts are suspended while an input, textarea, or the note editor has focus —
+typing `P` inside a note writes the letter, it does not pin.
 
 ---
 

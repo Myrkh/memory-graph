@@ -63,6 +63,36 @@
   animation: mg-counterpart-appear 260ms var(--mg-ease-standard, ease-out) 200ms both;
 }
 
+/**
+ * Range-flash — when a graph satellite is clicked, the PRECISE annotated
+ * span flashes (not the whole paragraph). §Innovation 03 acceptance
+ * criterion. Distinct keyframe from the paragraph-level flash so the two
+ * can coexist without visual collision.
+ */
+[data-mg-annotation-id][data-mg-flash] {
+  animation: mg-annotation-flash 1800ms var(--mg-ease-standard, ease-out) forwards;
+}
+
+@keyframes mg-annotation-flash {
+  0% {
+    background: color-mix(in oklch, var(--mg-accent) 5%, transparent);
+  }
+  10% {
+    background: color-mix(in oklch, var(--mg-accent) 45%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--mg-accent) 20%, transparent);
+  }
+  100% {
+    background: color-mix(in oklch, var(--mg-accent) 5%, transparent);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-mg-annotation-id][data-mg-flash] {
+    animation: none;
+  }
+}
+
 @keyframes mg-counterpart-appear {
   from { outline-color: transparent; }
   to { outline-color: color-mix(in oklch, var(--mg-accent) 55%, transparent); }

@@ -34,7 +34,10 @@
   padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
-  transition: color 140ms, border-color 140ms, background 140ms;
+  transition:
+    color var(--mg-duration-fast) var(--mg-ease-standard),
+    border-color var(--mg-duration-fast) var(--mg-ease-standard),
+    background var(--mg-duration-fast) var(--mg-ease-standard);
   font-weight: 600;
 }
 .mg-foot__btn:hover,

@@ -25,8 +25,16 @@ export interface AnnotationsTrackProps {
  */
 export function AnnotationsTrack(props: AnnotationsTrackProps) {
   const { className, style, kicker = 'TRACK' } = props;
-  const { state, trackOpen, open, closePanel, zoneRef, triggerFlash } =
-    useMemoryGraphContext();
+  const {
+    state,
+    trackOpen,
+    open,
+    closePanel,
+    zoneRef,
+    triggerFlash,
+    setHoveredAnnotation,
+    setHoveredNode,
+  } = useMemoryGraphContext();
 
   const annotations = useMemo<Annotation[]>(() => {
     const list = [...state.annotations.values()];
@@ -120,6 +128,14 @@ export function AnnotationsTrack(props: AnnotationsTrackProps) {
                   type="button"
                   className="mg-annotations-track__row-btn"
                   onClick={() => onJump(annotation.paraId)}
+                  onMouseEnter={() => {
+                    setHoveredAnnotation(annotation.id);
+                    setHoveredNode(annotation.paraId);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredAnnotation(null);
+                    setHoveredNode(null);
+                  }}
                   data-mg-annotation-id={annotation.id}
                 >
                   <div className="mg-annotations-track__meta">
