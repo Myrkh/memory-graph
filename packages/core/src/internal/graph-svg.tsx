@@ -1,6 +1,5 @@
 import type { Edge } from '../types.js';
-import type { GraphLayout } from './graph-layout.js';
-import type { ChainSet } from '../primitives/Graph.js';
+import type { ChainSet, GraphLayout } from './graph-layout.js';
 
 const TIME_HEIGHT_PX = 600;
 const AXIS_X_INSET = 24;
@@ -41,10 +40,18 @@ export interface EdgesProps {
   layout: GraphLayout;
   returnBend: number;
   chain?: ChainSet | null;
+  /**
+   * Map from ParagraphId to its `route`. When the two endpoints of an
+   * edge have different routes, the edge gets a `data-mg-route-jump`
+   * attribute — CSS styles it distinctly (coral subtle hairline) so the
+   * reader sees "at this moment, the user crossed from one page to
+   * another".
+   */
+  routeByNode?: Map<string, string | undefined>;
 }
 
 export function Edges(props: EdgesProps) {
-  const { edges, layout, returnBend, chain } = props;
+  const { edges, layout, returnBend, chain, routeByNode } = props;
   return (
     <g>
       {edges.map((e) => {
@@ -60,6 +67,10 @@ export function Edges(props: EdgesProps) {
           ? e.from === chain.hoveredId || e.to === chain.hoveredId
           : false;
         const chainAttr = inChain ? { 'data-mg-chain-connected': '' } : {};
+        const routeA = routeByNode?.get(e.from);
+        const routeB = routeByNode?.get(e.to);
+        const routeJumpAttr =
+          routeA && routeB && routeA !== routeB ? { 'data-mg-route-jump': '' } : {};
         if (e.kind === 'return') {
           const midY = (from.y + to.y) / 2;
           const ctrlX = Math.max(from.x, to.x) + returnBend;
@@ -69,6 +80,7 @@ export function Edges(props: EdgesProps) {
               className="mg-return-edge"
               d={`M ${from.x} ${from.y} Q ${ctrlX} ${midY} ${to.x} ${to.y}`}
               {...chainAttr}
+              {...routeJumpAttr}
             />
           );
         }
@@ -81,6 +93,7 @@ export function Edges(props: EdgesProps) {
             x2={to.x}
             y2={to.y}
             {...chainAttr}
+            {...routeJumpAttr}
           />
         );
       })}

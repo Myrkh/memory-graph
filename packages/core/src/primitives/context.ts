@@ -49,6 +49,9 @@ export interface MemoryGraphContextValue {
 
   currentParaId: ParagraphId | null;
 
+  /** Abstract route bucket currently passed via `<Root route="…">`. `undefined` when no route is in use. */
+  route: string | undefined;
+
   /**
    * The live `<Zone>` DOM element, or `null` if no Zone is mounted.
    *

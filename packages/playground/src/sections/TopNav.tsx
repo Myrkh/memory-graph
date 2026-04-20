@@ -1,5 +1,7 @@
+import { MemoryGraph } from '@myrkh/memory-graph';
 import { BrandMark } from '../components/BrandMark.js';
 import { SiteLink } from '../components/SiteLink.js';
+import { ThemeToggle } from '../components/ThemeToggle.js';
 import type { Page } from '../utils/navigation.js';
 
 const NAV_ITEMS: { hash: Page; label: string }[] = [
@@ -35,6 +37,7 @@ export function TopNav({ current }: TopNavProps) {
                   ? 'site-nav__link site-nav__link--active'
                   : 'site-nav__link'
               }
+              data-mg-id={`nav-${item.hash}`}
               {...activeAttr}
             >
               {item.label}
@@ -44,6 +47,9 @@ export function TopNav({ current }: TopNavProps) {
       </nav>
 
       <div className="site-nav__ctas">
+        <ThemeToggle />
+        {/* Panel trigger · always visible, available on every page. */}
+        <MemoryGraph.Handle variant="permanent" label="Memory Graph" />
         <a
           href="https://github.com/Myrkh/memory-graph"
           className="site-nav__cta"

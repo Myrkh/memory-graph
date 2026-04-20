@@ -1,20 +1,10 @@
 /* ============================================================================
- * Annotations Track (Innovation 04 · Track view).
- *
- * A secondary column anchored to the right edge of the Panel, rendering a
- * vertical git-graph-style list of every annotation plus the arcs between
- * linked ones. Same visual grammar as the main graph (coral diamonds,
- * dashed coral 3/2 arcs) so it reads as a *vertical variant*, not a new
- * widget.
- *
- * Sibling primitive: lives outside <Panel> in the DOM but fixed-positioned
- * flush against it for visual continuity. Zero breaking change to Panel.
- * Visible only when the panel is open AND trackOpen is true.
- *
- * Reveal choreography (narrative moment ≤ 700ms) :
- *   0-400ms  — width transitions 0 → target
- *   200-500ms — rows fade in, stagger 30ms each
- *   300-700ms — arcs draw themselves in (stroke-dashoffset animation)
+ * Annotations Track · vertical git-graph-style list of every annotation
+ * flush against the Panel's right edge. Same visual grammar as the main
+ * graph (coral diamonds, dashed 3/2 arcs) — a vertical variant.
+ * Sibling primitive (not child of Panel); visible when panel + trackOpen.
+ * Reveal choreography ≤ 700ms: width 0→target, rows fade 30ms stagger,
+ * arcs draw via stroke-dashoffset.
  * ==========================================================================*/
 
 .mg-annotations-track {
@@ -48,8 +38,7 @@
   visibility: visible;
 }
 
-/* Hide on narrow viewports — shipping Track as desktop-first (v0.3.1).
- * Mobile layout is deferred. */
+/* Desktop-first; mobile layout deferred. */
 @media (max-width: 900px) {
   .mg-annotations-track { display: none; }
 }
@@ -192,6 +181,16 @@
   color: var(--mg-accent);
 }
 
+.mg-annotations-track__route {
+  color: var(--mg-fg-muted);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  border: 1px solid var(--mg-border);
+  border-radius: 3px;
+  padding: 1px 4px 0;
+  font-size: 8.5px;
+}
+
 .mg-annotations-track__meta-sep {
   color: var(--mg-fg-subtle);
   font-weight: 400;
@@ -283,16 +282,12 @@
 /* -- Reduced motion -- */
 
 @media (prefers-reduced-motion: reduce) {
-  .mg-annotations-track {
-    transition: none;
-  }
+  .mg-annotations-track { transition: none; }
   .mg-annotations-track[data-mg-visible] .mg-annotations-track__row,
   .mg-annotations-track[data-mg-visible] .mg-annotations-track__arc {
     animation: none;
     opacity: 1;
     transform: none;
   }
-  .mg-annotations-track[data-mg-visible] .mg-annotations-track__arc {
-    opacity: 0.65;
-  }
+  .mg-annotations-track[data-mg-visible] .mg-annotations-track__arc { opacity: 0.65; }
 }

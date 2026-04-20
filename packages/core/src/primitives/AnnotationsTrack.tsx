@@ -11,7 +11,17 @@ export interface AnnotationsTrackProps {
   style?: CSSProperties;
   /** Title shown at the top of the column (default "TRACK"). */
   kicker?: string;
+  /**
+   * Transform the parent node's raw route (e.g. `/docs`) into the short
+   * tag shown in each row's meta line. Default: strip leading slash +
+   * uppercase. Annotations whose parent has no route are rendered
+   * without a route tag.
+   */
+  renderRouteLabel?: (route: string) => string;
 }
+
+const defaultRouteLabel = (route: string): string =>
+  route.replace(/^\/+/, '').replace(/\//g, ' · ').toUpperCase() || 'HOME';
 
 /**
  * Secondary column anchored to the right of the Panel, rendering a vertical
@@ -24,7 +34,7 @@ export interface AnnotationsTrackProps {
  * panel is closed OR when trackOpen is false.
  */
 export function AnnotationsTrack(props: AnnotationsTrackProps) {
-  const { className, style, kicker = 'TRACK' } = props;
+  const { className, style, kicker = 'TRACK', renderRouteLabel = defaultRouteLabel } = props;
   const {
     state,
     trackOpen,
@@ -115,7 +125,9 @@ export function AnnotationsTrack(props: AnnotationsTrackProps) {
           </svg>
 
           <ul className="mg-annotations-track__list" style={{ minHeight: layout.totalHeight }}>
-            {annotations.map((annotation, i) => (
+            {annotations.map((annotation, i) => {
+              const parentRoute = state.nodes.get(annotation.paraId)?.route;
+              return (
               <li
                 key={annotation.id}
                 className="mg-annotations-track__row"
@@ -140,6 +152,14 @@ export function AnnotationsTrack(props: AnnotationsTrackProps) {
                   data-mg-annotation-id={annotation.id}
                 >
                   <div className="mg-annotations-track__meta">
+                    {parentRoute ? (
+                      <>
+                        <span className="mg-annotations-track__route">
+                          {renderRouteLabel(parentRoute)}
+                        </span>
+                        <span className="mg-annotations-track__meta-sep" aria-hidden>·</span>
+                      </>
+                    ) : null}
                     <span className="mg-annotations-track__seq">
                       ANN-{String(i + 1).padStart(2, '0')}
                     </span>
@@ -166,7 +186,8 @@ export function AnnotationsTrack(props: AnnotationsTrackProps) {
                   ) : null}
                 </button>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       )}

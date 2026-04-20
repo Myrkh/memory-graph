@@ -21,6 +21,7 @@
 @import url('./base/handle.css');
 @import url('./base/panel.css');
 @import url('./base/graph.css');
+@import url('./base/graph-controls.css');
 @import url('./base/tooltip.css');
 @import url('./base/footer.css');
 @import url('./base/intensity.css');

@@ -1,0 +1,21 @@
+/* ============================================================================
+ * ThemeToggleNode · custom node shape for the tracked theme toggle.
+ * Same visual grammar as the nav toggle icon: disc in light, crescent in
+ * dark. Reads the live `data-scheme` written by `<ThemeToggleNode>`.
+ * ==========================================================================*/
+
+.theme-node__disc {
+  fill: var(--mg-accent);
+  stroke: var(--mg-bg);
+  stroke-width: 2;
+}
+
+.theme-node__mask {
+  fill: var(--mg-bg);
+  opacity: 0;
+  transition: opacity var(--mg-duration-normal, 200ms) var(--mg-ease-standard, ease-out);
+}
+
+.theme-node[data-scheme='dark'] .theme-node__mask {
+  opacity: 1;
+}

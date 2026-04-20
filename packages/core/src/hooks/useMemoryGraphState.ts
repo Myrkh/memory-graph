@@ -37,8 +37,15 @@ function generateAnnotationId(): AnnotationId {
 
 export interface MemoryGraphActions {
   /** Record dwell on a paragraph. Promotes to station when `dwellMs >= config.DWELL_MS`, otherwise logs a passage.
-   * `kind` is stored on first promotion and drives the node's graph shape. */
-  commit(paraId: ParagraphId, dwellMs: number, textContent: string, kind?: NodeKind): void;
+   * `kind` is stored on first promotion and drives the node's graph shape.
+   * `route` is an abstract bucket (URL path, tab id, doc id…) driving the 2D column layout. */
+  commit(
+    paraId: ParagraphId,
+    dwellMs: number,
+    textContent: string,
+    kind?: NodeKind,
+    route?: string,
+  ): void;
   /** Toggle the pinned flag. If the paragraph isn't yet a station, it is created with zero dwell. */
   togglePin(paraId: ParagraphId, textContent: string): void;
   /** Wipe all nodes, edges, passages, annotations and intensity buckets. */
@@ -92,7 +99,13 @@ export function useMemoryGraphState(config: MemoryGraphConfig): UseMemoryGraphSt
   const [state, dispatch] = useReducer(boundReducer, undefined, initialReducerState);
 
   const commit = useCallback(
-    (paraId: ParagraphId, dwellMs: number, textContent: string, kind?: NodeKind) => {
+    (
+      paraId: ParagraphId,
+      dwellMs: number,
+      textContent: string,
+      kind?: NodeKind,
+      route?: string,
+    ) => {
       dispatch({
         type: 'commit',
         paraId,
@@ -100,6 +113,7 @@ export function useMemoryGraphState(config: MemoryGraphConfig): UseMemoryGraphSt
         textContent,
         now: Date.now(),
         ...(kind !== undefined ? { kind } : {}),
+        ...(route !== undefined ? { route } : {}),
       });
     },
     [],

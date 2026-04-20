@@ -1,0 +1,105 @@
+/* ============================================================================
+ * Theme toggle — nav-integrated · Stit'Claude "Eclipse Reveal" signature.
+ *
+ *   Icon anatomy:
+ *     · 8 solar rays (light mode) that scale to zero in dark
+ *     · central disc in currentColor
+ *     · crescent mask (opacity 0 in light, 1 in dark) forming the moon
+ *   Whole icon rotates cumulatively 360° per click via the inline
+ *   `transform: rotate(...)` set in the React component. CSS handles the
+ *   per-part transitions (rays scale, mask opacity, disc scale whisper).
+ *
+ *   The page-wide circular reveal lives in `site-theme-reveal.css`.
+ * ==========================================================================*/
+
+.site-theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--mg-border);
+  border-radius: var(--mg-radius-pill, 100px);
+  color: var(--mg-fg);
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  transition:
+    color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    border-color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    background var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+
+.site-theme-toggle:hover,
+.site-theme-toggle:focus-visible {
+  color: var(--mg-accent);
+  border-color: var(--mg-accent);
+  outline: none;
+}
+
+.site-theme-toggle__icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  /* Rotation controlled via inline style from React (cumulative 360° per click). */
+  transition: transform 700ms var(--mg-ease-expo-out, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+/* -- Solar rays · 8 lines radiating from center ------------------------ */
+
+.site-theme-toggle__rays {
+  transform-origin: 16px 16px;
+  transform-box: view-box;
+  transition:
+    transform 500ms var(--mg-ease-expo-out, cubic-bezier(0.16, 1, 0.3, 1)),
+    opacity 320ms var(--mg-ease-standard, ease-out);
+}
+
+.site-theme-toggle__rays line {
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.site-theme-toggle[data-scheme='dark'] .site-theme-toggle__rays {
+  transform: scale(0) rotate(-45deg);
+  opacity: 0;
+}
+
+/* -- Central disc · fills currentColor ; whispers between scales -------- */
+
+.site-theme-toggle__disc {
+  fill: currentColor;
+  transform-origin: 16px 16px;
+  transform-box: view-box;
+  transition: transform 420ms var(--mg-ease-expo-out, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.site-theme-toggle[data-scheme='light'] .site-theme-toggle__disc {
+  transform: scale(0.88);
+}
+
+/* -- Crescent mask · page background color, opacity 0 → 1 -------------- */
+
+.site-theme-toggle__mask {
+  fill: var(--mg-bg);
+  opacity: 0;
+  transition: opacity 300ms var(--mg-ease-standard, ease-out);
+}
+
+.site-theme-toggle[data-scheme='dark'] .site-theme-toggle__mask {
+  opacity: 1;
+}
+
+/* -- Reduced motion: disable icon spin, keep the state swap instant --- */
+
+@media (prefers-reduced-motion: reduce) {
+  .site-theme-toggle__icon,
+  .site-theme-toggle__rays,
+  .site-theme-toggle__disc,
+  .site-theme-toggle__mask {
+    transition: none;
+  }
+}

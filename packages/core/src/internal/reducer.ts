@@ -87,8 +87,10 @@ export type Action =
       now: number;
       /** Visual kind of the element — written onto the Node on first promotion. */
       kind?: NodeKind;
+      /** Route bucket — stored on the Node on first promotion, backfilled on re-commit. */
+      route?: string;
     }
-  | { type: 'togglePin'; paraId: ParagraphId; textContent: string; now: number }
+  | { type: 'togglePin'; paraId: ParagraphId; textContent: string; now: number; route?: string }
   | { type: 'clear' }
   | { type: 'restore'; data: SerializedGraph }
   | { type: 'toggleShowPassages' }
@@ -122,7 +124,7 @@ function commitCase(
   action: Extract<Action, { type: 'commit' }>,
   config: MemoryGraphConfig,
 ): ReducerState {
-  const { paraId, dwellMs, textContent, now, kind } = action;
+  const { paraId, dwellMs, textContent, now, kind, route } = action;
   const { graph, previousStationId } = state;
 
   const intensityBuckets = pushIntensity(graph.intensityBuckets, dwellMs, now);
@@ -149,10 +151,11 @@ function commitCase(
       ...existing,
       totalMs: existing.totalMs + dwellMs,
       visits: existing.visits + 1,
-      // Backfill: legacy nodes persisted before Phase 3 have no `kind`.
-      // Opportunistically set it on re-commit so old graphs upgrade
-      // without forcing consumers to clear localStorage.
+      // Backfill: legacy nodes persisted before their respective release
+      // have no `kind` or `route`. Opportunistically set them on re-commit
+      // so old graphs upgrade without forcing consumers to clearPersisted().
       kind: existing.kind ?? kind ?? 'paragraph',
+      ...(existing.route === undefined && route !== undefined ? { route } : {}),
     });
     if (previousStationId && previousStationId !== paraId) {
       nextEdges = [
@@ -169,6 +172,7 @@ function commitCase(
       pinned: false,
       extract: truncate(textContent, EXTRACT_LEN_STATION),
       kind: kind ?? 'paragraph',
+      ...(route !== undefined ? { route } : {}),
     });
     if (previousStationId && previousStationId !== paraId) {
       nextEdges = [

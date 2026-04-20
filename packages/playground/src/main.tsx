@@ -8,6 +8,9 @@ import '@myrkh/memory-graph/themes/stit-claude';
 // Site shell (nav + footer + pages)
 import './styles/site-base.css';
 import './styles/site-brandmark.css';
+import './styles/site-theme-toggle.css';
+import './styles/site-theme-reveal.css';
+import './styles/theme-node.css';
 import './styles/site-hero.css';
 import './styles/site-promise.css';
 import './styles/site-features.css';

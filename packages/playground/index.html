@@ -3,12 +3,99 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="description" content="Visualize reading attention as a node-link graph. Multi-DOM · multi-strategy · smart defaults. React + TypeScript." />
     <meta name="theme-color" content="#ee624e" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Primary meta -->
     <title>memory-graph · see how people actually read</title>
+    <meta
+      name="description"
+      content="Visualize reading attention as a node-link graph. Drop it into any React app, mark the elements that matter, watch the trail form behind a slide-out panel. Multi-DOM · multi-strategy · smart defaults · zero network."
+    />
+    <meta
+      name="keywords"
+      content="react library, reading analytics, attention tracking, node-link graph, annotations, dwell time, scroll depth, react hooks, typescript, memory-graph, @myrkh/memory-graph, compound components, headless ui"
+    />
+    <meta name="author" content="Yoann Dumont (@Myrkh)" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://memory-graph-playground.vercel.app/" />
+
+    <!-- Open Graph · Facebook, LinkedIn, Discord, Slack -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="memory-graph" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://memory-graph-playground.vercel.app/" />
+    <meta property="og:title" content="memory-graph · see how people actually read" />
+    <meta
+      property="og:description"
+      content="A React library that turns reading into a graph. Drop it into any app, mark the elements that matter, watch the trail form behind a slide-out panel."
+    />
+    <meta property="og:image" content="https://memory-graph-playground.vercel.app/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="memory-graph — a node-link graph of reading attention, with coral stations and dashed return arcs on a cream background." />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="memory-graph · see how people actually read" />
+    <meta
+      name="twitter:description"
+      content="A React library that turns reading into a graph. Multi-DOM · multi-strategy · smart defaults · zero network."
+    />
+    <meta name="twitter:image" content="https://memory-graph-playground.vercel.app/og-image.svg" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- Structured data · JSON-LD SoftwareSourceCode + WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://memory-graph-playground.vercel.app/#website",
+          "url": "https://memory-graph-playground.vercel.app/",
+          "name": "memory-graph",
+          "description": "Visualize reading attention as a node-link graph. React + TypeScript library.",
+          "inLanguage": "en"
+        },
+        {
+          "@type": "SoftwareSourceCode",
+          "name": "@myrkh/memory-graph",
+          "description": "A React library that turns reading into a graph. Multi-DOM · multi-strategy · smart defaults · zero network.",
+          "codeRepository": "https://github.com/Myrkh/memory-graph",
+          "programmingLanguage": "TypeScript",
+          "runtimePlatform": "React 18+",
+          "license": "https://opensource.org/licenses/MIT",
+          "keywords": "react, reading analytics, annotations, attention, graph, dwell, headless-ui, compound-components",
+          "author": {
+            "@type": "Person",
+            "name": "Yoann Dumont",
+            "url": "https://github.com/Myrkh"
+          },
+          "version": "0.1.0",
+          "url": "https://www.npmjs.com/package/@myrkh/memory-graph"
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
+    <noscript>
+      <div style="font-family: system-ui, sans-serif; padding: 2rem; max-width: 640px; margin: 0 auto;">
+        <h1>memory-graph</h1>
+        <p>
+          A React library that visualizes reading attention as a node-link graph.
+          This site requires JavaScript to demonstrate the library interactively.
+        </p>
+        <p>
+          <a href="https://github.com/Myrkh/memory-graph">GitHub</a> ·
+          <a href="https://www.npmjs.com/package/@myrkh/memory-graph">npm</a>
+        </p>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

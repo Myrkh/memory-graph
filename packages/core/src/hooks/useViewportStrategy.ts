@@ -12,7 +12,15 @@ export interface UseViewportStrategyOptions {
   inference?: StrategyInference;
   /** How to decide the kind when `data-mg-kind` is absent. Default `'smart'`. */
   kindInference?: KindInference;
-  onCommit: (paraId: ParagraphId, dwellMs: number, textContent: string, kind?: NodeKind) => void;
+  /** Abstract route bucket stamped on every committed node. Passes through from `<Root route="…">`. */
+  route?: string;
+  onCommit: (
+    paraId: ParagraphId,
+    dwellMs: number,
+    textContent: string,
+    kind?: NodeKind,
+    route?: string,
+  ) => void;
 }
 
 export interface UseViewportStrategyReturn {
@@ -37,9 +45,11 @@ export function useViewportStrategy(
   container: HTMLElement | null,
   options: UseViewportStrategyOptions,
 ): UseViewportStrategyReturn {
-  const { config, inference = 'smart', kindInference = 'smart' } = options;
+  const { config, inference = 'smart', kindInference = 'smart', route } = options;
   const onCommitRef = useRef(options.onCommit);
   onCommitRef.current = options.onCommit;
+  const routeRef = useRef(route);
+  routeRef.current = route;
 
   const bandRatioRef = useRef(config.BAND_RATIO);
   bandRatioRef.current = config.BAND_RATIO;
@@ -63,7 +73,7 @@ export function useViewportStrategy(
         const el = paragraphs.find((p) => p.dataset.mgId === currentId);
         const textContent = el?.textContent ?? '';
         const kind = el ? resolveKind(el, kindInference) : undefined;
-        onCommitRef.current(currentId, now - entryTime, textContent, kind);
+        onCommitRef.current(currentId, now - entryTime, textContent, kind, routeRef.current);
       }
     };
 

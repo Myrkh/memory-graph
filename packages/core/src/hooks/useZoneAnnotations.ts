@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from 'react';
+import { useEffect } from 'react';
 import type { Annotation, AnnotationId } from '../types.js';
 import {
   applyBlockAnnotation,
@@ -16,21 +16,25 @@ export interface UseZoneAnnotationsOptions {
 }
 
 /**
- * Imperative annotation rendering for a zone element — runs on every
- * `state.annotations` change and wraps ranges in `<mark>` (text scope)
- * or sets `data-mg-annotated="block"` (block scope) on every
- * `[data-mg-id]` descendant. No Paragraph wrapper required: a raw
- * `<aside data-mg-id>` gets the same treatment as `<p data-mg-id>`.
+ * Imperative annotation rendering for every `[data-mg-id]` descendant of
+ * `zone` — wraps ranges in `<mark>` (text scope) or stamps
+ * `data-mg-annotated="block"` (block scope). No `<Paragraph>` wrapper
+ * required: a raw `<aside data-mg-id>` gets the same treatment as
+ * `<p data-mg-id>`, and a `<div data-mg-id>` inside any page too.
  *
- * Split into three effects so each one has the right dep set and can
- * re-run only when its signal changes:
+ * Accepts `zone` as a live element (not a ref) so the effects re-run
+ * when the zone mounts / unmounts across route changes. When `zone` is
+ * `null`, falls back to `document.body` — annotation rendering then
+ * covers the whole app (the right default for Provider-at-root sites
+ * that mark content outside any `<Zone>`).
+ *
+ * Three effects so each has the right dep set:
  * 1. rendering — rebuilds marks/blocks on annotations change
- * 2. flash — toggles `data-mg-flash` on every mark sharing the flash id
+ * 2. flash — toggles `data-mg-flash` on marks sharing the flash id
  * 3. counterpart — toggles `data-mg-link-counterpart` on linked marks
- *    when an annotation is hovered
  */
 export function useZoneAnnotations(
-  zoneRef: RefObject<HTMLElement | null>,
+  zone: HTMLElement | null,
   options: UseZoneAnnotationsOptions,
 ): void {
   const { annotations, flashAnnotationId, hoveredAnnotationId } = options;
@@ -38,10 +42,10 @@ export function useZoneAnnotations(
   /* -- 1 · Render marks + block attrs -------------------------------- */
 
   useEffect(() => {
-    const zone = zoneRef.current;
-    if (!zone) return;
+    const root = zone ?? (typeof document !== 'undefined' ? document.body : null);
+    if (!root) return;
 
-    clearAnnotations(zone);
+    clearAnnotations(root);
 
     const byPara = new Map<string, Annotation[]>();
     for (const a of annotations.values()) {
@@ -51,7 +55,7 @@ export function useZoneAnnotations(
     }
 
     for (const [paraId, anns] of byPara) {
-      const el = zone.querySelector<HTMLElement>(
+      const el = root.querySelector<HTMLElement>(
         `[data-mg-id="${CSS.escape(paraId)}"]`,
       );
       if (!el) continue;
@@ -63,30 +67,30 @@ export function useZoneAnnotations(
         else wrapAnnotationRange(el, a);
       }
     }
-  }, [zoneRef, annotations]);
+  }, [zone, annotations]);
 
   /* -- 2 · Flash toggling -------------------------------------------- */
 
   useEffect(() => {
-    const zone = zoneRef.current;
-    if (!zone) return;
-    const prev = zone.querySelectorAll<HTMLElement>(
+    const root = zone ?? (typeof document !== 'undefined' ? document.body : null);
+    if (!root) return;
+    const prev = root.querySelectorAll<HTMLElement>(
       '[data-mg-annotation-id][data-mg-flash]',
     );
     prev.forEach((el) => el.removeAttribute('data-mg-flash'));
     if (!flashAnnotationId) return;
-    const targets = zone.querySelectorAll<HTMLElement>(
+    const targets = root.querySelectorAll<HTMLElement>(
       `[data-mg-annotation-id="${CSS.escape(flashAnnotationId)}"]`,
     );
     targets.forEach((el) => el.setAttribute('data-mg-flash', ''));
-  }, [zoneRef, flashAnnotationId, annotations]);
+  }, [zone, flashAnnotationId, annotations]);
 
   /* -- 3 · Link counterpart outline ---------------------------------- */
 
   useEffect(() => {
-    const zone = zoneRef.current;
-    if (!zone) return;
-    const previous = zone.querySelectorAll<HTMLElement>(
+    const root = zone ?? (typeof document !== 'undefined' ? document.body : null);
+    if (!root) return;
+    const previous = root.querySelectorAll<HTMLElement>(
       '[data-mg-annotation-id][data-mg-link-counterpart]',
     );
     previous.forEach((el) => el.removeAttribute('data-mg-link-counterpart'));
@@ -94,10 +98,10 @@ export function useZoneAnnotations(
     const ann = annotations.get(hoveredAnnotationId);
     if (!ann) return;
     for (const linkedId of ann.links) {
-      const marks = zone.querySelectorAll<HTMLElement>(
+      const marks = root.querySelectorAll<HTMLElement>(
         `[data-mg-annotation-id="${CSS.escape(linkedId)}"]`,
       );
       marks.forEach((el) => el.setAttribute('data-mg-link-counterpart', ''));
     }
-  }, [zoneRef, hoveredAnnotationId, annotations]);
+  }, [zone, hoveredAnnotationId, annotations]);
 }

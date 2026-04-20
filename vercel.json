@@ -4,5 +4,10 @@
   "outputDirectory": "packages/playground/dist",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": null,
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/demo", "destination": "/index.html" },
+    { "source": "/docs", "destination": "/index.html" },
+    { "source": "/philosophy", "destination": "/index.html" }
+  ]
 }

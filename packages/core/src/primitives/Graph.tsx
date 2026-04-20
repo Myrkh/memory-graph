@@ -1,64 +1,69 @@
-import {
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from 'react';
-import type { Annotation, AnnotationId, GraphItem, ParagraphId } from '../types.js';
-import {
-  buildItems,
-  layoutGraph,
-  stationRadius,
-  type GraphLayout,
-} from '../internal/graph-layout.js';
-import { AxisMarks, Edges, Nodes } from '../internal/graph-svg.js';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import type { Annotation, GraphItem, NodeKind, ParagraphId } from '../types.js';
+import { buildItems, computeChainSet, layoutGraph, stationRadius, type ChainSet, type GraphLayout } from '../internal/graph-layout.js';
+import { AxisMarks, Edges } from '../internal/graph-svg.js';
+import { Nodes } from '../internal/graph-node-svg.js';
+import { RouteColumns } from '../internal/graph-columns-svg.js';
+import { GraphControls } from '../internal/graph-controls.js';
+import { useGraphZoom } from '../hooks/useGraphZoom.js';
 import { AnnotationSatellites } from '../internal/annotation-satellites.js';
 import { AnnotationLinks } from '../internal/annotation-links.js';
 import { computeSatellitePositions } from '../internal/annotation-layout.js';
 import { useMemoryGraphContext } from './context.js';
 
-/**
- * Strict ego set for chain-highlight. Given a hovered node id:
- * - `nodes` = { hoveredId, ...endpoints of edges TOUCHING hoveredId }
- * - `annotations` = { annotations of hoveredId } ∪
- *                   { annotations linked from hoveredId's annotations }
- *
- * An edge is considered "in-chain" iff one of its endpoints IS hoveredId —
- * not simply "both endpoints happen to be in the set". This answers
- * "where does THIS node go", not "the neighborhood around it".
- */
-export interface ChainSet {
-  hoveredId: ParagraphId;
-  nodes: Set<ParagraphId>;
-  annotations: Set<AnnotationId>;
-}
+export type { ChainSet };
+
+/** Context passed to the consumer-provided `renderNode` override. */
+export interface RenderNodeContext { r: number; kind: NodeKind }
 
 export interface GraphProps {
   className?: string;
   style?: CSSProperties;
-  /**
-   * Delay between `closePanel()` and `scrollIntoView` on node click. Gives
-   * the panel time to slide out. Default 200ms.
-   */
+  /** Delay between `closePanel()` and `scrollIntoView` on node click. Default 200ms. */
   jumpDelayMs?: number;
   /** Called in addition to the default jump behavior with the clicked id. */
   onNodeClick?: (paraId: ParagraphId) => void;
+  /**
+   * Escape hatch for per-node custom rendering. Return a ReactNode to
+   * replace the default kind shape, or `null` to fall back. Rendered
+   * inside the node's `<g transform>` wrapper (use local 0,0 coords).
+   * Pulse, pinned ring, highlight ring and order label stay library-
+   * managed. Use this to give a specific tracked element (theme toggle,
+   * KPI card) a custom look without polluting `NodeKind` with site-
+   * specific values.
+   */
+  renderNode?: (item: GraphItem, ctx: RenderNodeContext) => ReactNode | null;
+  /** Transform a raw route string into the column label. Default: strip leading slash + uppercase. */
+  renderRouteLabel?: (route: string) => string;
 }
+
+const defaultRouteLabel = (route: string): string =>
+  route.replace(/^\/+/, '').replace(/\//g, ' · ').toUpperCase() || 'HOME';
 
 /**
  * SVG rendering of the reading graph: stations + optional passages,
  * forward/return edges, and minute axis. Clicking a node scrolls the
  * corresponding paragraph into view and triggers a flash.
+ *
+ * When 2+ unique routes accumulate in state, switches to a 2D column
+ * layout — one column per route, laid out in the chronological order
+ * routes were first visited. The graph wrap gains horizontal scroll.
  */
 export function Graph(props: GraphProps) {
-  const { className, style, jumpDelayMs = 200, onNodeClick } = props;
+  const {
+    className,
+    style,
+    jumpDelayMs = 200,
+    onNodeClick,
+    renderNode,
+    renderRouteLabel = defaultRouteLabel,
+  } = props;
   const {
     config,
     state,
     showPassages,
     currentParaId,
+    route: currentRoute,
     zoneElement,
     closePanel,
     triggerFlash,
@@ -95,6 +100,11 @@ export function Graph(props: GraphProps) {
   const layout = useMemo<GraphLayout | null>(
     () => layoutGraph(items, svgWidth, config),
     [items, svgWidth, config],
+  );
+
+  const { zoom, canZoomIn, canZoomOut, zoomIn, zoomOut, fit } = useGraphZoom(
+    wrapRef,
+    layout,
   );
 
   const maxMs = useMemo(() => {
@@ -178,54 +188,78 @@ export function Graph(props: GraphProps) {
     [layout, nodeRadiusFor, state.annotations],
   );
 
-  const chain = useMemo<ChainSet | null>(() => {
-    if (!hoveredNodeId || !state.nodes.has(hoveredNodeId)) return null;
+  const chain = useMemo<ChainSet | null>(
+    () =>
+      hoveredNodeId
+        ? computeChainSet(hoveredNodeId, state.edges, state.annotations, state.nodes)
+        : null,
+    [hoveredNodeId, state.edges, state.annotations, state.nodes],
+  );
 
-    // Nodes reached directly by an edge touching hoveredId.
-    const nodes = new Set<ParagraphId>([hoveredNodeId]);
-    for (const e of state.edges) {
-      if (e.from === hoveredNodeId) nodes.add(e.to);
-      if (e.to === hoveredNodeId) nodes.add(e.from);
-    }
-
-    // Annotations owned by hoveredId + annotations those link to
-    // (semantic paths OUT of this node, not incidental neighborhood notes).
-    const hoveredAnnotations = new Set<AnnotationId>();
-    for (const a of state.annotations.values()) {
-      if (a.paraId === hoveredNodeId) hoveredAnnotations.add(a.id);
-    }
-    const annotations = new Set<AnnotationId>(hoveredAnnotations);
-    for (const annId of hoveredAnnotations) {
-      const ann = state.annotations.get(annId);
-      if (!ann) continue;
-      for (const linkedId of ann.links) {
-        if (state.annotations.has(linkedId)) annotations.add(linkedId);
-      }
-    }
-
-    return { hoveredId: hoveredNodeId, nodes, annotations };
-  }, [hoveredNodeId, state.edges, state.annotations, state.nodes]);
+  const routeByNode = useMemo(() => {
+    const m = new Map<ParagraphId, string | undefined>();
+    for (const [id, node] of state.nodes) m.set(id, node.route);
+    return m;
+  }, [state.nodes]);
 
   const base = className ? `mg-graph-wrap ${className}` : 'mg-graph-wrap';
+  const multiColumn = Boolean(layout?.columns);
+
+  // Auto-follow · when the current route changes, center its column in
+  // the horizontal scroll viewport. Smooth, so the move reads as
+  // "the graph is listening to where you are."
+  useEffect(() => {
+    if (!multiColumn || !layout?.columns || !currentRoute) return;
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const col = layout.columns.find((c) => c.route === currentRoute);
+    if (!col) return;
+    const target = Math.max(0, col.centerX * zoom - wrap.clientWidth / 2);
+    wrap.scrollTo({ left: target, behavior: 'smooth' });
+  }, [currentRoute, multiColumn, layout, zoom]);
 
   return (
-    <div className={base} style={style} ref={wrapRef}>
+    <div className="mg-graph-container" style={style}>
+      {layout ? (
+        <GraphControls
+          zoom={zoom}
+          canZoomIn={canZoomIn}
+          canZoomOut={canZoomOut}
+          onZoomIn={zoomIn}
+          onZoomOut={zoomOut}
+          onFit={fit}
+        />
+      ) : null}
+      <div
+        className={base}
+        ref={wrapRef}
+        data-mg-graph-wrap
+        data-mg-multi-column={multiColumn ? '' : undefined}
+      >
       {layout ? (
         <svg
           className="mg-svg"
-          viewBox={`0 0 ${svgWidth} ${layout.totalHeight}`}
-          height={layout.totalHeight}
-          style={{ width: svgWidth }}
+          viewBox={`0 0 ${layout.totalWidth} ${layout.totalHeight}`}
+          height={layout.totalHeight * zoom}
+          width={layout.totalWidth * zoom}
+          style={{ width: layout.totalWidth * zoom, height: layout.totalHeight * zoom }}
           role="img"
           aria-label="Reading memory graph"
           data-mg-chain-active={chain ? '' : undefined}
         >
-          <AxisMarks layout={layout} svgWidth={svgWidth} paddingTop={config.GRAPH_PADDING_TOP} />
+          <RouteColumns
+            layout={layout}
+            currentRoute={currentRoute}
+            renderRouteLabel={renderRouteLabel}
+          />
+
+          <AxisMarks layout={layout} svgWidth={layout.totalWidth} paddingTop={config.GRAPH_PADDING_TOP} />
           <Edges
             edges={state.edges}
             layout={layout}
             returnBend={config.RETURN_BEND}
             chain={chain}
+            routeByNode={routeByNode}
           />
           <Nodes
             layout={layout}
@@ -239,6 +273,7 @@ export function Graph(props: GraphProps) {
             onClick={jumpToParagraph}
             onHover={setHover}
             onHoverNode={setHoveredNode}
+            {...(renderNode ? { renderNode } : {})}
           />
           <AnnotationLinks
             annotations={state.annotations}
@@ -254,6 +289,7 @@ export function Graph(props: GraphProps) {
           />
         </svg>
       ) : null}
+      </div>
     </div>
   );
 }

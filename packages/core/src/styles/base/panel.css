@@ -176,9 +176,14 @@
 
 .mg-graph-wrap {
   flex: 1;
+  min-height: 0;
   overflow: auto;
   position: relative;
   background: var(--mg-bg);
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mg-graph-wrap { scroll-behavior: auto; }
 }
 .mg-graph-wrap::-webkit-scrollbar { width: 4px; }
 .mg-graph-wrap::-webkit-scrollbar-thumb {

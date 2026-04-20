@@ -16,7 +16,15 @@ export interface UseFocusStrategyOptions {
   inference?: StrategyInference;
   /** How to decide the kind when `data-mg-kind` is absent. Default `'smart'`. */
   kindInference?: KindInference;
-  onCommit: (paraId: ParagraphId, dwellMs: number, textContent: string, kind?: NodeKind) => void;
+  /** Abstract route bucket stamped on every committed node. */
+  route?: string;
+  onCommit: (
+    paraId: ParagraphId,
+    dwellMs: number,
+    textContent: string,
+    kind?: NodeKind,
+    route?: string,
+  ) => void;
 }
 
 /**
@@ -34,9 +42,17 @@ export function useFocusStrategy(
   container: HTMLElement | null,
   options: UseFocusStrategyOptions,
 ): void {
-  const { triggerDwellMs, commitDwellMs, inference = 'smart', kindInference = 'smart' } = options;
+  const {
+    triggerDwellMs,
+    commitDwellMs,
+    inference = 'smart',
+    kindInference = 'smart',
+    route,
+  } = options;
   const onCommitRef = useRef(options.onCommit);
   onCommitRef.current = options.onCommit;
+  const routeRef = useRef(route);
+  routeRef.current = route;
 
   useEffect(() => {
     const root = container ?? (typeof document !== 'undefined' ? document.body : null);
@@ -68,7 +84,13 @@ export function useFocusStrategy(
       const triggerMs = Number(el.dataset.mgDwell) || triggerDwellMs;
       const kind = resolveKind(el, kindInference);
       const id = setTimeout(() => {
-        onCommitRef.current(paraId, commitDwellMs, el.textContent ?? '', kind);
+        onCommitRef.current(
+          paraId,
+          commitDwellMs,
+          el.textContent ?? '',
+          kind,
+          routeRef.current,
+        );
         timers.delete(paraId);
       }, triggerMs);
       timers.set(paraId, id);

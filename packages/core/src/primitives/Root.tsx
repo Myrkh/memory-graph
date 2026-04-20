@@ -2,7 +2,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type CSSProperties,
   type ReactNode,
@@ -18,6 +17,8 @@ import { useMemoryGraphState } from '../hooks/useMemoryGraphState.js';
 import { usePersistence } from '../hooks/usePersistence.js';
 import { useAttentionTracker } from '../hooks/useAttentionTracker.js';
 import { useLinkingModeEffects } from '../hooks/useLinkingModeEffects.js';
+import { useZoneAnnotations } from '../hooks/useZoneAnnotations.js';
+import { useTimedValue } from '../hooks/useTimedValue.js';
 import {
   MemoryGraphContext,
   type HoverState,
@@ -39,6 +40,14 @@ export interface RootProps {
   open?: boolean;
   /** Called whenever open state changes. */
   onOpenChange?: (open: boolean) => void;
+  /**
+   * Abstract "route" bucket stamped on every tracked node at commit time.
+   * Whatever the consumer wants — URL path, tab id, document id, mode
+   * name. Agnostic of any routing library. When two or more unique
+   * routes accumulate in state, `<Graph>` switches to a 2D column layout
+   * (one column per route). Omit for a single-page / single-bucket graph.
+   */
+  route?: string;
   className?: string;
   style?: CSSProperties;
   children: ReactNode;
@@ -66,6 +75,7 @@ export function Root(props: RootProps) {
     defaultOpen = false,
     open: openProp,
     onOpenChange,
+    route,
     className,
     style,
     children,
@@ -91,6 +101,7 @@ export function Root(props: RootProps) {
   const { currentParaId } = useAttentionTracker(zoneElement, {
     config,
     onCommit: actions.commit,
+    ...(route !== undefined ? { route } : {}),
   });
 
   /* -- Panel open (controlled + uncontrolled) --------------------------- */
@@ -111,41 +122,10 @@ export function Root(props: RootProps) {
   const closePanel = useCallback(() => setOpen(false), [setOpen]);
   const togglePanel = useCallback(() => setOpen(!open), [open, setOpen]);
 
-  /* -- Flash (scroll-to-paragraph animation) ---------------------------- */
+  /* -- Flash (scroll-to-paragraph animation) + toast -------------------- */
 
-  const [flashParaId, setFlashParaId] = useState<ParagraphId | null>(null);
-  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const triggerFlash = useCallback((paraId: ParagraphId) => {
-    setFlashParaId(paraId);
-    if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
-    flashTimerRef.current = setTimeout(() => setFlashParaId(null), FLASH_MS);
-  }, []);
-
-  useEffect(
-    () => () => {
-      if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
-    },
-    [],
-  );
-
-  /* -- Toast ------------------------------------------------------------ */
-
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const showToast = useCallback((message: string) => {
-    setToastMessage(message);
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    toastTimerRef.current = setTimeout(() => setToastMessage(null), TOAST_MS);
-  }, []);
-
-  useEffect(
-    () => () => {
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    },
-    [],
-  );
+  const [flashParaId, triggerFlash] = useTimedValue<ParagraphId>(FLASH_MS);
+  const [toastMessage, showToast] = useTimedValue<string>(TOAST_MS);
 
   /* -- Hover (for Tooltip) --------------------------------------------- */
 
@@ -171,24 +151,8 @@ export function Root(props: RootProps) {
 
   /* -- Annotation range-flash (§Innovation 03) ------------------------ */
 
-  const [flashAnnotationId, setFlashAnnotationId] = useState<AnnotationId | null>(null);
-  const annotationFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const triggerAnnotationFlash = useCallback((id: AnnotationId) => {
-    setFlashAnnotationId(id);
-    if (annotationFlashTimerRef.current) clearTimeout(annotationFlashTimerRef.current);
-    annotationFlashTimerRef.current = setTimeout(
-      () => setFlashAnnotationId(null),
-      FLASH_MS,
-    );
-  }, []);
-
-  useEffect(
-    () => () => {
-      if (annotationFlashTimerRef.current) clearTimeout(annotationFlashTimerRef.current);
-    },
-    [],
-  );
+  const [flashAnnotationId, triggerAnnotationFlash] =
+    useTimedValue<AnnotationId>(FLASH_MS);
 
   /* -- Bidirectional hover (paragraph ↔ node) -------------------------- */
 
@@ -206,6 +170,16 @@ export function Root(props: RootProps) {
     if (!open) setHoveredNodeState(null);
   }, [open]);
 
+  /* -- Annotation rendering · app-shell level so `[data-mg-id]`
+   * elements OUTSIDE any `<Zone>` (multi-page sites, sidebar content,
+   * anything) still get the coral marks + block treatment. Falls back
+   * to `document.body` when `zoneElement` is null. */
+  useZoneAnnotations(zoneElement, {
+    annotations: state.annotations,
+    flashAnnotationId,
+    hoveredAnnotationId,
+  });
+
   /* -- Context memoization --------------------------------------------- */
 
   const value = useMemo<MemoryGraphContextValue>(
@@ -217,6 +191,7 @@ export function Root(props: RootProps) {
       derived,
       actions,
       currentParaId,
+      route,
       zoneElement,
       setZoneElement,
       exportJson,
@@ -250,6 +225,7 @@ export function Root(props: RootProps) {
       derived,
       actions,
       currentParaId,
+      route,
       zoneElement,
       setZoneElement,
       exportJson,

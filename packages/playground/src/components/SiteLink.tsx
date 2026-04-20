@@ -1,5 +1,9 @@
 import type { ReactNode } from 'react';
-import { handleSiteLinkClick, type Page } from '../utils/navigation.js';
+import {
+  handleSiteLinkClick,
+  pathFromPage,
+  type Page,
+} from '../utils/navigation.js';
 
 export interface SiteLinkProps {
   to: Page;
@@ -7,18 +11,23 @@ export interface SiteLinkProps {
   className?: string;
   'aria-current'?: 'page' | 'step' | 'location' | 'date' | 'time' | 'true' | 'false';
   'aria-label'?: string;
+  'data-mg-id'?: string;
 }
 
 /**
- * Internal navigation link — wraps an `<a>` and intercepts the click to
- * trigger a directional view transition (`navigate()` in
- * `utils/navigation.ts`). Respects modifier keys so Cmd/Ctrl-click still
- * opens in a new tab, which is what a user expects from a real link.
+ * Internal navigation link — wraps an `<a>` with a canonical `href`
+ * (`/`, `/demo`, `/docs`, `/philosophy`) and intercepts the click to run
+ * the directional view transition via `navigate()`. Canonical paths
+ * (not `#` hashes) mean each route is a separate crawlable URL, so
+ * Google can index all four pages as distinct documents.
+ *
+ * Respects modifier keys so Cmd/Ctrl-click still opens in a new tab,
+ * which is what users expect from a real link.
  */
 export function SiteLink({ to, children, className, ...rest }: SiteLinkProps) {
   return (
     <a
-      href={`#${to}`}
+      href={pathFromPage(to)}
       className={className}
       onClick={(e) => handleSiteLinkClick(e, to)}
       {...rest}

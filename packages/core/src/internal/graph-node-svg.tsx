@@ -1,8 +1,9 @@
-import type { NodeKind, ParagraphId } from '../types.js';
-import type { GraphLayout, Position } from './graph-layout.js';
+import type { ReactNode } from 'react';
+import type { GraphItem, NodeKind, ParagraphId } from '../types.js';
+import type { ChainSet, GraphLayout, Position } from './graph-layout.js';
 import { stationRadius } from './graph-layout.js';
 import type { HoverState } from '../primitives/context.js';
-import type { ChainSet } from '../primitives/Graph.js';
+import type { RenderNodeContext } from '../primitives/Graph.js';
 
 /**
  * Per-kind node rendering for the Graph SVG. Five geometric kinds share
@@ -26,6 +27,8 @@ export interface NodesProps {
   onClick: (paraId: ParagraphId) => void;
   onHover: (state: HoverState | null) => void;
   onHoverNode: (paraId: ParagraphId | null) => void;
+  /** Optional per-node shape override forwarded from `<Graph>`. */
+  renderNode?: (item: GraphItem, ctx: RenderNodeContext) => ReactNode | null;
 }
 
 export function Nodes(props: NodesProps) {
@@ -41,6 +44,7 @@ export function Nodes(props: NodesProps) {
     onClick,
     onHover,
     onHoverNode,
+    renderNode,
   } = props;
   return (
     <g>
@@ -59,6 +63,7 @@ export function Nodes(props: NodesProps) {
           onClick={onClick}
           onHover={onHover}
           onHoverNode={onHoverNode}
+          {...(renderNode ? { renderNode } : {})}
         />
       ))}
     </g>
@@ -78,6 +83,7 @@ interface NodeProps {
   onClick: (paraId: ParagraphId) => void;
   onHover: (state: HoverState | null) => void;
   onHoverNode: (paraId: ParagraphId | null) => void;
+  renderNode?: (item: GraphItem, ctx: RenderNodeContext) => ReactNode | null;
 }
 
 function Node(props: NodeProps) {
@@ -94,6 +100,7 @@ function Node(props: NodeProps) {
     onClick,
     onHover,
     onHoverNode,
+    renderNode,
   } = props;
   const { item } = pos;
   const isStation = item.type === 'station';
@@ -105,6 +112,8 @@ function Node(props: NodeProps) {
   const chainAttr = inChain ? { 'data-mg-chain-connected': '' } : {};
   const typeAttr = { 'data-mg-type': item.type };
   const kindAttr = isStation ? { 'data-mg-kind': kind } : {};
+  const routeAttr = isStation && item.route ? { 'data-mg-route': item.route } : {};
+  const customShape = renderNode?.(item, { r, kind });
 
   return (
     <g
@@ -124,6 +133,7 @@ function Node(props: NodeProps) {
       }}
       {...typeAttr}
       {...kindAttr}
+      {...routeAttr}
       {...pinnedAttr}
       {...currentAttr}
       {...highlightAttr}
@@ -142,7 +152,11 @@ function Node(props: NodeProps) {
           className="mg-node-highlight-ring"
         />
       ) : null}
-      <NodeShape r={r} kind={isStation ? kind : 'paragraph'} />
+      {customShape !== null && customShape !== undefined ? (
+        customShape
+      ) : (
+        <NodeShape r={r} kind={isStation ? kind : 'paragraph'} />
+      )}
       {isStation && r >= 7 ? (
         <text className="mg-node-order" x={0} y={0}>
           {String(item.order + 1).padStart(2, '0')}

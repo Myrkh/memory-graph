@@ -1,4 +1,5 @@
 import { MemoryGraph, useMemoryGraphContext } from '@myrkh/memory-graph';
+import { ThemeToggleNode } from './ThemeToggleNode.js';
 
 /**
  * Panel + all chrome — rendered once at App level as a singleton sibling
@@ -52,5 +53,11 @@ function GraphOrEmpty() {
   const { derived, showPassages, state } = useMemoryGraphContext();
   const hasContent = derived.stationCount > 0 || (showPassages && state.passages.size > 0);
   if (!hasContent) return <MemoryGraph.Empty />;
-  return <MemoryGraph.Graph />;
+  return (
+    <MemoryGraph.Graph
+      renderNode={(item, ctx) =>
+        item.id === 'ui-theme-toggle' ? <ThemeToggleNode r={ctx.r} /> : null
+      }
+    />
+  );
 }

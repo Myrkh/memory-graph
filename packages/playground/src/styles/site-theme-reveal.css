@@ -1,0 +1,54 @@
+/* ============================================================================
+ * Theme transition · Stit'Claude "Eclipse Reveal".
+ *
+ * When the user toggles light/dark, the new theme is painted over the old
+ * and clipped to a circle that grows from the exact click position. The
+ * old theme stays static behind — the new one uncovers it like a passing
+ * eclipse. Pure CSS consumption of the View Transitions API; the React
+ * toggle sets `html[data-theme-transition]` + CSS variables `--theme-x` /
+ * `--theme-y` before calling `document.startViewTransition()`.
+ *
+ * Scoped by `data-theme-transition` so it NEVER collides with the
+ * directional page slide (`data-site-transition` in `site-transitions.css`).
+ * The two are mutually exclusive at runtime — a theme toggle doesn't
+ * change the route, and a route change doesn't toggle the theme.
+ *
+ * Fallback: browsers without View Transitions API → the React component
+ * falls back to a direct `setScheme()`, CSS-level scheme swap with the
+ * gentle `background-color / color / border-color` transitions defined in
+ * `site-theme-toggle.css` neighbourhood rules. No broken state.
+ * ==========================================================================*/
+
+@media not (prefers-reduced-motion: reduce) {
+  /* Old theme stays static — no default fade. Static backdrop. */
+  html[data-theme-transition]::view-transition-old(root) {
+    animation: none;
+    opacity: 1;
+    mix-blend-mode: normal;
+    z-index: 1;
+  }
+
+  /* New theme is a circle that grows from the click position. */
+  html[data-theme-transition]::view-transition-new(root) {
+    animation: site-theme-reveal 700ms var(--mg-ease-expo-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    mix-blend-mode: normal;
+    z-index: 2;
+  }
+
+  @keyframes site-theme-reveal {
+    from {
+      clip-path: circle(0 at var(--theme-x, 50%) var(--theme-y, 50%));
+    }
+    to {
+      clip-path: circle(150vmax at var(--theme-x, 50%) var(--theme-y, 50%));
+    }
+  }
+}
+
+/* Reduced motion · no reveal, no clip — instant swap. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme-transition]::view-transition-old(root),
+  html[data-theme-transition]::view-transition-new(root) {
+    animation: none;
+  }
+}

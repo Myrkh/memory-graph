@@ -10,7 +10,6 @@ import {
   type Ref,
 } from 'react';
 import { detectScope } from '../internal/annotation-dom.js';
-import { useZoneAnnotations } from '../hooks/useZoneAnnotations.js';
 import { useMemoryGraphContext } from './context.js';
 
 export interface ZoneProps {
@@ -41,7 +40,6 @@ export const Zone = forwardRef<HTMLElement, ZoneProps>(function Zone(
     setHoveredNode,
     hoveredAnnotationId,
     setHoveredAnnotation,
-    flashAnnotationId,
     state,
     open,
     linkingMode,
@@ -111,19 +109,9 @@ export const Zone = forwardRef<HTMLElement, ZoneProps>(function Zone(
     };
   }, []);
 
-  /* -- Uniform annotation rendering (delegated to hook) --------------
-   *
-   * Handles three imperative DOM concerns for ALL `[data-mg-id]`
-   * descendants: (1) wrap text-scope ranges in `<mark>`, (2) stamp
-   * block-scope elements with `data-mg-annotated="block"`, (3) toggle
-   * `data-mg-flash` and `data-mg-link-counterpart`. No Paragraph wrapper
-   * required — same treatment in a raw `<aside>` as in a `<p>`.
-   */
-  useZoneAnnotations(localRef, {
-    annotations: state.annotations,
-    flashAnnotationId,
-    hoveredAnnotationId,
-  });
+  /* -- Annotation rendering lives in `<Root>` so it works site-wide,
+   * not just inside a `<Zone>`. See `useZoneAnnotations` invocation
+   * in Root. */
 
   /* -- Mirror hoveredNodeId onto the matching paragraph's DOM --------- */
 

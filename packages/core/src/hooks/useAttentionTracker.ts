@@ -15,7 +15,13 @@ export interface UseAttentionTrackerOptions {
    * or holds focus long enough (focus strategy). Every strategy ultimately
    * converges on this single callback.
    */
-  onCommit: (paraId: ParagraphId, dwellMs: number, textContent: string, kind?: NodeKind) => void;
+  onCommit: (
+    paraId: ParagraphId,
+    dwellMs: number,
+    textContent: string,
+    kind?: NodeKind,
+    route?: string,
+  ) => void;
   /** Default dwell for hover strategy, overridable per-element via `data-mg-dwell`. Default 1500. */
   hoverDwellMs?: number;
   /** Default dwell for focus strategy, overridable per-element via `data-mg-dwell`. Default 1500. */
@@ -43,6 +49,14 @@ export interface UseAttentionTrackerOptions {
    *   per element for total control over graph geometry.
    */
   kindInference?: KindInference;
+  /**
+   * Abstract "route" bucket stamped on every committed node — whatever
+   * the consumer passes via `<MemoryGraph.Root route="…">`. Agnostic of
+   * any routing library (URL path, tab id, doc id, mode name…). Drives
+   * the 2D column layout in `<Graph>` when two or more unique routes are
+   * present in state.
+   */
+  route?: string;
 }
 
 export interface UseAttentionTrackerReturn {
@@ -79,35 +93,44 @@ export function useAttentionTracker(
     focusDwellMs = DEFAULT_FOCUS_DWELL_MS,
     strategyInference = 'smart',
     kindInference = 'smart',
+    route,
   } = options;
 
-  const { currentParaId } = useViewportStrategy(container, {
+  const viewportOpts = {
     config,
     onCommit,
     inference: strategyInference,
     kindInference,
-  });
-
-  useHoverStrategy(container, {
+    ...(route !== undefined ? { route } : {}),
+  };
+  const hoverOpts = {
     triggerDwellMs: hoverDwellMs,
     commitDwellMs: config.DWELL_MS,
     onCommit,
     inference: strategyInference,
     kindInference,
-  });
-  useClickStrategy(container, {
+    ...(route !== undefined ? { route } : {}),
+  };
+  const clickOpts = {
     commitDwellMs: config.DWELL_MS,
     onCommit,
     inference: strategyInference,
     kindInference,
-  });
-  useFocusStrategy(container, {
+    ...(route !== undefined ? { route } : {}),
+  };
+  const focusOpts = {
     triggerDwellMs: focusDwellMs,
     commitDwellMs: config.DWELL_MS,
     onCommit,
     inference: strategyInference,
     kindInference,
-  });
+    ...(route !== undefined ? { route } : {}),
+  };
+
+  const { currentParaId } = useViewportStrategy(container, viewportOpts);
+  useHoverStrategy(container, hoverOpts);
+  useClickStrategy(container, clickOpts);
+  useFocusStrategy(container, focusOpts);
 
   return { currentParaId };
 }

@@ -73,6 +73,14 @@ export interface Node {
   extract: string;
   /** Visual kind — drives the graph shape. Defaults to `paragraph` when omitted. */
   kind?: NodeKind;
+  /**
+   * Abstract "route" bucket the node belongs to — whatever the consumer
+   * passes via `<MemoryGraph.Root route="…">` at commit time. Agnostic of
+   * any routing library: can be a URL path, a tab id, a document id, a
+   * mode name, anything. Drives the 2D column layout in the graph when
+   * two or more unique routes are present in state.
+   */
+  route?: string;
 }
 
 /**
