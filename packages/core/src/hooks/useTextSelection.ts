@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, useRef } from 'react';
 import { resolveSelection, type ResolvedSelection } from '../internal/selection-offsets.js';
 
 export interface UseTextSelectionOptions {
@@ -16,12 +16,17 @@ export interface UseTextSelectionOptions {
 }
 
 /**
- * Observes text selection inside `zoneRef.current` and emits a resolved
- * offset pair on every qualifying mouseup / keyup. Cross-paragraph and
- * short selections are rejected (spec §03 acceptance criteria).
+ * Observes text selection inside `zone` and emits a resolved offset pair on
+ * every qualifying mouseup / keyup. Cross-paragraph and short selections are
+ * rejected (spec §03 acceptance criteria).
+ *
+ * Accepts the zone as a live element (not a ref) so the effect re-subscribes
+ * when the zone mounts/unmounts. When `zone` is `null`, falls back to
+ * `document.body` — text selection still works, scoped by `[data-mg-id]`
+ * ancestry inside `resolveSelection`.
  */
 export function useTextSelection(
-  zoneRef: RefObject<HTMLElement | null>,
+  zone: HTMLElement | null,
   options: UseTextSelectionOptions,
 ): void {
   const { minChars = 4 } = options;
@@ -29,19 +34,18 @@ export function useTextSelection(
   onSelectRef.current = options.onSelect;
 
   useEffect(() => {
-    const zone = zoneRef.current;
-    if (!zone) return;
+    const root = zone ?? (typeof document !== 'undefined' ? document.body : null);
+    if (!root) return;
 
     const check = (): void => {
       const sel = typeof window !== 'undefined' ? window.getSelection() : null;
-      const resolved = resolveSelection(sel, { zone, minChars });
+      const resolved = resolveSelection(sel, { zone: root, minChars });
       onSelectRef.current(resolved);
     };
 
     const onMouseUp = (e: MouseEvent): void => {
       const target = e.target;
-      if (!(target instanceof Node) || !zone.contains(target)) return;
-      // Let the browser finalise the selection before reading it.
+      if (!(target instanceof Node) || !root.contains(target)) return;
       window.setTimeout(check, 0);
     };
 
@@ -50,7 +54,6 @@ export function useTextSelection(
         onSelectRef.current(null);
         return;
       }
-      // Shift-arrow-keys / Cmd-A selections.
       if (e.shiftKey || (e.metaKey && e.key.toLowerCase() === 'a')) check();
     };
 
@@ -67,7 +70,7 @@ export function useTextSelection(
       document.removeEventListener('keyup', onKeyUp);
       document.removeEventListener('selectionchange', onSelectionChange);
     };
-  }, [zoneRef, minChars]);
+  }, [zone, minChars]);
 }
 
 export type { ResolvedSelection } from '../internal/selection-offsets.js';

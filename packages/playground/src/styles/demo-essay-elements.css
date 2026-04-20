@@ -1,0 +1,257 @@
+/* ============================================================================
+ * Editorial typography — elements (quotes, callouts, code, figures, lists).
+ * Companion to demo-essay.css. Same house rules: tokens only, hairlines,
+ * tabular nums, no decorative asset.
+ * ==========================================================================*/
+
+/* -- Pull-quotes ------------------------------------------------------- */
+
+.demo-quote {
+  margin: clamp(28px, 4vw, 44px) 0;
+  padding: 8px 0 8px 22px;
+  border-left: 2px solid var(--mg-accent);
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(20px, 2.4vw, 24px);
+  line-height: 1.32;
+  letter-spacing: -0.015em;
+  color: var(--mg-fg);
+  text-wrap: balance;
+}
+
+.demo-quote cite {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--mg-font-mono);
+  font-style: normal;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mg-fg-subtle);
+  font-weight: 500;
+}
+
+.demo-quote--pull {
+  text-align: center;
+  max-width: 22ch;
+  margin-inline: auto;
+  border-left: 0;
+  padding: clamp(20px, 3vw, 28px) 0;
+  border-block: 1px solid var(--mg-border);
+}
+
+/* -- Callout aside ---------------------------------------------------- */
+
+.demo-callout {
+  margin: clamp(28px, 4vw, 40px) 0;
+  padding: 18px 22px;
+  background: color-mix(in oklch, var(--mg-accent) 4%, var(--mg-surface));
+  border: 1px solid color-mix(in oklch, var(--mg-accent) 18%, var(--mg-border));
+  border-radius: var(--mg-radius-md, 10px);
+  font-family: var(--mg-font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--mg-fg-muted);
+}
+
+.demo-callout-kicker {
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--mg-accent);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.demo-callout-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px;
+  display: grid;
+  gap: 4px;
+}
+.demo-callout-list li {
+  padding-left: 0;
+  color: var(--mg-fg);
+}
+.demo-callout-list code {
+  color: var(--mg-accent);
+  font-family: inherit;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.demo-callout p {
+  margin: 0;
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--mg-fg-muted);
+}
+
+/* -- Code block ------------------------------------------------------- */
+
+.demo-code {
+  margin: clamp(28px, 4vw, 40px) 0;
+  padding: 18px 22px;
+  background: var(--mg-surface);
+  border: 1px solid var(--mg-border);
+  border-radius: var(--mg-radius-md, 10px);
+  font-family: var(--mg-font-mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--mg-fg);
+  overflow-x: auto;
+  font-variant-numeric: tabular-nums;
+}
+.demo-code code {
+  font-family: inherit;
+  font-size: inherit;
+  background: transparent;
+  padding: 0;
+}
+
+/* -- Figure + SVG ----------------------------------------------------- */
+
+.demo-figure {
+  margin: clamp(32px, 5vw, 48px) 0;
+  text-align: center;
+}
+.demo-figure svg {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+}
+.demo-figure-station {
+  fill: var(--mg-accent);
+  stroke: var(--mg-bg);
+  stroke-width: 2;
+}
+.demo-figure-passage {
+  fill: var(--mg-fg-subtle);
+  opacity: 0.35;
+}
+.demo-figure-label {
+  font-family: var(--mg-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  fill: var(--mg-fg-subtle);
+  text-anchor: middle;
+  font-weight: 600;
+}
+.demo-figure figcaption {
+  margin-top: 14px;
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--mg-fg-muted);
+  max-width: 48ch;
+  margin-inline: auto;
+  text-wrap: pretty;
+}
+
+/* -- Essay lists ------------------------------------------------------ */
+
+.demo-list {
+  margin: clamp(18px, 2.5vw, 28px) 0;
+  padding-left: 0;
+  counter-reset: demo-list;
+  list-style: none;
+}
+
+.demo-list--numbered li {
+  counter-increment: demo-list;
+  position: relative;
+  padding: 10px 0 10px 44px;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--mg-fg);
+  border-top: 1px solid var(--mg-border);
+  text-wrap: pretty;
+}
+.demo-list--numbered li:last-child {
+  border-bottom: 1px solid var(--mg-border);
+}
+.demo-list--numbered li::before {
+  content: counter(demo-list, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 12px;
+  font-family: var(--mg-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--mg-accent);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.demo-list--numbered strong {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  color: var(--mg-fg);
+}
+
+/* -- Strategy samples (§8 live demo) ---------------------------------- */
+
+.demo-strategies {
+  margin: clamp(24px, 3vw, 36px) 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.demo-strategy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 22px;
+  background: var(--mg-surface);
+  border: 1px solid var(--mg-border);
+  border-radius: var(--mg-radius-md, 10px);
+  color: var(--mg-fg);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    background var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+.demo-strategy:hover,
+.demo-strategy:focus-within {
+  border-color: var(--mg-accent);
+  background: color-mix(in oklch, var(--mg-accent) 4%, var(--mg-surface));
+}
+
+.demo-strategy-kicker {
+  font-family: var(--mg-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mg-accent);
+  font-weight: 600;
+}
+
+.demo-strategy-label {
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.demo-strategy input {
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: 15px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--mg-border);
+  padding: 4px 0;
+  color: var(--mg-fg);
+  outline: none;
+  transition: border-color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+.demo-strategy input:focus {
+  border-color: var(--mg-accent);
+}

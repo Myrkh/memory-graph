@@ -4,15 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "$npm_execpath --filter @stitclaude/memory-graph build",
+    "predev": "$npm_execpath --filter @myrkh/memory-graph build",
     "dev": "vite",
-    "prebuild": "$npm_execpath --filter @stitclaude/memory-graph build",
+    "prebuild": "$npm_execpath --filter @myrkh/memory-graph build",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@stitclaude/memory-graph": "workspace:*",
+    "@myrkh/memory-graph": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

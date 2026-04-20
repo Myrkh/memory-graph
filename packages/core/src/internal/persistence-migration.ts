@@ -9,7 +9,7 @@
 
 import { CURRENT_SCHEMA_VERSION, type Annotation, type SerializedGraph } from '../types.js';
 
-const WARN_PREFIX = '[@stitclaude/memory-graph]';
+const WARN_PREFIX = '[@myrkh/memory-graph]';
 
 /**
  * Parse a raw localStorage payload into a current-shape {@link SerializedGraph}.

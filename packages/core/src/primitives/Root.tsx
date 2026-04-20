@@ -7,6 +7,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react';
+
 import {
   DEFAULT_CONFIG,
   type AnnotationId,
@@ -75,14 +76,19 @@ export function Root(props: RootProps) {
     [configOverrides, storageKey],
   );
 
-  const zoneRef = useRef<HTMLElement | null>(null);
+  /**
+   * Live `<Zone>` element (state, not ref) — lets observer hooks re-run when
+   * the zone mounts/unmounts under a persistent Root (Provider-at-root).
+   * `null` when no `<Zone>` is mounted; consumers fall back to `document.body`.
+   */
+  const [zoneElement, setZoneElement] = useState<HTMLElement | null>(null);
 
   const { state, previousStationId, showPassages, actions, derived } =
     useMemoryGraphState(config);
 
   const { exportJson, clearPersisted } = usePersistence(state, storageKey, actions.restore);
 
-  const { currentParaId } = useAttentionTracker(zoneRef, {
+  const { currentParaId } = useAttentionTracker(zoneElement, {
     config,
     onCommit: actions.commit,
   });
@@ -211,7 +217,8 @@ export function Root(props: RootProps) {
       derived,
       actions,
       currentParaId,
-      zoneRef,
+      zoneElement,
+      setZoneElement,
       exportJson,
       clearPersisted,
       open,
@@ -243,6 +250,8 @@ export function Root(props: RootProps) {
       derived,
       actions,
       currentParaId,
+      zoneElement,
+      setZoneElement,
       exportJson,
       clearPersisted,
       open,

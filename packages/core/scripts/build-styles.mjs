@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Build step for @stitclaude/memory-graph CSS.
+ * Build step for @myrkh/memory-graph CSS.
  *
  * Reads `src/styles/base.css` (the @import manifest), inlines each referenced
  * module, and writes a single `dist/styles/base.css`. Copies every theme file
@@ -73,7 +73,7 @@ async function main() {
 
   const bundled = await inlineImports(join(SRC_STYLES, 'base.css'), new Set());
   const header =
-    '/* @stitclaude/memory-graph · base.css — generated, do not edit. */\n\n';
+    '/* @myrkh/memory-graph · base.css — generated, do not edit. */\n\n';
   await writeFile(join(DIST_STYLES, 'base.css'), header + bundled);
 
   await copyThemes();

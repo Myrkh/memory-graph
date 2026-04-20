@@ -104,6 +104,50 @@
   }
 }
 
+/* ============================================================================
+ * Block-scope annotation — applied on the `[data-mg-id]` element itself
+ * when the user's selection covered the whole card (Cmd+A / triple-click
+ * / drag through the entire block). Signals "I annotated this block as a
+ * whole" without flooding the card with inline underlines.
+ *
+ * Visual grammar is the same coral family as the inline mark:
+ *   - inset left stripe (instead of the inline underline)
+ *   - subtle tint (same color-mix formula)
+ *   - hover deepens the tint (mirrors .mg-annotation:hover)
+ * So the two scopes feel like variants of one voice, not two systems.
+ * ==========================================================================*/
+
+[data-mg-id][data-mg-annotated='block'] {
+  background: color-mix(in oklch, var(--mg-accent) 5%, transparent);
+  box-shadow: inset 2px 0 0 var(--mg-accent);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+[data-mg-id][data-mg-annotated='block']:hover {
+  background: color-mix(in oklch, var(--mg-accent) 12%, transparent);
+}
+[data-mg-id][data-mg-annotated='block'][data-mg-has-link]::after {
+  content: '›';
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-family: var(--mg-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--mg-accent);
+  opacity: 0.6;
+  line-height: 1;
+}
+[data-mg-id][data-mg-annotated='block'][data-mg-has-link] {
+  position: relative;
+}
+[data-mg-id][data-mg-annotated='block'][data-mg-link-counterpart] {
+  outline: 1px dashed color-mix(in oklch, var(--mg-accent) 55%, transparent);
+  outline-offset: 3px;
+  animation: mg-counterpart-appear 260ms var(--mg-ease-standard, ease-out) 200ms both;
+}
+
 /* Tooltip note variant — italic serif extension of the generic tooltip,
  * rendered when the hover payload carries an annotation instead of a node. */
 .mg-tooltip__note {

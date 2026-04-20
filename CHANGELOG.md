@@ -1,11 +1,171 @@
 # Changelog
 
-All notable changes to `@stitclaude/memory-graph` are documented in this file.
+All notable changes to `@myrkh/memory-graph` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] — Unreleased
+## [0.1.0] — 2026-04-20
+
+The inaugural public release. React + TypeScript port of the vanilla
+memory-graph component, plus five waves of post-port architecture work
+that make the library genuinely multi-DOM, multi-strategy, and uniform
+across element types.
+
+### Added — Provider-at-root pattern
+
+- `<MemoryGraph.Root>` is now a canonical Provider — wrap your app once,
+  put `[data-mg-id]` on any element anywhere in the tree. Matches the
+  shape of `<QueryClientProvider>`, `<TooltipProvider>`, Redux `<Provider>`.
+- `<Zone>` becomes optional. When mounted, it scopes the tracker +
+  bridges; when absent, both fall back to `document.body`, unlocking
+  zero-Zone usage for dashboards / Chrome extensions.
+- Context exposes `zoneElement` (state) + `setZoneElement` (callback
+  ref) instead of a mutable `zoneRef` — observers re-run on zone
+  mount/unmount cycles across route changes under a persistent Root.
+  Fixes stale IntersectionObserver bindings when pages swap.
+
+### Added — Multi-strategy capture
+
+- Four capture strategies routed by `data-mg-strategy`:
+  - `viewport` (default) — reading-mode dwell inside the attention band
+  - `hover` — pointer rests on the element for `data-mg-dwell` ms
+  - `click` — element is clicked (instant station promotion)
+  - `focus` — keyboard focus rests on the element for `data-mg-dwell` ms
+- Each strategy ships as a standalone hook —
+  `useViewportStrategy` / `useHoverStrategy` / `useClickStrategy` /
+  `useFocusStrategy` — composed by `useAttentionTracker`. All converge
+  on a single `onCommit(paraId, dwellMs, textContent, kind?)` callback.
+- `hover` and `focus` strategies commit with `DWELL_MS` synthetic dwell
+  (promotion guaranteed) — intent gestures are never passages.
+- Per-element `data-mg-dwell="N"` override for hover/focus trigger
+  thresholds. Delegation-based implementation, zero MutationObserver —
+  dynamic DOM elements just work.
+- Public: `NodeStrategy` type, four strategy hooks, all typed options
+  exported.
+
+### Added — Smart inference (`strategyInference: 'smart' | 'explicit'`)
+
+- `inferStrategy(el)` reads semantic HTML: `<button>`/`<a>` → click,
+  `<input>`/`<textarea>` → focus, rest → viewport. Zero-annotation
+  ergonomics for the "wrap the app once, mark anything" use-case.
+- `resolveStrategy(el, mode)` combines explicit `data-mg-strategy` with
+  the inference mode. Explicit attribute always wins.
+- Default mode is `'smart'`; switch to `'explicit'` for strict control.
+
+### Added — Rich-children annotations + uniform rendering
+
+- `<MemoryGraph.Paragraph>` accepts rich JSX children (not just strings).
+  Nested markup (`<em>`, `<code>`, `<ul>`…) fully supported — the
+  annotation renderer walks the tree and emits one `<mark>` per crossed
+  text chunk, all sharing the same `data-mg-annotation-id` so hover /
+  link / flash behave as a single visual unit.
+- All annotation rendering moved from `<Paragraph>` into `<Zone>` via a
+  new `useZoneAnnotations(zoneRef, …)` hook. Every `[data-mg-id]`
+  descendant — `<p>`, `<aside>`, `<figure>`, `<blockquote>`, raw
+  `<div>` — receives uniform annotation treatment. No primitive wrapper
+  required.
+- New `internal/annotation-dom.ts` module with pure DOM utilities:
+  `wrapAnnotationRange`, `applyBlockAnnotation`, `clearAnnotations`,
+  `detectScope`. TreeWalker-based wrapping handles nested elements
+  without `Range.surroundContents` throwing on element boundaries.
+- **SVG guard** — text nodes inside `<svg>` skip inline wrapping
+  gracefully (HTML `<mark>` can't live inside the SVG namespace). The
+  annotation still exists in state and surfaces in the Track + tooltip
+  + graph; only the inline visual is dropped. Block-scope annotations
+  on the `<figure>` itself always work.
+
+### Added — Text vs block annotation scope
+
+- New `AnnotationScope = 'text' | 'block'` type on `Annotation`.
+- `detectScope(el, offsetStart, offsetEnd)` auto-detects: selection
+  covering the full `textContent` (Cmd+A, triple-click, drag entire
+  block) → `block`; any partial selection → `text`.
+- Block scope renders as `data-mg-annotated="block"` on the element,
+  styled as a coral left stripe + subtle tint — same visual grammar as
+  the inline mark, at card level.
+- Text scope renders as inline `<mark class="mg-annotation">` on the
+  range, preserved from the original behavior.
+- Hover deepens the tint; link-counterpart outlines; flash animation —
+  all consistent between scopes.
+
+### Added — Node kinds (visual differentiation)
+
+- Five geometric kinds on the graph, selected via `data-mg-kind`:
+  - `paragraph` (default) — circle
+  - `heading` — concentric ring
+  - `kpi` — square (hard edges)
+  - `figure` — diamond (rotated square)
+  - `code` — rounded square
+- Smart inference from tagName: h1-h6 → `heading`, `<figure>`/`<img>` →
+  `figure`, `<pre>` → `code`. `kpi` requires explicit opt-in.
+- `<NodeRing>` mirrors the shape geometry so pinned / hover /
+  highlight outlines read as the same coral signature across every kind.
+- All existing effects (pulse current, pinned ring, chain dimming,
+  order label) are preserved on every kind — zero regression.
+- Reducer backfills `kind` on re-commit for nodes persisted before this
+  release, so upgrading consumers don't need to `clearPersisted()`.
+- Public: `NodeKind`, `KindInference`, `inferKind`, `resolveKind`.
+
+### Added — Data model & types
+
+- `ParagraphId`, `Node` (with `kind?`), `Passage`, `Edge`, `EdgeKind`,
+  `IntensityBucket`, `GraphState`, `SerializedGraph`.
+- `Annotation` (with `scope?`), `AnnotationId`, `AnnotationScope`
+  (§Innovation 03).
+- `NodeStrategy`, `NodeKind`, `StrategyInference`, `KindInference`.
+- `MemoryGraphConfig` + `DEFAULT_CONFIG` (13 runtime constants
+  mirroring the vanilla reference line-for-line).
+- `StationItem`, `PassageItem`, `GraphItem` — renderable item contracts.
+- `CURRENT_SCHEMA_VERSION` (`2`) exported for consumers needing to
+  introspect persisted payloads.
+
+### Added — Hooks (public API)
+
+- `useMemoryGraphState(config)` — `useReducer`-based state machine.
+  Returns `{ state, actions, derived, showPassages, previousStationId }`.
+  Derived metrics: `stationCount`, `loopCount`, `totalMs`, `pinCount`,
+  `deepest`.
+- `usePersistence(state, storageKey, onRestore)` — localStorage
+  auto-save, forward schema migration, richer `exportJson(meta?)`,
+  `clearPersisted()`.
+- `useAttentionTracker(zoneElement, options)` — composer over the four
+  per-strategy hooks. Accepts a live `HTMLElement | null` (not a ref);
+  re-runs when the zone mounts / unmounts. Options: `config`,
+  `onCommit`, `hoverDwellMs`, `focusDwellMs`, `strategyInference`,
+  `kindInference`.
+- Four per-strategy hooks: `useViewportStrategy`, `useHoverStrategy`,
+  `useClickStrategy`, `useFocusStrategy`. Use these directly for
+  granular control.
+- `useZoneAnnotations(zoneRef, options)` — imperative annotation
+  renderer (render marks, flash, counterpart outline). Used internally
+  by `<Zone>`.
+- `useMemoryGraphHover()` — bidirectional hover state (§Innovation 02).
+- `useTextSelection(zone, options)` — resolves live
+  `window.getSelection()` into paragraph-scoped character offsets.
+  Rejects cross-paragraph and sub-4-char selections.
+- `useFocusTrap(ref, active)` — focus trap for the panel, restores the
+  previously focused element on cleanup.
+- `useMemoryGraphContext()` — advanced escape hatch exposing the full
+  context value for consumers composing their own primitives.
+
+### Added — Primitives
+
+Twenty-five composable primitives exported via named exports and the
+`MemoryGraph.*` namespace:
+
+| Category | Primitives |
+|---|---|
+| Root + zone | `Root`, `Zone`, `Paragraph` |
+| Handle + backdrop | `Handle`, `Backdrop` |
+| Panel shell | `Panel`, `Head`, `TitleRow`, `Title`, `CloseButton` |
+| Panel content | `Stats`, `DeepestIndicator`, `Empty`, `Graph`, `IntensitySparkline` |
+| Footer | `Footer`, `FooterGroup`, `ClearButton`, `ExportButton`, `PassagesToggle` |
+| Annotations | `SelectionToolbar`, `NoteEditor`, `LinkReveal` |
+| Track (§Innovation 04 polish) | `AnnotationsTrack`, `AnnotationsTrackToggle` |
+| Feedback | `PinToast`, `Tooltip`, `KeyboardShortcuts` |
+
+### Added — Styles & theming
 
 The inaugural release. A full React + TypeScript port of the vanilla
 `memory-graph` reference component with four innovations on top (see §Waves
@@ -193,4 +353,4 @@ Twenty-four composable primitives exported via named exports and the
 - Respect `prefers-reduced-motion` as a proxy for "no haptics/audio either"
   when those channels are later added.
 
-[Unreleased]: https://github.com/Myrkh/memory-graph
+[0.1.0]: https://github.com/Myrkh/memory-graph/releases/tag/v0.1.0

@@ -25,19 +25,36 @@
   stroke-linecap: round;
 }
 
-/* Nodes ------------------------------------------------------------------ */
+/* Nodes ------------------------------------------------------------------
+ *
+ * Five geometric kinds share the same accent/stroke grammar — fill coral,
+ * stroke with page bg so nodes punch cleanly against both light and dark
+ * themes. The kind (circle / square / rounded-square / diamond / concentric
+ * circle) is drawn by `<NodeShape>`; CSS only supplies fill + stroke + the
+ * `r` transition that animates dwell-driven sizing.
+ * ----------------------------------------------------------------------- */
 
 .mg-svg .mg-node { cursor: pointer; }
 
-.mg-svg .mg-node-circle {
+.mg-svg .mg-node-shape {
   fill: var(--mg-accent);
   stroke: var(--mg-bg);
   stroke-width: 2;
   transition: r var(--mg-duration-normal) var(--mg-ease-spring-snappy);
 }
 
-.mg-svg .mg-node[data-mg-type='passage'] .mg-node-circle {
+.mg-svg .mg-node[data-mg-type='passage'] .mg-node-shape {
   fill: var(--mg-fg-subtle);
+  opacity: 0.35;
+}
+
+/* Heading kind · thin concentric halo behind the disc — signals landmark
+ * without adding a second colour. Same coral, lower opacity, painted behind
+ * the main shape so the ring reads as a "quiet" extension of it. */
+.mg-svg .mg-node-shape-halo {
+  fill: none;
+  stroke: var(--mg-accent);
+  stroke-width: 1;
   opacity: 0.35;
 }
 
@@ -49,7 +66,8 @@
 }
 
 /* Innovation 02 · bidirectional hover — dashed ring on the node whose
- * paragraph is currently hovered in the article (spec §02). */
+ * paragraph is currently hovered in the article (spec §02). Works on any
+ * kind because `<NodeRing>` matches the shape geometry. */
 .mg-svg .mg-node[data-mg-highlight] .mg-node-highlight-ring {
   fill: none;
   stroke: var(--mg-accent);
@@ -99,7 +117,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mg-svg .mg-node-circle { transition: none; }
+  .mg-svg .mg-node-shape { transition: none; }
   .mg-svg .mg-node[data-mg-current] .mg-node-pulse { animation: none; }
 }
 

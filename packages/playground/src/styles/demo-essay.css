@@ -1,0 +1,129 @@
+/* ============================================================================
+ * Editorial typography — base (hero, rules, sections, paragraphs, sign-off).
+ * House: Editorial · references: Stripe long-form docs, Robin Sloan essays,
+ * NYT Magazine. Rules Stit'Claude signature: 60-66ch measure, tabular nums,
+ * hairline borders, text-wrap balance/pretty, zero decorative asset.
+ * Element-level styles (quotes, callouts, code, figures, lists) live in
+ * demo-essay-elements.css.
+ * ==========================================================================*/
+
+.demo-essay {
+  max-width: 640px;
+  margin: 0 auto;
+  color: var(--mg-fg);
+  font-family: var(--mg-font-serif);
+}
+
+/* -- Hero -------------------------------------------------------------- */
+
+.demo-hero {
+  text-align: center;
+  padding-bottom: clamp(32px, 5vw, 56px);
+}
+
+.demo-byline {
+  margin-top: 24px;
+  font-family: var(--mg-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mg-fg-subtle);
+  font-variant-numeric: tabular-nums;
+}
+.demo-byline strong {
+  color: var(--mg-fg-muted);
+  font-weight: 600;
+}
+
+.demo-aside-slot {
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+}
+
+/* -- Section rule (hairline with § ornament) --------------------------- */
+
+.demo-rule {
+  border: 0;
+  height: 1px;
+  background: var(--mg-border);
+  margin: clamp(40px, 6vw, 72px) auto;
+  max-width: 120px;
+}
+
+.demo-rule--ornate {
+  position: relative;
+  max-width: 40px;
+  background: transparent;
+  height: auto;
+  margin-top: clamp(48px, 8vw, 96px);
+}
+.demo-rule--ornate::before {
+  content: '§';
+  display: block;
+  text-align: center;
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--mg-accent);
+}
+
+/* -- Sections + titles ------------------------------------------------- */
+
+.demo-section {
+  margin-block: clamp(48px, 7vw, 80px);
+}
+
+.demo-section-title {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(26px, 3.4vw, 34px);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--mg-fg);
+  margin: 0 0 clamp(20px, 2.5vw, 32px);
+  text-wrap: balance;
+  max-width: 22ch;
+}
+
+.demo-section-num {
+  display: inline-block;
+  margin-right: 10px;
+  font-family: var(--mg-font-mono);
+  font-style: normal;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--mg-accent);
+  vertical-align: 0.3em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* -- Body paragraphs (already styled by .demo-p — extend here) -------- */
+
+.demo-essay .demo-p {
+  text-wrap: pretty;
+  margin: 0 0 clamp(18px, 2vw, 24px);
+}
+.demo-essay .demo-p:last-child {
+  margin-bottom: 0;
+}
+
+/* -- Sign-off --------------------------------------------------------- */
+
+.demo-signoff {
+  text-align: center;
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--mg-fg-subtle);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+/* -- Reduced motion --------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-rule--ornate::before { transition: none; }
+}

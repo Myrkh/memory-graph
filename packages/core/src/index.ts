@@ -18,6 +18,33 @@ export type {
   UseAttentionTrackerReturn,
 } from './hooks/useAttentionTracker.js';
 
+export { useViewportStrategy } from './hooks/useViewportStrategy.js';
+export type {
+  UseViewportStrategyOptions,
+  UseViewportStrategyReturn,
+} from './hooks/useViewportStrategy.js';
+
+export { useHoverStrategy } from './hooks/useHoverStrategy.js';
+export type { UseHoverStrategyOptions } from './hooks/useHoverStrategy.js';
+
+export { useClickStrategy } from './hooks/useClickStrategy.js';
+export type { UseClickStrategyOptions } from './hooks/useClickStrategy.js';
+
+export { useFocusStrategy } from './hooks/useFocusStrategy.js';
+export type { UseFocusStrategyOptions } from './hooks/useFocusStrategy.js';
+
+export {
+  inferStrategy,
+  resolveStrategy,
+} from './internal/strategy-inference.js';
+export type { StrategyInference } from './internal/strategy-inference.js';
+
+export {
+  inferKind,
+  resolveKind,
+} from './internal/kind-inference.js';
+export type { KindInference } from './internal/kind-inference.js';
+
 export { useMemoryGraphHover } from './hooks/useMemoryGraphHover.js';
 export type { UseMemoryGraphHoverReturn } from './hooks/useMemoryGraphHover.js';
 

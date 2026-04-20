@@ -38,7 +38,7 @@ importers:
 
   packages/playground:
     dependencies:
-      '@stitclaude/memory-graph':
+      '@myrkh/memory-graph':
         specifier: workspace:*
         version: link:../core
       react:

@@ -1,12 +1,16 @@
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
   type ElementType,
+  type MutableRefObject,
   type ReactNode,
   type Ref,
 } from 'react';
+import { detectScope } from '../internal/annotation-dom.js';
+import { useZoneAnnotations } from '../hooks/useZoneAnnotations.js';
 import { useMemoryGraphContext } from './context.js';
 
 export interface ZoneProps {
@@ -18,12 +22,12 @@ export interface ZoneProps {
 
 /**
  * Scroll container whose descendant `[data-mg-id]` elements are observed.
- * Must be rendered inside `<MemoryGraph.Root>`. Ref is shared with the root
- * context so the attention tracker knows what to observe.
+ * Registers itself on context via a callback ref (`setZoneElement`), so
+ * observer hooks re-run across mount/unmount cycles when Root lives at
+ * app-level and pages swap the Zone in and out of the tree.
  *
  * Also wires the article-to-graph side of Innovation 02 (bidirectional
- * hover): a delegated mouseover/mouseout listener resolves the nearest
- * `[data-mg-id]` ancestor and updates `hoveredNodeId` on context.
+ * hover) + annotation hover bridge + linking-mode click handler.
  */
 export const Zone = forwardRef<HTMLElement, ZoneProps>(function Zone(
   props,
@@ -31,12 +35,13 @@ export const Zone = forwardRef<HTMLElement, ZoneProps>(function Zone(
 ) {
   const { as: Tag = 'article', className, children } = props;
   const {
-    zoneRef,
+    setZoneElement,
     currentParaId,
     hoveredNodeId,
     setHoveredNode,
     hoveredAnnotationId,
     setHoveredAnnotation,
+    flashAnnotationId,
     state,
     open,
     linkingMode,
@@ -45,10 +50,17 @@ export const Zone = forwardRef<HTMLElement, ZoneProps>(function Zone(
   } = useMemoryGraphContext();
 
   const localRef = useRef<HTMLElement | null>(null);
-  const setRef = (node: HTMLElement | null): void => {
-    localRef.current = node;
-    (zoneRef as unknown as { current: HTMLElement | null }).current = node;
-  };
+
+  const combinedRef = useCallback(
+    (node: HTMLElement | null) => {
+      localRef.current = node;
+      setZoneElement(node);
+      if (typeof forwardedRef === 'function') forwardedRef(node);
+      else if (forwardedRef)
+        (forwardedRef as MutableRefObject<HTMLElement | null>).current = node;
+    },
+    [setZoneElement, forwardedRef],
+  );
 
   useImperativeHandle<HTMLElement | null, HTMLElement | null>(
     forwardedRef as Ref<HTMLElement | null>,
@@ -98,6 +110,20 @@ export const Zone = forwardRef<HTMLElement, ZoneProps>(function Zone(
       zone.removeEventListener('mouseout', onOut);
     };
   }, []);
+
+  /* -- Uniform annotation rendering (delegated to hook) --------------
+   *
+   * Handles three imperative DOM concerns for ALL `[data-mg-id]`
+   * descendants: (1) wrap text-scope ranges in `<mark>`, (2) stamp
+   * block-scope elements with `data-mg-annotated="block"`, (3) toggle
+   * `data-mg-flash` and `data-mg-link-counterpart`. No Paragraph wrapper
+   * required — same treatment in a raw `<aside>` as in a `<p>`.
+   */
+  useZoneAnnotations(localRef, {
+    annotations: state.annotations,
+    flashAnnotationId,
+    hoveredAnnotationId,
+  });
 
   /* -- Mirror hoveredNodeId onto the matching paragraph's DOM --------- */
 
@@ -153,26 +179,6 @@ export const Zone = forwardRef<HTMLElement, ZoneProps>(function Zone(
     };
   }, []);
 
-  /* -- Counterpart mark marking via imperative DOM (same pattern as
-   * data-mg-highlight for bidirectional node hover). */
-  useEffect(() => {
-    const zone = localRef.current;
-    if (!zone) return;
-    const previous = zone.querySelectorAll<HTMLElement>(
-      '[data-mg-annotation-id][data-mg-link-counterpart]',
-    );
-    previous.forEach((el) => el.removeAttribute('data-mg-link-counterpart'));
-    if (!hoveredAnnotationId) return;
-    const ann = state.annotations.get(hoveredAnnotationId);
-    if (!ann) return;
-    for (const linkedId of ann.links) {
-      const el = zone.querySelector<HTMLElement>(
-        `[data-mg-annotation-id="${CSS.escape(linkedId)}"]`,
-      );
-      el?.setAttribute('data-mg-link-counterpart', '');
-    }
-  }, [hoveredAnnotationId, state.annotations]);
-
   /* -- Linking mode · click annotation to complete the link ----------- */
 
   const linkingModeRef = useRef(linkingMode);
@@ -196,14 +202,20 @@ export const Zone = forwardRef<HTMLElement, ZoneProps>(function Zone(
       if (!targetId) return;
       e.preventDefault();
       e.stopPropagation();
+      const { pendingSelection } = active;
       actionsRef.current.addAnnotationWithLink(
         {
-          paraId: active.pendingSelection.paraId,
+          paraId: pendingSelection.paraId,
           selection: {
-            text: active.pendingSelection.text,
-            offsetStart: active.pendingSelection.offsetStart,
-            offsetEnd: active.pendingSelection.offsetEnd,
+            text: pendingSelection.text,
+            offsetStart: pendingSelection.offsetStart,
+            offsetEnd: pendingSelection.offsetEnd,
           },
+          scope: detectScope(
+            pendingSelection.paraElement,
+            pendingSelection.offsetStart,
+            pendingSelection.offsetEnd,
+          ),
         },
         targetId,
       );
@@ -218,7 +230,7 @@ export const Zone = forwardRef<HTMLElement, ZoneProps>(function Zone(
 
   return (
     <Tag
-      ref={setRef}
+      ref={combinedRef}
       className={className}
       data-mg-zone
       {...currentAttr}

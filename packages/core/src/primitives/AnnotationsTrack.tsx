@@ -30,7 +30,7 @@ export function AnnotationsTrack(props: AnnotationsTrackProps) {
     trackOpen,
     open,
     closePanel,
-    zoneRef,
+    zoneElement,
     triggerFlash,
     setHoveredAnnotation,
     setHoveredNode,
@@ -51,7 +51,8 @@ export function AnnotationsTrack(props: AnnotationsTrackProps) {
   const onJump = (paraId: ParagraphId): void => {
     closePanel();
     window.setTimeout(() => {
-      const el = zoneRef.current?.querySelector<HTMLElement>(
+      const root = zoneElement ?? document.body;
+      const el = root.querySelector<HTMLElement>(
         `[data-mg-id="${CSS.escape(paraId)}"]`,
       );
       if (!el) return;

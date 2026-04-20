@@ -1,7 +1,7 @@
 {
-  "name": "@stitclaude/memory-graph",
+  "name": "@myrkh/memory-graph",
   "version": "0.1.0",
-  "description": "Visualize reading trails as a node-link graph — React + TypeScript port of the vanilla memory-graph component",
+  "description": "Visualize reading attention as a node-link graph. Multi-DOM · multi-strategy · smart defaults. React + TypeScript.",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -15,11 +15,27 @@
     "./themes/stit-claude": "./dist/styles/themes/stit-claude.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "sideEffects": [
     "**/*.css"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Myrkh/memory-graph.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/Myrkh/memory-graph#readme",
+  "bugs": {
+    "url": "https://github.com/Myrkh/memory-graph/issues"
+  },
+  "author": "Yoann Dumont",
+  "license": "MIT",
   "scripts": {
     "build": "tsup && node scripts/build-styles.mjs",
     "build:styles": "node scripts/build-styles.mjs",
@@ -27,7 +43,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm run build && pnpm run test"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -44,11 +61,15 @@
   },
   "keywords": [
     "react",
+    "reading",
+    "attention",
     "graph",
     "visualization",
-    "reading",
-    "trails",
-    "memory"
-  ],
-  "license": "MIT"
+    "annotations",
+    "dwell",
+    "observer",
+    "multi-dom",
+    "headless-ui",
+    "compound-components"
+  ]
 }

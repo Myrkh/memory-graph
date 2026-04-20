@@ -4,7 +4,7 @@
 
 **Visualize how readers move through your content — as a living node-link graph.**
 
-[![npm version](https://img.shields.io/npm/v/@stitclaude/memory-graph?style=flat-square&color=6366f1&label=npm)](https://www.npmjs.com/package/@stitclaude/memory-graph)
+[![npm version](https://img.shields.io/npm/v/@myrkh/memory-graph?style=flat-square&color=6366f1&label=npm)](https://www.npmjs.com/package/@myrkh/memory-graph)
 [![License: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4+-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18%2B%20%7C%2019-61dafb?style=flat-square&logo=react&logoColor=white)](https://react.dev/)
@@ -19,7 +19,7 @@
 
 <br />
 
-[**Live Demo**](https://github.com/Myrkh/memory-graph) · [**GitHub**](https://github.com/Myrkh/memory-graph) · [**Report a bug**](https://github.com/Myrkh/memory-graph/issues) · [**Request a feature**](https://github.com/Myrkh/memory-graph/issues)
+[**Live Demo**](https://memory-graph.vercel.app) · [**GitHub**](https://github.com/Myrkh/memory-graph) · [**Report a bug**](https://github.com/Myrkh/memory-graph/issues) · [**Request a feature**](https://github.com/Myrkh/memory-graph/issues)
 
 </div>
 
@@ -42,11 +42,11 @@ As a reader scrolls through your content, `memory-graph` silently observes them 
 ## 🚀 Installation
 
 ```bash
-npm install @stitclaude/memory-graph
+npm install @myrkh/memory-graph
 # or
-pnpm add @stitclaude/memory-graph
+pnpm add @myrkh/memory-graph
 # or
-yarn add @stitclaude/memory-graph
+yarn add @myrkh/memory-graph
 ```
 
 **Peer dependencies:** React ≥ 18 and ReactDOM ≥ 18 must already be in your project.
@@ -59,38 +59,29 @@ yarn add @stitclaude/memory-graph
 
 ```tsx
 // In your entry file (e.g. main.tsx)
-import '@stitclaude/memory-graph/styles';
+import '@myrkh/memory-graph/styles';
 
 // Optional — built-in theme with sane defaults
-import '@stitclaude/memory-graph/themes/stit-claude';
+import '@myrkh/memory-graph/themes/stit-claude';
 ```
 
-### 2. Wrap your content
+### 2. Wrap your app once
+
+`<MemoryGraph.Root>` is a **Provider**, the canonical pattern for stateful libs
+(same idea as `<QueryClientProvider>` or Radix's `<TooltipProvider>`). Mount it
+once at the root; mark the elements you want tracked anywhere inside with
+`data-mg-id`.
 
 ```tsx
-import { MemoryGraph } from '@stitclaude/memory-graph';
+import { MemoryGraph } from '@myrkh/memory-graph';
 
-export function Article() {
+export function App() {
   return (
-    <MemoryGraph.Root storageKey="mg:my-article">
+    <MemoryGraph.Root storageKey="mg:my-app">
+      <YourContent />
 
-      {/* The reading zone — paragraphs must have data-mg-id */}
-      <MemoryGraph.Zone>
-        {/* MemoryGraph.Paragraph renders <p data-mg-id="…"> for you;
-            pass plain string children (no nested React elements in v0.1). */}
-        <MemoryGraph.Paragraph id="intro">
-          Introduction…
-        </MemoryGraph.Paragraph>
-        <MemoryGraph.Paragraph id="section-1">
-          First section…
-        </MemoryGraph.Paragraph>
-        {/* ...more paragraphs */}
-      </MemoryGraph.Zone>
-
-      {/* Floating button to open the panel */}
+      {/* Panel + chrome singletons — mount once, anywhere below Root */}
       <MemoryGraph.Handle />
-
-      {/* The slide-out panel with the graph */}
       <MemoryGraph.Panel>
         <MemoryGraph.Head>
           <MemoryGraph.TitleRow>
@@ -101,10 +92,7 @@ export function Article() {
           <MemoryGraph.Stats />
           <MemoryGraph.DeepestIndicator />
         </MemoryGraph.Head>
-
-        {/* Choose Graph or Empty at the call site — see <GraphOrEmpty /> below. */}
         <GraphOrEmpty />
-
         <MemoryGraph.IntensitySparkline />
         <MemoryGraph.Footer>
           <MemoryGraph.FooterGroup>
@@ -117,7 +105,6 @@ export function Article() {
         </MemoryGraph.Footer>
       </MemoryGraph.Panel>
 
-      {/* Siblings of Panel — never nested inside it */}
       <MemoryGraph.AnnotationsTrack />
       <MemoryGraph.Backdrop />
       <MemoryGraph.Tooltip />
@@ -125,12 +112,10 @@ export function Article() {
       <MemoryGraph.SelectionToolbar />
       <MemoryGraph.LinkReveal />
       <MemoryGraph.KeyboardShortcuts />
-
     </MemoryGraph.Root>
   );
 }
 
-/** Decide between the SVG graph and the empty placeholder. */
 function GraphOrEmpty() {
   const { derived, showPassages, state } = useMemoryGraphContext();
   const hasContent =
@@ -138,6 +123,97 @@ function GraphOrEmpty() {
   return hasContent ? <MemoryGraph.Graph /> : <MemoryGraph.Empty />;
 }
 ```
+
+### 3. Mark anything, anywhere
+
+Any DOM element with `data-mg-id` is tracked. Zero wrapper required:
+
+```tsx
+<p data-mg-id="intro">Text that gets read…</p>            {/* viewport dwell  */}
+<h2 data-mg-id="s1">Section title</h2>                    {/* auto: heading   */}
+<button data-mg-id="tab-analytics">Analytics</button>     {/* auto: click     */}
+<input data-mg-id="search" />                             {/* auto: focus     */}
+<figure data-mg-id="fig-1"><img src="…" /></figure>       {/* auto: figure    */}
+<div data-mg-id="kpi-revenue"                             {/* explicit: KPI   */}
+     data-mg-kind="kpi"
+     data-mg-strategy="hover"
+     data-mg-dwell="1200">
+  $42k
+</div>
+```
+
+For content that needs pin/flash state plumbed to the DOM automatically, use
+the optional `<MemoryGraph.Paragraph>` primitive — accepts rich JSX children
+(nested `<em>`, `<code>`, `<ul>`…) and works with `as="aside" | "figure" | …`:
+
+```tsx
+<MemoryGraph.Paragraph as="aside" id="callout-1" className="callout">
+  <strong>Tip:</strong> annotate any part of this aside — inline or whole-card.
+</MemoryGraph.Paragraph>
+```
+
+### Optional: `<Zone>` for article-scoped tracking
+
+When you want observation scoped to a specific subtree (e.g. one essay on a
+larger page), wrap it in `<MemoryGraph.Zone>`. Without Zone, the tracker
+observes `document.body` — which is exactly what you want for dashboards,
+Chrome extensions, or single-article apps.
+
+---
+
+## 🎛️ Multi-strategy capture
+
+| strategy | when it fires | inferred from |
+|---|---|---|
+| `viewport` (default) | element centered in attention band for `DWELL_MS` | `<p>`, `<div>`, everything else |
+| `click` | element is clicked (synthetic dwell = `DWELL_MS`) | `<button>`, `<a>`, `[role="button"\|"link"\|"tab"]` |
+| `focus` | keyboard focus rests for `data-mg-dwell` ms | `<input>`, `<textarea>`, `<select>`, `[contenteditable]` |
+| `hover` | pointer rests for `data-mg-dwell` ms | explicit only |
+
+Override per element with `data-mg-strategy="…"`, or disable inference globally
+with `strategyInference: 'explicit'` on the tracker. Semantic HTML signals
+intent — the library just reads it.
+
+Hover, click and focus commit with `DWELL_MS` synthetic dwell, so they always
+promote to stations — intent gestures are not passages. Only viewport is
+dwell-dominated.
+
+---
+
+## 🔷 Node kinds (graph geometry)
+
+| kind | shape | inferred from |
+|---|---|---|
+| `paragraph` (default) | circle | `<p>`, everything else |
+| `heading` | concentric ring | `<h1>`–`<h6>`, `[role="heading"]` |
+| `figure` | diamond | `<figure>`, `<img>`, `<picture>`, `<video>` |
+| `code` | rounded square | `<pre>`, standalone block `<code>` |
+| `kpi` | square | **explicit only** (`data-mg-kind="kpi"`) |
+
+Every existing effect (pulse on centered, pinned ring, hover ring, chain
+highlighting, order label) works consistently across every kind — `<NodeRing>`
+mirrors the shape geometry so the coral signature reads as one voice on a
+square or a diamond as much as on a circle.
+
+---
+
+## ✍️ Annotations (uniform across every element)
+
+Select text anywhere below `<MemoryGraph.Root>` and the floating toolbar opens:
+Note, Pin, Link. Two scopes, auto-detected:
+
+- **Text scope** — partial selection → inline coral `<mark>` on the selected
+  range. Nested markup (`<code>`, `<em>`…) is handled by a TreeWalker that
+  emits one mark per text chunk, all sharing the same
+  `data-mg-annotation-id` so hover / link / flash behave as one.
+- **Block scope** — selection covering the full element (Cmd+A, triple-click,
+  drag entire block) → `data-mg-annotated="block"` on the element itself,
+  styled as a coral left stripe + subtle tint. Same visual grammar, card-level.
+
+Works the same in `<p>`, `<aside>`, `<figure>`, `<blockquote>`, raw `<div>` — no
+primitive wrapper required. SVG text gracefully skips inline wrapping (HTML
+`<mark>` can't live inside the SVG namespace); block-scope annotations on
+the enclosing `<figure>` always work.
 
 ---
 
@@ -149,7 +225,7 @@ function GraphOrEmpty() {
 |---|---|
 | `MemoryGraph.Root` | Context owner. Manages all state, wires hooks, provides context to descendants. |
 | `MemoryGraph.Zone` | Wraps your readable content. Observes `[data-mg-id]` descendants. |
-| `MemoryGraph.Paragraph` | Renders `<p data-mg-id="…">`, auto-applies pin/flash state attributes, wraps annotation ranges in `<mark>`. String children only in v0.1. |
+| `MemoryGraph.Paragraph` | Thin semantic wrapper — stamps `data-mg-*` attributes + plumbs pin/flash state. Accepts rich JSX children (nested `<em>`, `<code>`, lists). Optional; a raw `<p data-mg-id>` works just as well — annotation rendering is owned by `<Zone>`. |
 | `MemoryGraph.Handle` | Floating left-edge button that opens the panel. Carries `data-mg-armed` when ≥ 1 station exists. Variants: `permanent` · `ghost` · `none`. |
 | `MemoryGraph.Panel` | The slide-out graph panel container. |
 | `MemoryGraph.Head` | Panel header slot. |
@@ -183,13 +259,26 @@ For advanced use-cases, all core logic is available as standalone hooks.
 
 ```tsx
 import {
+  // Core state + persistence
   useMemoryGraphState,
   usePersistence,
+  useMemoryGraphContext,
+  // Tracking — composer + per-strategy hooks
   useAttentionTracker,
+  useViewportStrategy,
+  useHoverStrategy,
+  useClickStrategy,
+  useFocusStrategy,
+  // Hover + selection
   useMemoryGraphHover,
   useTextSelection,
-  useMemoryGraphContext,
-} from '@stitclaude/memory-graph';
+  useFocusTrap,
+  // Inference helpers
+  inferStrategy,
+  resolveStrategy,
+  inferKind,
+  resolveKind,
+} from '@myrkh/memory-graph';
 ```
 
 ### `useMemoryGraphState(config)`
@@ -207,18 +296,31 @@ const { state, actions, derived, showPassages, previousStationId } =
 // derived.deepest       — { id, node } of the most-dwelled station
 ```
 
-### `useAttentionTracker(containerRef, options)`
+### `useAttentionTracker(container, options)`
 
-Observes `[data-mg-id]` elements inside a container ref and emits dwell-time commits via `IntersectionObserver` + scroll (rAF-throttled) + `visibilitychange`. Faithfully ports the vanilla observation loop.
+Composes the four capture strategies (viewport · hover · click · focus) and
+routes every `[data-mg-id]` to the right observer based on its
+`data-mg-strategy` attribute (or smart inference). All strategies converge on
+`onCommit(paraId, dwellMs, textContent, kind?)`.
 
 ```tsx
-const { currentParaId } = useAttentionTracker(zoneRef, {
+const { currentParaId } = useAttentionTracker(zoneElement, {
   config,
-  onCommit: (paraId, dwellMs, textContent) => {
-    actions.commit(paraId, dwellMs, textContent);
-  },
+  onCommit: actions.commit,
+  strategyInference: 'smart',   // default
+  kindInference: 'smart',       // default
+  hoverDwellMs: 1500,
+  focusDwellMs: 1500,
 });
 ```
+
+Takes a live `HTMLElement | null` (not a ref) so observers re-run when the
+zone mounts / unmounts. When `container` is `null`, falls back to
+`document.body` — enables zero-Zone dashboards and Chrome extensions.
+
+Use the per-strategy hooks directly (`useViewportStrategy`, `useHoverStrategy`,
+`useClickStrategy`, `useFocusStrategy`) when you need finer control — e.g.
+viewport-only tracking without click side-effects.
 
 ### `usePersistence(state, storageKey, restore)`
 
@@ -302,7 +404,7 @@ the library reads a `--mg-*` token. You can import the built-in theme as a
 starting point and override any token:
 
 ```css
-@import '@stitclaude/memory-graph/themes/stit-claude';
+@import '@myrkh/memory-graph/themes/stit-claude';
 
 /* Override the tokens you want at the canonical theme selector */
 [data-mg-theme='stit-claude'] {
@@ -325,7 +427,7 @@ defaults at `:where(:root)` (zero specificity) so the component renders
 correctly with no theme file loaded:
 
 ```tsx
-import '@stitclaude/memory-graph/styles'; // base layout only, no opinionated palette
+import '@myrkh/memory-graph/styles'; // base layout only, no opinionated palette
 ```
 
 ---
@@ -401,7 +503,7 @@ The full graph is serializable as JSON via `ExportButton` or `usePersistence`.
 ```
 memory-graph/
 ├── packages/
-│   ├── core/          # @stitclaude/memory-graph — the library
+│   ├── core/          # @myrkh/memory-graph — the library
 │   │   ├── src/
 │   │   │   ├── hooks/        # useMemoryGraphState, useAttentionTracker, …
 │   │   │   ├── internal/     # reducer, graph layout, SVG rendering, …
@@ -430,7 +532,7 @@ pnpm dev
 pnpm build
 
 # Run tests
-pnpm --filter @stitclaude/memory-graph test
+pnpm --filter @myrkh/memory-graph test
 
 # Type-check all packages
 pnpm typecheck

@@ -49,7 +49,7 @@ export function KeyboardShortcuts(props: KeyboardShortcutsProps) {
     togglePanel,
     closePanel,
     currentParaId,
-    zoneRef,
+    zoneElement,
     state,
     actions,
     showToast,
@@ -77,7 +77,8 @@ export function KeyboardShortcuts(props: KeyboardShortcutsProps) {
       if (pinKey && lowerKey === pinKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
         if (!currentParaId) return;
         e.preventDefault();
-        const el = zoneRef.current?.querySelector<HTMLElement>(
+        const root = zoneElement ?? document.body;
+        const el = root.querySelector<HTMLElement>(
           `[data-mg-id="${CSS.escape(currentParaId)}"]`,
         );
         const text = el?.textContent ?? '';
@@ -104,7 +105,7 @@ export function KeyboardShortcuts(props: KeyboardShortcutsProps) {
     togglePanel,
     closePanel,
     currentParaId,
-    zoneRef,
+    zoneElement,
     state,
     actions,
     showToast,

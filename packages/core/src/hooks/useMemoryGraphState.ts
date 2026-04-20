@@ -2,9 +2,11 @@ import { useCallback, useMemo, useReducer, useRef } from 'react';
 import type {
   Annotation,
   AnnotationId,
+  AnnotationScope,
   GraphState,
   MemoryGraphConfig,
   Node,
+  NodeKind,
   ParagraphId,
   SerializedGraph,
 } from '../types.js';
@@ -23,6 +25,8 @@ export interface NewAnnotationInput {
   paraId: ParagraphId;
   selection: Annotation['selection'];
   note?: string | null;
+  /** Scope of the visual treatment (`text` inline vs `block` full-card). Defaults to `text`. */
+  scope?: AnnotationScope;
 }
 
 function generateAnnotationId(): AnnotationId {
@@ -32,8 +36,9 @@ function generateAnnotationId(): AnnotationId {
 }
 
 export interface MemoryGraphActions {
-  /** Record dwell on a paragraph. Promotes to station when `dwellMs >= config.DWELL_MS`, otherwise logs a passage. */
-  commit(paraId: ParagraphId, dwellMs: number, textContent: string): void;
+  /** Record dwell on a paragraph. Promotes to station when `dwellMs >= config.DWELL_MS`, otherwise logs a passage.
+   * `kind` is stored on first promotion and drives the node's graph shape. */
+  commit(paraId: ParagraphId, dwellMs: number, textContent: string, kind?: NodeKind): void;
   /** Toggle the pinned flag. If the paragraph isn't yet a station, it is created with zero dwell. */
   togglePin(paraId: ParagraphId, textContent: string): void;
   /** Wipe all nodes, edges, passages, annotations and intensity buckets. */
@@ -86,9 +91,19 @@ export function useMemoryGraphState(config: MemoryGraphConfig): UseMemoryGraphSt
 
   const [state, dispatch] = useReducer(boundReducer, undefined, initialReducerState);
 
-  const commit = useCallback((paraId: ParagraphId, dwellMs: number, textContent: string) => {
-    dispatch({ type: 'commit', paraId, dwellMs, textContent, now: Date.now() });
-  }, []);
+  const commit = useCallback(
+    (paraId: ParagraphId, dwellMs: number, textContent: string, kind?: NodeKind) => {
+      dispatch({
+        type: 'commit',
+        paraId,
+        dwellMs,
+        textContent,
+        now: Date.now(),
+        ...(kind !== undefined ? { kind } : {}),
+      });
+    },
+    [],
+  );
 
   const togglePin = useCallback((paraId: ParagraphId, textContent: string) => {
     dispatch({ type: 'togglePin', paraId, textContent, now: Date.now() });
@@ -113,6 +128,7 @@ export function useMemoryGraphState(config: MemoryGraphConfig): UseMemoryGraphSt
     note: input.note ?? null,
     createdAt: Date.now(),
     links: [],
+    scope: input.scope ?? 'text',
   }), []);
 
   const addAnnotation = useCallback((input: NewAnnotationInput): AnnotationId => {

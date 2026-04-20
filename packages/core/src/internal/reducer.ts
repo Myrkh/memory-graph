@@ -14,6 +14,7 @@ import type {
   IntensityBucket,
   MemoryGraphConfig,
   Node,
+  NodeKind,
   ParagraphId,
   Passage,
   SerializedGraph,
@@ -78,7 +79,15 @@ export function initialReducerState(): ReducerState {
 }
 
 export type Action =
-  | { type: 'commit'; paraId: ParagraphId; dwellMs: number; textContent: string; now: number }
+  | {
+      type: 'commit';
+      paraId: ParagraphId;
+      dwellMs: number;
+      textContent: string;
+      now: number;
+      /** Visual kind of the element — written onto the Node on first promotion. */
+      kind?: NodeKind;
+    }
   | { type: 'togglePin'; paraId: ParagraphId; textContent: string; now: number }
   | { type: 'clear' }
   | { type: 'restore'; data: SerializedGraph }
@@ -113,7 +122,7 @@ function commitCase(
   action: Extract<Action, { type: 'commit' }>,
   config: MemoryGraphConfig,
 ): ReducerState {
-  const { paraId, dwellMs, textContent, now } = action;
+  const { paraId, dwellMs, textContent, now, kind } = action;
   const { graph, previousStationId } = state;
 
   const intensityBuckets = pushIntensity(graph.intensityBuckets, dwellMs, now);
@@ -140,6 +149,10 @@ function commitCase(
       ...existing,
       totalMs: existing.totalMs + dwellMs,
       visits: existing.visits + 1,
+      // Backfill: legacy nodes persisted before Phase 3 have no `kind`.
+      // Opportunistically set it on re-commit so old graphs upgrade
+      // without forcing consumers to clear localStorage.
+      kind: existing.kind ?? kind ?? 'paragraph',
     });
     if (previousStationId && previousStationId !== paraId) {
       nextEdges = [
@@ -155,6 +168,7 @@ function commitCase(
       visits: 1,
       pinned: false,
       extract: truncate(textContent, EXTRACT_LEN_STATION),
+      kind: kind ?? 'paragraph',
     });
     if (previousStationId && previousStationId !== paraId) {
       nextEdges = [

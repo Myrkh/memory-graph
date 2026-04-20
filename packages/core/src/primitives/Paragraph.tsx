@@ -1,80 +1,69 @@
-import { useMemo, type ElementType, type ReactNode } from 'react';
-import type { Annotation } from '../types.js';
+import { type ElementType, type ReactNode } from 'react';
+import type { NodeKind, NodeStrategy } from '../types.js';
 import { useMemoryGraphContext } from './context.js';
 
 export interface ParagraphProps {
   /** Unique id — written as `data-mg-id` for observation + annotation anchoring. */
   id: string;
-  /** Element tag to render (default: `p`). */
+  /** Element tag to render (default: `p`). Use `as="aside"`, `as="blockquote"`, `as="figure"`…
+   * for any block the consumer wants to observe or annotate. */
   as?: ElementType;
-  /** Plain string text. Nested React elements are not supported in v0.3 (offsets would drift). */
-  children: string;
+  /** Children. Plain text or arbitrary JSX — annotation rendering lives in `<Zone>`,
+   * not here, so nested markup (`<em>`, `<code>`, `<ul>`…) is fully supported. */
+  children: ReactNode;
   className?: string;
+  /**
+   * Capture strategy for this element — forwarded as `data-mg-strategy`.
+   * Omit for the default viewport strategy (reading-mode dwell) or to let
+   * smart inference pick click/focus based on the tag.
+   */
+  strategy?: NodeStrategy;
+  /**
+   * Per-element dwell override in ms — forwarded as `data-mg-dwell`.
+   * Respected by hover and focus strategies (viewport uses the global
+   * `DWELL_MS`; click commits immediately).
+   */
+  dwell?: number;
+  /**
+   * Visual kind of the node in the graph — forwarded as `data-mg-kind`.
+   * Omit to let smart inference pick from tagName (h1 → heading, figure →
+   * figure, pre → code, else paragraph). Set explicitly for `kpi`.
+   */
+  kind?: NodeKind;
 }
 
 /**
- * Opt-in paragraph primitive. Compared with a raw `<p data-mg-id>`, this
- * component wires the library-managed state into the DOM automatically:
- *
- * - `data-mg-pinned` when the corresponding station is pinned
- * - `data-mg-flash` when a flash has been triggered by a graph-node click
- * - `<mark class="mg-annotation">` wrappers around each annotation range
- *
- * Bidirectional hover (`data-mg-highlight`) is still managed imperatively
- * by `<Zone>` — it works for raw `<p data-mg-id>` as well as for this
- * primitive without conflict.
+ * Thin, semantic wrapper that stamps `data-mg-*` attributes on a block
+ * element and wires it to library state (`data-mg-pinned`,
+ * `data-mg-flash`). All annotation rendering — inline marks AND block
+ * treatments — is handled uniformly by `<Zone>` for every `[data-mg-id]`
+ * descendant, whether it was authored with this primitive or with a raw
+ * `<aside data-mg-id>`. Equivalent output; Paragraph exists purely for
+ * ergonomic pin/flash state plumbing.
  */
 export function Paragraph(props: ParagraphProps) {
-  const { id, as: Tag = 'p', children, className } = props;
-  const { state, flashParaId, flashAnnotationId } = useMemoryGraphContext();
+  const { id, as: Tag = 'p', children, className, strategy, dwell, kind } = props;
+  const { state, flashParaId } = useMemoryGraphContext();
 
   const node = state.nodes.get(id);
-  const annotations = useMemo(() => {
-    const out: Annotation[] = [];
-    for (const a of state.annotations.values()) {
-      if (a.paraId === id) out.push(a);
-    }
-    out.sort((a, b) => a.selection.offsetStart - b.selection.offsetStart);
-    return out;
-  }, [state.annotations, id]);
 
   const pinnedAttr = node?.pinned ? { 'data-mg-pinned': '' } : {};
   const flashAttr = flashParaId === id ? { 'data-mg-flash': '' } : {};
+  const strategyAttr = strategy ? { 'data-mg-strategy': strategy } : {};
+  const dwellAttr = dwell ? { 'data-mg-dwell': String(dwell) } : {};
+  const kindAttr = kind ? { 'data-mg-kind': kind } : {};
 
   return (
-    <Tag className={className} data-mg-id={id} {...pinnedAttr} {...flashAttr}>
-      {renderWithAnnotations(children, annotations, flashAnnotationId)}
+    <Tag
+      className={className}
+      data-mg-id={id}
+      {...strategyAttr}
+      {...dwellAttr}
+      {...kindAttr}
+      {...pinnedAttr}
+      {...flashAttr}
+    >
+      {children}
     </Tag>
   );
-}
-
-function renderWithAnnotations(
-  text: string,
-  annotations: Annotation[],
-  flashAnnotationId: string | null,
-): ReactNode[] {
-  if (annotations.length === 0) return [text];
-  const parts: ReactNode[] = [];
-  let cursor = 0;
-  for (const a of annotations) {
-    const { offsetStart, offsetEnd } = a.selection;
-    if (offsetStart < cursor) continue; // overlapping → skip later entry
-    if (offsetStart > cursor) parts.push(text.slice(cursor, offsetStart));
-    const linkAttr = a.links.length > 0 ? { 'data-mg-has-link': '' } : {};
-    const flashAttr = flashAnnotationId === a.id ? { 'data-mg-flash': '' } : {};
-    parts.push(
-      <mark
-        key={a.id}
-        className="mg-annotation"
-        data-mg-annotation-id={a.id}
-        {...linkAttr}
-        {...flashAttr}
-      >
-        {text.slice(offsetStart, offsetEnd)}
-      </mark>,
-    );
-    cursor = offsetEnd;
-  }
-  if (cursor < text.length) parts.push(text.slice(cursor));
-  return parts;
 }

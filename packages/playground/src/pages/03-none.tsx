@@ -1,18 +1,15 @@
-import { MemoryGraph, useMemoryGraphContext } from '@stitclaude/memory-graph';
-import { DemoEssay, DemoPanel } from '../components/DemoEssay.js';
-
-const STORAGE_KEY = 'mg-playground:03-none';
+import { MemoryGraph, useMemoryGraphContext } from '@myrkh/memory-graph';
+import { DemoEssay } from '../components/DemoEssay.js';
 
 export function NonePage() {
   return (
-    <MemoryGraph.Root storageKey={STORAGE_KEY}>
+    <>
       <DemoEssay
         kicker="Variant · None · keyboard-only (⌘M) or custom trigger"
         aside={<CustomOpenButton />}
       />
       <MemoryGraph.Handle variant="none" />
-      <DemoPanel />
-    </MemoryGraph.Root>
+    </>
   );
 }
 

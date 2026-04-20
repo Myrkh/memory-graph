@@ -59,7 +59,7 @@ export function Graph(props: GraphProps) {
     state,
     showPassages,
     currentParaId,
-    zoneRef,
+    zoneElement,
     closePanel,
     triggerFlash,
     triggerAnnotationFlash,
@@ -110,7 +110,8 @@ export function Graph(props: GraphProps) {
       onNodeClick?.(paraId);
       closePanel();
       window.setTimeout(() => {
-        const el = zoneRef.current?.querySelector<HTMLElement>(
+        const root = zoneElement ?? document.body;
+        const el = root.querySelector<HTMLElement>(
           `[data-mg-id="${CSS.escape(paraId)}"]`,
         );
         if (!el) return;
@@ -118,7 +119,7 @@ export function Graph(props: GraphProps) {
         window.setTimeout(() => triggerFlash(paraId), jumpDelayMs);
       }, jumpDelayMs);
     },
-    [closePanel, jumpDelayMs, onNodeClick, triggerFlash, zoneRef],
+    [closePanel, jumpDelayMs, onNodeClick, triggerFlash, zoneElement],
   );
 
   const nodeRadiusFor = useCallback(
@@ -151,7 +152,8 @@ export function Graph(props: GraphProps) {
       onNodeClick?.(annotation.paraId);
       closePanel();
       window.setTimeout(() => {
-        const el = zoneRef.current?.querySelector<HTMLElement>(
+        const root = zoneElement ?? document.body;
+        const el = root.querySelector<HTMLElement>(
           `[data-mg-annotation-id="${CSS.escape(annotation.id)}"]`,
         );
         if (!el) return;
@@ -167,7 +169,7 @@ export function Graph(props: GraphProps) {
       onNodeClick,
       setLinkingMode,
       triggerAnnotationFlash,
-      zoneRef,
+      zoneElement,
     ],
   );
 

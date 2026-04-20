@@ -10,6 +10,7 @@ import {
 import { useMemoryGraphContext } from './context.js';
 import { useTextSelection } from '../hooks/useTextSelection.js';
 import type { ResolvedSelection } from '../internal/selection-offsets.js';
+import { detectScope } from '../internal/annotation-dom.js';
 import { NoteEditor } from './NoteEditor.js';
 
 export interface SelectionToolbarProps {
@@ -44,7 +45,7 @@ export function SelectionToolbar(props: SelectionToolbarProps) {
     linkingEmptyMessage = 'Create an annotation first — then you can link to it.',
   } = props;
   const {
-    zoneRef,
+    zoneElement,
     actions,
     showToast,
     state,
@@ -56,7 +57,7 @@ export function SelectionToolbar(props: SelectionToolbarProps) {
   const [mode, setMode] = useState<Mode>('idle');
   const [frozen, setFrozen] = useState<ResolvedSelection | null>(null);
 
-  useTextSelection(zoneRef, {
+  useTextSelection(zoneElement, {
     minChars,
     onSelect: (sel) => {
       setSelection((prev) => {
@@ -111,6 +112,7 @@ export function SelectionToolbar(props: SelectionToolbarProps) {
           offsetEnd: frozen.offsetEnd,
         },
         note,
+        scope: detectScope(frozen.paraElement, frozen.offsetStart, frozen.offsetEnd),
       });
       setMode('idle');
       setFrozen(null);

@@ -32,7 +32,7 @@ interface RevealPath {
  */
 export function LinkReveal(props: LinkRevealProps) {
   const { className, style } = props;
-  const { hoveredAnnotationId, state, zoneRef } = useMemoryGraphContext();
+  const { hoveredAnnotationId, state, zoneElement } = useMemoryGraphContext();
   const [paths, setPaths] = useState<RevealPath[]>([]);
 
   const compute = useCallback(() => {
@@ -45,7 +45,7 @@ export function LinkReveal(props: LinkRevealProps) {
       setPaths([]);
       return;
     }
-    const zone = zoneRef.current;
+    const zone = zoneElement ?? (typeof document !== 'undefined' ? document.body : null);
     if (!zone) return;
 
     const fromMark = zone.querySelector<HTMLElement>(
@@ -74,7 +74,7 @@ export function LinkReveal(props: LinkRevealProps) {
       next.push({ fromId: hoveredAnnotationId, toId, d });
     }
     setPaths(next);
-  }, [hoveredAnnotationId, state.annotations, zoneRef]);
+  }, [hoveredAnnotationId, state.annotations, zoneElement]);
 
   useLayoutEffect(() => {
     compute();

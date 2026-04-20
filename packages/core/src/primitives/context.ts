@@ -1,4 +1,4 @@
-import { createContext, useContext, type RefObject } from 'react';
+import { createContext, useContext } from 'react';
 import type {
   Annotation,
   AnnotationId,
@@ -48,7 +48,21 @@ export interface MemoryGraphContextValue {
   actions: MemoryGraphActions;
 
   currentParaId: ParagraphId | null;
-  zoneRef: RefObject<HTMLElement | null>;
+
+  /**
+   * The live `<Zone>` DOM element, or `null` if no Zone is mounted.
+   *
+   * State-based (not a ref) so observers can re-run when the zone mounts
+   * or unmounts across route changes — critical for the Provider-at-root
+   * pattern where `<Root>` persists but pages swap their `<Zone>` in and
+   * out of the tree.
+   *
+   * When `null`, tracker + text selection fall back to `document.body`,
+   * enabling zero-Zone usage for dashboards / extensions.
+   */
+  zoneElement: HTMLElement | null;
+  /** Callback ref used by `<Zone>` to register itself. Consumers do not call this. */
+  setZoneElement: (el: HTMLElement | null) => void;
 
   exportJson: (meta?: ExportMeta) => string;
   clearPersisted: () => void;
@@ -127,7 +141,7 @@ export function useMemoryGraphContext(): MemoryGraphContextValue {
   const ctx = useContext(MemoryGraphContext);
   if (!ctx) {
     throw new Error(
-      '[@stitclaude/memory-graph] A MemoryGraph primitive was rendered outside of <MemoryGraph.Root>.',
+      '[@myrkh/memory-graph] A MemoryGraph primitive was rendered outside of <MemoryGraph.Root>.',
     );
   }
   return ctx;

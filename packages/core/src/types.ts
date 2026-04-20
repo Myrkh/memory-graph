@@ -1,5 +1,5 @@
 /**
- * Core types for @stitclaude/memory-graph.
+ * Core types for @myrkh/memory-graph.
  *
  * Mirrors the data model of the vanilla reference component
  * (packages/playground/public/reference-vanilla.html). Any change here should
@@ -14,6 +14,45 @@
  * Kept as `string` to stay serialisable and to support any scheme.
  */
 export type ParagraphId = string;
+
+/**
+ * Capture strategy for a tracked element. Selected at the DOM level via
+ * `data-mg-strategy="<value>"`. Defaults to `viewport` when the attribute
+ * is absent.
+ *
+ * - `viewport` — classic reading mode: element centered in the attention
+ *   band for `DWELL_MS` is promoted to a station. Suited for paragraphs,
+ *   headings, figures — anything consumed by scroll.
+ * - `hover` — cursor rests on the element for `data-mg-dwell` ms (default
+ *   1500). Suited for KPI cards, sidebar entries, menu items — small UI
+ *   atoms the eye pauses on.
+ * - `click` — element is clicked. Suited for tabs, buttons, links,
+ *   discrete user intents. Commits with `DWELL_MS` as synthetic dwell so
+ *   the node promotes to a station on a single click.
+ * - `focus` — element receives keyboard focus for `data-mg-dwell` ms.
+ *   Suited for form inputs, data-grid cells, accessible flows.
+ *
+ * Manual tracking (dashboard events, custom signals) is performed via
+ * `actions.commit(id, dwellMs, text)` — no DOM attribute needed.
+ */
+export type NodeStrategy = 'viewport' | 'hover' | 'click' | 'focus';
+
+/**
+ * Visual kind of a tracked element — drives the shape the node takes in
+ * the graph. Orthogonal to {@link NodeStrategy}: strategy = how we decide
+ * to track, kind = how we draw it.
+ *
+ * - `paragraph` (default) — circle, the canonical reading station
+ * - `heading` — concentric ring around the disc, signals landmark
+ * - `kpi` — square, hard-edged datapoint (no HTML tag maps to this; set
+ *   it explicitly via `data-mg-kind="kpi"`)
+ * - `figure` — diamond (rotated square), media / illustration
+ * - `code` — rounded square, monospace feel
+ *
+ * Selected at the DOM level via `data-mg-kind`, or inferred from tagName
+ * when inference is `smart`.
+ */
+export type NodeKind = 'paragraph' | 'heading' | 'kpi' | 'figure' | 'code';
 
 /**
  * A "station": a paragraph that was dwelled on long enough (>= `DWELL_MS`)
@@ -32,6 +71,8 @@ export interface Node {
   pinned: boolean;
   /** Short text excerpt used for tooltips and the "deepest" label. */
   extract: string;
+  /** Visual kind — drives the graph shape. Defaults to `paragraph` when omitted. */
+  kind?: NodeKind;
 }
 
 /**
@@ -100,6 +141,21 @@ export const CURRENT_SCHEMA_VERSION = 2 as const;
 export type AnnotationId = string;
 
 /**
+ * Scope of an annotation's visual treatment.
+ *
+ * - `text` — the selection is a sub-range of the element's textContent.
+ *   Rendered as an inline `<mark>` wrapping the exact range (coral
+ *   underline). Default scope — matches the long-form reading use-case.
+ * - `block` — the selection covers the element in full. Rendered as a
+ *   card-level treatment on the `[data-mg-id]` element itself (coral
+ *   left stripe + subtle tint), matching the rest of the annotation
+ *   visual language without flooding the card with inline underlines.
+ *   The library detects block scope automatically when the user selects
+ *   from offset 0 through the complete textContent length.
+ */
+export type AnnotationScope = 'text' | 'block';
+
+/**
  * A reader-authored mark on a span of paragraph text. Innovation 03 · the
  * "reader's voice" feature. Selection offsets are character indices inside
  * the paragraph's `textContent`, not DOM ranges — offsets survive reflow.
@@ -121,6 +177,8 @@ export interface Annotation {
   createdAt: number;
   /** Cross-annotation links (Innovation 04). Empty array when unused. */
   links: AnnotationId[];
+  /** `text` (default) or `block` when the selection covered the element in full. */
+  scope?: AnnotationScope;
 }
 
 /**
