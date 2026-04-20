@@ -19,7 +19,7 @@
 
 <br />
 
-[**Live Demo**](https://memory-graph.vercel.app) · [**GitHub**](https://github.com/Myrkh/memory-graph) · [**Report a bug**](https://github.com/Myrkh/memory-graph/issues) · [**Request a feature**](https://github.com/Myrkh/memory-graph/issues)
+[**Live Demo**](https://memory-graph-playground.vercel.app) · [**GitHub**](https://github.com/Myrkh/memory-graph) · [**Report a bug**](https://github.com/Myrkh/memory-graph/issues) · [**Request a feature**](https://github.com/Myrkh/memory-graph/issues)
 
 </div>
 
