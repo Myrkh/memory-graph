@@ -27,15 +27,17 @@
 
 ## ✨ What it does
 
-As a reader scrolls through your content, `memory-graph` silently observes them — detecting which paragraphs they actually spent time on, how they navigated back and forth, and where their attention concentrated most. All of this becomes a **node-link graph**, available in a slide-out panel:
+`memory-graph` is **ambient** — it follows the reader across your whole site, not just one article. As they scroll, it silently observes which paragraphs they actually spent time on, how they navigated back and forth, and where their attention concentrated most. All of this becomes a **node-link graph** available in a slide-out panel:
 
 - 🔵 **Stations** — paragraphs where dwell time exceeded your threshold
 - 🔘 **Passages** — paragraphs crossed below the threshold (optionally shown)
 - ➡️ **Forward edges** — first-time transitions between stations
 - 🔁 **Return edges** — revisits to already-read stations
+- 🧭 **Route columns** — when the reader moves between pages, the graph switches to a 2D layout, one column per route (v0.2.0)
+- 🔎 **Zoom controls** — floating satellite on the panel with focal-point zoom and blur escamotage (v0.2.0)
 - 📊 **Intensity sparkline** — per-minute reading activity over the last hour
 - 📌 **Pins & annotations** — highlight text, add notes, link annotations together
-- 💾 **Persistence** — everything auto-saves to `localStorage`, with JSON export/import
+- 💾 **Persistence** — auto-saves to `localStorage`, with JSON export/import and **live cross-tab sync** on the same origin (v0.2.0)
 
 ---
 
@@ -158,6 +160,82 @@ When you want observation scoped to a specific subtree (e.g. one essay on a
 larger page), wrap it in `<MemoryGraph.Zone>`. Without Zone, the tracker
 observes `document.body` — which is exactly what you want for dashboards,
 Chrome extensions, or single-article apps.
+
+---
+
+## 🧭 Multi-page tracking — the `route` dimension
+
+Pass a `route` prop on `<Root>` to tell the graph which "bucket" the user is
+currently in. Whatever the consumer wants — URL pathname, tab id, doc id,
+feature flag. Agnostic of any routing library.
+
+```tsx
+<MemoryGraph.Root
+  storageKey="mg:my-app"
+  route={currentPathname}        // "/home", "/docs", "/pricing", …
+  onPersistError={(err) => toast(`Couldn't save: ${err.message}`)}
+>
+  {/* Stays rendered across route changes — track across the whole site. */}
+</MemoryGraph.Root>
+```
+
+When two or more unique routes accumulate in state, the `<Graph>`
+automatically switches to a **2D column layout** — one column per route,
+laid out chronologically in the order routes were first visited. Edges
+crossing a route boundary get a distinct coral-dashed treatment
+(`data-mg-route-jump`). Single-route graphs stay in the legacy single-column
+mode.
+
+The graph auto-follows the current route with a smooth horizontal scroll,
+so navigating to a new page centers its column in the viewport.
+
+---
+
+## 🎨 Custom node shapes — `renderNode`
+
+Give a specific tracked element its own SVG without polluting `NodeKind`
+with site-specific values :
+
+```tsx
+<MemoryGraph.Graph
+  renderNode={(item, ctx) =>
+    item.id === 'ui-theme-toggle'
+      ? <ThemeToggleNode r={ctx.r} />   /* your custom shape */
+      : null                             /* fall back to default kind */
+  }
+/>
+```
+
+Pulse, pinned ring, highlight ring and order label stay library-managed —
+the escape hatch only replaces the shape geometry.
+
+---
+
+## 🔎 Zoom controls
+
+`<MemoryGraph.Graph>` ships a floating **zoom satellite** (in / out / fit)
+anchored outside the panel's right edge in a hairline backdrop-blur pill.
+Three Stit'Claude-signature icons: an aperture that contracts around a
+magnifying node, satellites cascading outward, and chevrons clamping inward
+on a coral diamond. Keyboard-complete, `prefers-reduced-motion`-safe.
+
+- **Focal-point preservation** — the viewport center stays anchored at the
+  same SVG coordinate through the transition
+- **Blur escamotage** — a brief `blur(0) → blur(1.6px) → blur(0)` keyframe
+  masks any perceptual jitter during the parallel scroll + dimension change
+- Visibility gated by the panel open state so the satellite never lingers
+  off-screen; mobile fallback pulls it back inside on narrow viewports
+
+---
+
+## 🔄 Intertab sync
+
+Multiple tabs open on the same origin stay in sync automatically via the
+browser's native `storage` event. Any write from one tab is picked up by
+every other tab of the same origin and rehydrates into the reducer — no
+`BroadcastChannel`, no sync server, no dependency. The write effect has a
+built-in guard that skips redundant writes, so the cross-tab echo loop is
+broken cleanly with zero config.
 
 ---
 
@@ -322,12 +400,20 @@ Use the per-strategy hooks directly (`useViewportStrategy`, `useHoverStrategy`,
 `useClickStrategy`, `useFocusStrategy`) when you need finer control — e.g.
 viewport-only tracking without click side-effects.
 
-### `usePersistence(state, storageKey, restore)`
+### `usePersistence(state, storageKey, restore, onPersistError?)`
 
-Auto-saves the graph to `localStorage` on every state change and provides JSON export/restore.
+Auto-saves the graph to `localStorage` on every state change, rehydrates on
+mount, **syncs across tabs of the same origin via the native `storage` event**,
+and provides JSON export/restore. Fourth arg is an optional callback invoked
+when `setItem` fails (quota exceeded, private mode, disabled storage).
 
 ```tsx
-const { exportJson, clearPersisted } = usePersistence(state, 'mg:my-article', actions.restore);
+const { exportJson, clearPersisted } = usePersistence(
+  state,
+  'mg:my-article',
+  actions.restore,
+  (err) => toast(`Couldn't save: ${err.message}`),
+);
 ```
 
 ### `useTextSelection(options)`

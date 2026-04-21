@@ -1,6 +1,7 @@
 import { ApiTable } from '../sections/ApiTable.js';
 import { NodeAnatomy } from '../sections/NodeAnatomy.js';
 import { QuickstartBlock } from '../sections/QuickstartBlock.js';
+import { ReleaseNotes } from '../sections/ReleaseNotes.js';
 import { SiteFooter } from '../sections/SiteFooter.js';
 
 /**
@@ -13,7 +14,7 @@ export function DocsPage() {
   return (
     <main className="site-page site-page--docs">
       <header className="site-docs-head">
-        <div className="site-docs-head__kicker">Documentation · v0.1.0</div>
+        <div className="site-docs-head__kicker">Documentation · v0.2.0</div>
         <h1 className="site-docs-head__title">
           Everything you need. <em>Nothing</em> you don't.
         </h1>
@@ -27,6 +28,7 @@ export function DocsPage() {
       <QuickstartBlock />
       <ApiTable />
       <NodeAnatomy />
+      <ReleaseNotes />
 
       <section className="site-docs-more" aria-labelledby="docs-more-title">
         <div className="site-docs-more__inner">

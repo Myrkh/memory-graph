@@ -19,6 +19,7 @@ import './styles/site-docs.css';
 import './styles/site-quickstart.css';
 import './styles/site-api.css';
 import './styles/site-anatomy.css';
+import './styles/site-release.css';
 import './styles/site-philosophy.css';
 import './styles/site-footer.css';
 import './styles/site-motion.css';

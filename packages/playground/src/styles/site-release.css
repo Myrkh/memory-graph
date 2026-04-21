@@ -1,0 +1,186 @@
+/* ============================================================================
+ * Docs page · Release Notes.
+ *
+ * Editorial highlights list · mono left-rail ("01"..."05"), hairline
+ * separators between items, display italic subtitles with coral accent.
+ * Same grammar as QuickstartBlock but horizontal (rail + body) instead
+ * of vertical (label + code). Closes with a link to the full CHANGELOG
+ * on GitHub as the source of truth.
+ * ==========================================================================*/
+
+.site-release {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: clamp(48px, 7vw, 80px) clamp(20px, 5vw, 56px);
+  border-top: 1px solid var(--mg-border);
+}
+
+.site-release__head {
+  max-width: 640px;
+  margin: 0 auto clamp(40px, 6vw, 56px);
+  text-align: center;
+}
+
+.site-release__kicker {
+  font-family: var(--mg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mg-accent);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.site-release__title {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(28px, 4.2vw, 40px);
+  line-height: 1.08;
+  letter-spacing: -0.028em;
+  color: var(--mg-fg);
+  margin: 0 0 14px;
+  text-wrap: balance;
+}
+.site-release__title em {
+  color: var(--mg-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.site-release__deck {
+  font-family: var(--mg-font-serif);
+  font-size: clamp(15px, 1.6vw, 17px);
+  line-height: 1.55;
+  color: var(--mg-fg-muted);
+  margin: 0;
+  text-wrap: pretty;
+}
+.site-release__deck em {
+  color: var(--mg-fg);
+  font-style: italic;
+}
+
+/* -- Highlights list ---------------------------------------------------- */
+
+.site-release__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  counter-reset: release;
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.site-release__item {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: clamp(16px, 2.5vw, 28px);
+  padding: clamp(20px, 3vw, 28px) 0;
+  border-top: 1px solid var(--mg-border);
+  align-items: start;
+}
+.site-release__item:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.site-release__num {
+  font-family: var(--mg-font-mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.16em;
+  color: var(--mg-fg-subtle);
+  font-weight: 600;
+  padding-top: 8px;
+  border-top: 1px solid var(--mg-accent);
+}
+
+.site-release__item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.site-release__item-kicker {
+  font-family: var(--mg-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mg-accent);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.site-release__item-title {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(18px, 2.2vw, 22px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--mg-fg);
+  margin: 0;
+  text-wrap: balance;
+}
+
+.site-release__item-prose {
+  font-family: var(--mg-font-serif);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--mg-fg-muted);
+  margin: 2px 0 0;
+  text-wrap: pretty;
+}
+.site-release__item-prose code {
+  font-family: var(--mg-font-mono);
+  font-size: 12.5px;
+  color: var(--mg-accent);
+  background: color-mix(in oklch, var(--mg-accent) 7%, transparent);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* -- Footer link to full CHANGELOG -------------------------------------- */
+
+.site-release__foot {
+  max-width: 760px;
+  margin: clamp(32px, 4vw, 44px) auto 0;
+  padding-top: clamp(20px, 2.5vw, 28px);
+  border-top: 1px solid var(--mg-border);
+  text-align: center;
+}
+
+.site-release__link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--mg-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--mg-fg-muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border: 1px solid var(--mg-border);
+  border-radius: 999px;
+  transition:
+    color var(--mg-duration-normal) var(--mg-ease-standard),
+    border-color var(--mg-duration-normal) var(--mg-ease-standard);
+}
+.site-release__link:hover,
+.site-release__link:focus-visible {
+  color: var(--mg-accent);
+  border-color: var(--mg-accent);
+  outline: none;
+}
+.site-release__link span {
+  font-size: 0.9em;
+  transform: translateY(1px);
+}
+
+@media (max-width: 520px) {
+  .site-release__item {
+    grid-template-columns: 32px 1fr;
+    gap: 14px;
+  }
+}

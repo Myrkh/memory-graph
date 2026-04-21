@@ -82,7 +82,7 @@ export function SiteFooter() {
           © {year} · MIT License · Free to use, fork, remix.
         </span>
         <span className="site-footer__meta">
-          v0.1.0 · built with TypeScript, React, and a lot of patience.
+          v0.2.0 · built with TypeScript, React, and a lot of patience.
         </span>
       </div>
 

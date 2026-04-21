@@ -21,7 +21,7 @@ export function TopNav({ current }: TopNavProps) {
       <SiteLink to="home" className="site-nav__brand" aria-label="memory-graph — home">
         <BrandMark animated />
         <span className="site-nav__brand-text">memory-graph</span>
-        <span className="site-nav__brand-version">v0.1.0</span>
+        <span className="site-nav__brand-version">v0.2.0</span>
       </SiteLink>
 
       <nav className="site-nav__links" aria-label="Primary">

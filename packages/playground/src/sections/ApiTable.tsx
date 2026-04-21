@@ -35,6 +35,21 @@ const ATTRS: ApiRow[] = [
   { name: 'data-mg-dwell', kind: 'optional', note: 'Per-element dwell threshold in ms. Hover/focus only.' },
 ];
 
+const ROOT_PROPS: ApiRow[] = [
+  { name: 'storageKey', kind: 'required', note: 'localStorage key under which the graph is persisted.' },
+  { name: 'route', kind: 'v0.2.0', note: 'Abstract route bucket stamped on every new node — activates 2D columns.' },
+  { name: 'onPersistError', kind: 'v0.2.0', note: 'Callback fired when localStorage write fails (quota, private mode).' },
+  { name: 'config', kind: 'optional', note: 'Partial override of DEFAULT_CONFIG (13 runtime constants).' },
+  { name: 'open / defaultOpen / onOpenChange', kind: 'optional', note: 'Controlled or uncontrolled panel state.' },
+];
+
+const GRAPH_PROPS: ApiRow[] = [
+  { name: 'renderNode', kind: 'v0.2.0', note: 'Escape hatch · (item, ctx) => ReactNode | null. Return null to fall back to the default kind.' },
+  { name: 'renderRouteLabel', kind: 'v0.2.0', note: 'Transform a raw route string into the column label. Default: strip leading slash + uppercase.' },
+  { name: 'onNodeClick', kind: 'optional', note: 'Called in addition to the default jump behavior with the clicked paraId.' },
+  { name: 'jumpDelayMs', kind: 'optional', note: 'Delay between closePanel() and scrollIntoView on node click. Default 200ms.' },
+];
+
 export function ApiTable() {
   return (
     <section className="site-api" aria-labelledby="api-title">
@@ -50,6 +65,8 @@ export function ApiTable() {
       </header>
 
       <ApiGroup id="api-attrs" title="DOM attributes" kicker="author-set" rows={ATTRS} />
+      <ApiGroup id="api-root-props" title="<Root> props" kicker="Provider" rows={ROOT_PROPS} />
+      <ApiGroup id="api-graph-props" title="<Graph> props" kicker="SVG" rows={GRAPH_PROPS} />
       <ApiGroup id="api-primitives" title="Primitives · compound components" kicker="JSX" rows={PRIMITIVES} />
       <ApiGroup id="api-hooks" title="Hooks · headless logic" kicker="React" rows={HOOKS} />
     </section>

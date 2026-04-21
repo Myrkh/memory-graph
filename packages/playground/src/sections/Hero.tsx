@@ -19,7 +19,7 @@ export function Hero() {
         <div className="site-hero__kicker">
           <span>@myrkh/memory-graph</span>
           <span aria-hidden>·</span>
-          <span>v0.1.0</span>
+          <span>v0.2.0</span>
           <span aria-hidden>·</span>
           <span>MIT</span>
         </div>
