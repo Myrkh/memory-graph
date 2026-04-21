@@ -257,3 +257,4 @@ describe('reducer · annotations', () => {
     expect(s.graph.annotations.get('ann-A')?.links).toEqual(['ann-B']);
   });
 });
+

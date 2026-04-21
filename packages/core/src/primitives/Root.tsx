@@ -48,6 +48,13 @@ export interface RootProps {
    * (one column per route). Omit for a single-page / single-bucket graph.
    */
   route?: string;
+  /**
+   * Called when persistence fails (localStorage quota exceeded, private-
+   * mode sandbox, disabled storage). Lets the consumer surface a toast
+   * or downgrade a feature instead of failing silently. Swallowed by
+   * default, matching the vanilla reference.
+   */
+  onPersistError?: (err: Error) => void;
   className?: string;
   style?: CSSProperties;
   children: ReactNode;
@@ -76,6 +83,7 @@ export function Root(props: RootProps) {
     open: openProp,
     onOpenChange,
     route,
+    onPersistError,
     className,
     style,
     children,
@@ -96,7 +104,12 @@ export function Root(props: RootProps) {
   const { state, previousStationId, showPassages, actions, derived } =
     useMemoryGraphState(config);
 
-  const { exportJson, clearPersisted } = usePersistence(state, storageKey, actions.restore);
+  const { exportJson, clearPersisted } = usePersistence(
+    state,
+    storageKey,
+    actions.restore,
+    onPersistError,
+  );
 
   const { currentParaId } = useAttentionTracker(zoneElement, {
     config,

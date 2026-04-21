@@ -1,7 +1,7 @@
 {
   "name": "@myrkh/memory-graph",
-  "version": "0.1.0",
-  "description": "Visualize reading attention as a node-link graph. Multi-DOM · multi-strategy · smart defaults. React + TypeScript.",
+  "version": "0.2.0",
+  "description": "Ambient reading-attention graph for React. Multi-page · multi-strategy · 2D column layout · annotations · intertab sync. Token-only styling. Zero network.",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

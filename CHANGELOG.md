@@ -5,6 +5,134 @@ All notable changes to `@myrkh/memory-graph` are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-04-21 · *Ambient memory-graph*
+
+The graph becomes **ambient** — it follows the reader across a multi-
+screen site or app, not just a single article. Zero breaking change : every
+new surface is opt-in, and legacy graphs fall back to single-column mode.
+
+### Added — Route dimension (multi-page tracking)
+
+- `<MemoryGraph.Root route?: string>` — abstract route bucket stamped on
+  every tracked node at commit time. Whatever the consumer passes
+  (pathname, tabId, docId, feature flag). Agnostic of any routing library.
+- `Node.route?: string` — the route each node belongs to, set once on
+  first promotion (birth-route, immutable).
+- Reducer backfills `route` on re-commit for legacy nodes without one, so
+  existing graphs upgrade without forcing `clearPersisted()`.
+- Commit + togglePin actions accept an optional `route` payload.
+
+### Added — 2D column layout
+
+- Automatic multi-column mode when ≥ 2 unique routes accumulate. Each
+  route gets its own column, ordered **chronologically** by first-seen
+  timestamp (not alphabetically). Single-column mode stays the default.
+- `GraphLayout.columns?: RouteColumn[]` exposed in the pure layout output
+  for consumers reading layout state.
+- **Law 3 preserved** · Y = `firstAt`-driven within every column.
+- **Law 4 preserved** · return arcs curve right, same control-point formula.
+- **Route-jump edges** get `data-mg-route-jump` — coral dashed for
+  forwards, dashed return arcs, so crossing a route boundary reads visually.
+- Horizontal scroll kicks in on the graph wrap; `scroll-snap-type: x
+  proximity` aligns columns cleanly. Thin scrollbar coral-tinted on hover.
+- Sticky column headers (mono kicker, uppercase) via SVG-embedded text —
+  coral on the current route, muted elsewhere.
+- Auto-follow · when the `route` prop changes, the graph smooth-scrolls
+  horizontally to center the matching column.
+
+### Added — `renderNode` escape hatch
+
+- `<MemoryGraph.Graph renderNode?: (item, ctx) => ReactNode | null>` —
+  per-item custom SVG without polluting `NodeKind` with site-specific
+  values. Return `null` to fall back to the default kind shape. Pulse,
+  pinned ring, highlight ring and order label stay library-managed.
+- Enables consumers to give a specific tracked element (theme toggle,
+  KPI widget, landmark brand mark) its own iconography without forking.
+
+### Added — Zoom controls with Stit'Claude signature
+
+- Three-button floating satellite (zoom in · fit · zoom out) hanging
+  outside the panel's right edge in a hairline backdrop-blur pill.
+  Custom 24×24 SVG icons sharing the component's visual grammar — coral
+  node, hairline 1.3px strokes, round linecaps. Each icon *enacts* its
+  verb on hover (aperture contracts, satellites cascade, chevrons clamp).
+- **Focal-point zoom** — the viewport center stays anchored at the same
+  SVG coordinate through the zoom transition. Effective zoom is read
+  from the DOM (`getBoundingClientRect`) so rapid repeat clicks don't
+  jolt the viewport.
+- **Blur escamotage** — a 280ms `blur(0) → blur(1.6px) → blur(0)`
+  keyframe masks any perceptual jitter during the parallel scroll +
+  dimension transition. Apple-HIG focus-racking in spirit.
+- `useGraphZoom` hook exposed as an internal primitive, exercised by the
+  `<Graph>` primitive's `GraphControls` toolbar.
+- Visibility gated by `[data-mg-open]` so the satellite doesn't linger
+  off-screen with the closed panel. Mobile fallback (<520px) pulls it
+  back inside the graph area.
+
+### Added — `onPersistError` callback
+
+- `<MemoryGraph.Root onPersistError?: (err) => void>` — called when
+  `localStorage.setItem` throws (quota exceeded, private-mode sandbox,
+  disabled storage). Lets consumers surface a toast or downgrade a
+  feature instead of failing silently. Still swallowed by default.
+
+### Added — Intertab sync (same origin)
+
+- `usePersistence` now listens to the native `storage` event. When any
+  tab on the same origin writes to `storageKey`, every other tab picks
+  it up and calls `onRestore`, keeping in-memory state consistent across
+  all open tabs. Zero dependency, zero new API surface.
+- Write effect gained a guard : if `localStorage.getItem` already matches
+  the serialized state, the write is skipped. Breaks the cross-tab echo
+  loop cleanly and avoids redundant serialization on re-renders.
+
+### Added — Annotations universal
+
+- `useZoneAnnotations` moved from `<Zone>` to `<Root>`, with a
+  `document.body` fallback when no Zone is mounted. Annotations now
+  render on **any** `[data-mg-id]` element anywhere on the page —
+  multi-page sites, sidebar content, floating panels — instead of only
+  descendants of a Zone.
+
+### Added — Node Anatomy living documentation
+
+- New `/docs` section : *Sizing · Kinds · States* — every specimen is
+  rendered through the library's own CSS classes (`.mg-node`,
+  `.mg-node-shape`, `.mg-node-pulse`, `.mg-node-ring`…) so the docs
+  track the component automatically. If a keyframe, a radius, or a
+  color changes, the docs update without intervention.
+
+### Added — Tests
+
+- Reducer · route stamping, legacy backfill, birth-route immutability.
+- Layout · single-column vs multi-column activation, chronological
+  column order, totalWidth expansion, column centerX anchoring, law 3
+  preservation in 2D mode. **23/23 tests pass** (+11 from v0.1.0's 12).
+
+### Enhanced — Root.tsx refactor
+
+- Extracted `useTimedValue<T>(durationMs)` hook that consolidates the
+  three duplicate timed-flash patterns (paragraph flash, toast, annotation
+  flash). Trimmed Root.tsx from 311 → 264 lines, back under the
+  project-wide ≤300 discipline.
+
+### Enhanced — `<Graph>` structural fix
+
+- Restored the panel's flex chain (`flex: 1; display: flex;
+  flex-direction: column; min-height: 0`) on the `.mg-graph-container`
+  wrapper introduced for the zoom satellite, so the graph scroll and
+  panel footer keep working inside composed panel layouts.
+
+### Playground — Ambient wiring
+
+- Site-wide `<Root route={pathnameFromPage(page)}>` at app shell.
+- TopNav links tracked (`data-mg-id="nav-home"` etc).
+- `ThemeToggle` tracked as `kpi` kind, rendered via `renderNode` as a
+  morphing sun/moon node that reacts live to `data-mg-scheme` via a
+  MutationObserver-based `useCurrentScheme` hook.
+- History API routing (was hash routing in v0.1.0) so Google indexes
+  `/`, `/demo`, `/docs`, `/philosophy` as separate documents.
+
 ## [0.1.0] — 2026-04-20
 
 The inaugural public release. React + TypeScript port of the vanilla
@@ -353,4 +481,5 @@ Twenty-four composable primitives exported via named exports and the
 - Respect `prefers-reduced-motion` as a proxy for "no haptics/audio either"
   when those channels are later added.
 
+[0.2.0]: https://github.com/Myrkh/memory-graph/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Myrkh/memory-graph/releases/tag/v0.1.0

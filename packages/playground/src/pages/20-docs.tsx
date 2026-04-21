@@ -1,4 +1,5 @@
 import { ApiTable } from '../sections/ApiTable.js';
+import { NodeAnatomy } from '../sections/NodeAnatomy.js';
 import { QuickstartBlock } from '../sections/QuickstartBlock.js';
 import { SiteFooter } from '../sections/SiteFooter.js';
 
@@ -25,6 +26,7 @@ export function DocsPage() {
 
       <QuickstartBlock />
       <ApiTable />
+      <NodeAnatomy />
 
       <section className="site-docs-more" aria-labelledby="docs-more-title">
         <div className="site-docs-more__inner">

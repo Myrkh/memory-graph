@@ -34,22 +34,35 @@ function readStorage(): Storage | null {
 }
 
 /**
- * Persists a graph to localStorage under `storageKey`, and rehydrates it once on mount.
+ * Persists a graph to localStorage under `storageKey`, rehydrates it once
+ * on mount, and **keeps tabs in sync** via the browser's native `storage`
+ * event — any `setItem` on the same origin fires a `storage` event in
+ * every OTHER tab, so we pick up peer writes and restore into the reducer.
  *
  * - Reads on mount: if a snapshot exists, calls `onRestore(data)`.
- * - Writes on every state change (after the initial mount read).
+ * - Writes on every state change (after the initial mount read),
+ *   skipping the write when localStorage already matches — breaks the
+ *   intertab echo loop cleanly and avoids redundant serialization.
+ * - On write failure (quota / privacy mode), calls `onPersistError` if
+ *   provided so the consumer can surface a toast or downgrade a feature
+ *   instead of failing silently.
  * - `showPassages` is intentionally NOT persisted, matching the vanilla reference.
  */
 export function usePersistence(
   state: GraphState,
   storageKey: string,
   onRestore: (data: SerializedGraph) => void,
+  onPersistError?: (err: Error) => void,
 ): UsePersistenceReturn {
   const onRestoreRef = useRef(onRestore);
   onRestoreRef.current = onRestore;
 
+  const onPersistErrorRef = useRef(onPersistError);
+  onPersistErrorRef.current = onPersistError;
+
   const hasRestoredRef = useRef(false);
 
+  // Initial mount restore --------------------------------------------------
   useEffect(() => {
     if (hasRestoredRef.current) return;
     hasRestoredRef.current = true;
@@ -60,14 +73,31 @@ export function usePersistence(
     if (parsed) onRestoreRef.current(parsed);
   }, [storageKey]);
 
+  // Intertab sync · listen to peer writes on the same origin ---------------
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onStorage = (e: StorageEvent): void => {
+      if (e.key !== storageKey || !e.newValue) return;
+      const parsed = parseStoredPayload(e.newValue);
+      if (parsed) onRestoreRef.current(parsed);
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [storageKey]);
+
+  // Write on state change (guarded against redundant + echo writes) --------
   useEffect(() => {
     if (!hasRestoredRef.current) return;
     const storage = readStorage();
     if (!storage) return;
     try {
-      storage.setItem(storageKey, JSON.stringify(serialize(state)));
-    } catch {
-      // Storage quota / privacy mode — swallow like the vanilla does.
+      const serialized = JSON.stringify(serialize(state));
+      if (storage.getItem(storageKey) === serialized) return;
+      storage.setItem(storageKey, serialized);
+    } catch (err) {
+      onPersistErrorRef.current?.(
+        err instanceof Error ? err : new Error(String(err)),
+      );
     }
   }, [state, storageKey]);
 
@@ -116,8 +146,10 @@ export function usePersistence(
     if (!storage) return;
     try {
       storage.removeItem(storageKey);
-    } catch {
-      // swallow
+    } catch (err) {
+      onPersistErrorRef.current?.(
+        err instanceof Error ? err : new Error(String(err)),
+      );
     }
   }, [storageKey]);
 

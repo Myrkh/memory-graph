@@ -59,6 +59,48 @@ Then anywhere inside, on any DOM element:
 
 Every `[data-mg-id]` gets uniform behavior: tracked, annotatable (partial selection → inline mark, full selection → block treatment), hover-linked, flash-reachable, persistable.
 
+## Multi-page tracking — the `route` dimension
+
+Pass a `route` prop on `<Root>` to tell the graph which "bucket" the user is currently in. Whatever the consumer wants — URL pathname, tab id, doc id, feature flag. Agnostic of any routing library.
+
+```tsx
+<MemoryGraph.Root
+  storageKey="mg:my-app"
+  route={currentPathname}        // "/home", "/docs", "/pricing", …
+  onPersistError={(err) => toast(`Couldn't save: ${err.message}`)}
+>
+  {/* Stays rendered across route changes — track across the whole site. */}
+</MemoryGraph.Root>
+```
+
+When two or more unique routes accumulate in state, the `<Graph>` automatically switches to a **2D column layout** — one column per route, laid out chronologically in the order routes were first visited. Edges crossing a route boundary get a distinct coral-dashed treatment (`data-mg-route-jump`). Single-route graphs stay in the legacy single-column mode.
+
+The graph auto-follows your current route with a smooth horizontal scroll, so navigating to a new page centers its column in the viewport.
+
+## Custom node shapes — `renderNode`
+
+Give a specific tracked element its own SVG without polluting `NodeKind` with site-specific values :
+
+```tsx
+<MemoryGraph.Graph
+  renderNode={(item, ctx) =>
+    item.id === 'ui-theme-toggle'
+      ? <ThemeToggleNode r={ctx.r} />   /* your custom shape */
+      : null                             /* fall back to default kind */
+  }
+/>
+```
+
+Pulse, pinned ring, highlight ring and order label stay library-managed — the escape hatch only replaces the shape geometry.
+
+## Zoom controls
+
+`<MemoryGraph.Graph>` ships a floating zoom satellite (in / out / fit) anchored to the panel's right edge. Focal-point preservation keeps the viewport center anchored through the transition; a brief blur masks any perceptual jitter. Visibility is gated by the panel open state, so the controls never linger off-screen.
+
+## Intertab sync
+
+Multiple tabs open on the same origin stay in sync automatically via the browser's native `storage` event. Any write from one tab is picked up by every other tab of the same origin and rehydrates into the reducer — no BroadcastChannel, no sync server, no dependency. Zero config.
+
 ## Four capture strategies
 
 | strategy | when it fires | inferred from |
