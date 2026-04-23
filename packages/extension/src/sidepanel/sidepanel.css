@@ -1,0 +1,134 @@
+/* ============================================================================
+ * Extension side panel · v0.3.0 step 3.5 styles.
+ *
+ * The sidePanel IS the panel — no slide-in chrome, no fixed positioning,
+ * no backdrop. We replicate ONLY the flex-column behavior of `.mg-panel`
+ * so every library primitive below (Head, Stats, DeepestIndicator, Graph,
+ * IntensitySparkline, Footer) renders with its own token-driven styles.
+ *
+ * Premium themes will swap tokens via `[data-mg-theme="…"]` without
+ * touching this structural CSS.
+ * ==========================================================================*/
+
+/* The Chrome side panel iframe has its own viewport — pin html / body
+ * to the full dynamic height and clamp `overflow: hidden` so nothing
+ * can ever scroll the outer document. All scrolling happens INSIDE
+ * the library's `.mg-graph-wrap`. `100dvh` (not `100vh`) so iOS/Android
+ * webviews + Chrome with URL chrome don't leak pixels. */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+body {
+  background: var(--mg-bg);
+  color: var(--mg-fg);
+  font-family: var(--mg-font-serif);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* `.mgx-theme-root` is the transparent wrapper that carries the
+ * `[data-mg-theme="…"]` attribute. It exists purely to scope the
+ * active theme's custom properties to everything inside — the user
+ * flips the attribute via the shop picker, all `--mg-*` tokens swap
+ * in a frame. Must be `position: relative` so `<MemoryGraph.Tooltip>`
+ * and `<ThemeShop>` position correctly against it. */
+.mgx-theme-root {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The lib's `<Root>` renders its own `<div data-mg-root>` between the
+ * theme-root and `.mgx-panel`. Without help, that div is a non-flex
+ * block — `.mgx-panel`'s `flex: 1` collapses to content height and
+ * the drawer floats to a ghost position. Pass `className="mgx-root"`
+ * to `<Root>` to lift that intermediate div into the flex chain. */
+.mgx-root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* `.mgx-panel` mirrors the flex-column plumbing of `.mg-panel` (the
+ * lib's slide-in container) without the positioning chrome — we ARE
+ * the panel. Flex:1 now works because the `.mgx-root` wrapper is
+ * itself a flex column. No padding-bottom : the `<BottomDrawer>`
+ * sits flush at `bottom: 0`, its closed-handle row (22 px) overlays
+ * the very last 22 px of the graph — invisible in practice since
+ * scrollable content rarely terminates exactly there. */
+.mgx-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* -- Narrow-viewport polish --------------------------------------------
+
+   Chrome side panels live in a ~320-400px-wide slot. The library's
+   `.mg-stats` defaults to `grid-template-columns: repeat(4, 1fr)` which
+   becomes cramped below ~380px. Drop to a 2×2 grid for readability.
+*/
+@media (max-width: 380px) {
+  .mg-stats {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 14px;
+  }
+}
+
+/* ============================================================================
+ * AnnotationsTrack repositioning for the sidepanel context.
+ *
+ * The lib's default Track is `position: fixed; left: clamp(340, 32vw,
+ * 460)` — flush to the right of a slide-in Panel that lives on a wide
+ * browser window. It ALSO hides itself below 900px viewport (desktop-
+ * only, mobile layout deferred). The Chrome sidepanel is ~360px wide
+ * AND IS the panel, so both rules misfire : the Track is hidden by
+ * the media query, and even if shown it'd be positioned outside the
+ * sidepanel viewport.
+ *
+ * Override : within `.mgx-panel`, anchor the Track to the RIGHT edge,
+ * let it animate its width from 0 → 100 % (lib's native reveal), and
+ * re-enable rendering below 900px. Motion tokens + data-attrs untouched
+ * so the lib drives it identically.
+ * ==========================================================================*/
+
+@media (max-width: 900px) {
+  .mgx-panel .mg-annotations-track {
+    display: block;
+    position: absolute;
+    left: auto;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: auto;
+    max-width: 100%;
+    z-index: 10;
+    transform: none;
+  }
+  .mgx-panel .mg-annotations-track[data-mg-visible] {
+    width: 100%;
+    max-width: 100%;
+  }
+  /* The lib hides the toggle < 900 px (desktop-only default). The
+   * sidepanel IS narrow by construction — re-enable it so the user
+   * can actually open the Track overlay. */
+  .mgx-panel .mg-annotations-track-toggle {
+    display: inline-flex;
+  }
+}
+
+/* Bottom drawer + shop modal styles live in dedicated files
+ * (`drawer.css`, `shop.css`) imported alongside this one from
+ * `sidepanel.tsx`. Keeps this shell focused on `.mgx-panel` + Track. */

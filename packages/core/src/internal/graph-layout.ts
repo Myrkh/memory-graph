@@ -79,6 +79,13 @@ const TIME_HEIGHT_PX = 600;
 const MINUTE_MS = 60_000;
 const COLUMN_MIN_WIDTH = 200;
 
+export interface LayoutOptions {
+  /** When set, filter items to only stations whose `site` matches ;
+   * passages without a site are dropped. Leave undefined to include
+   * everything (default — v0.2.0 behaviour). */
+  site?: string;
+}
+
 /**
  * Compute node positions and the total SVG dimensions for a set of items.
  * Items must already be sorted by `firstAt` ascending.
@@ -87,8 +94,17 @@ export function layoutGraph(
   items: GraphItem[],
   svgWidth: number,
   config: LayoutConfig,
+  options: LayoutOptions = {},
 ): GraphLayout | null {
-  if (items.length === 0) return null;
+  const { site } = options;
+  // Per-site filter keeps BOTH stations and passages whose `site` matches
+  // — passages without a site (legacy / pre-v0.3.0) are dropped, which
+  // matches the semantics "show the quiet dots of this site only".
+  const filtered = site === undefined
+    ? items
+    : items.filter((it) => it.site === site);
+  if (filtered.length === 0) return null;
+  items = filtered;
 
   const firstTime = items[0]!.firstAt;
   const lastTime = items[items.length - 1]!.firstAt;
@@ -246,6 +262,7 @@ export function buildItems(
         visits: 0,
         pinned: false,
         order: -1,
+        ...(passage.site !== undefined ? { site: passage.site } : {}),
       });
     }
   }

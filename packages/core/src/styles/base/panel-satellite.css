@@ -1,0 +1,158 @@
+/* ============================================================================
+ * Panel satellite · top-right floating toolbar for panel-meta actions
+ * (theme shop, settings). Mirror of the graph's bottom-right zoom
+ * satellite with the same hairline pill grammar — same radii (12px
+ * outer, 6px interior buttons → rayons concentriques), same backdrop-
+ * blur, same `[data-mg-open]` visibility gating, same motion tokens.
+ *
+ * Button hover grammar matches `.mg-graph-control` so both satellites
+ * read as one family. Each icon inside carries its own
+ * `.mg-icon--<name>` hover choreography (see bottom of this file for
+ * the Palette-Orbits rotation).
+ * ==========================================================================*/
+
+.mg-panel-satellite {
+  position: absolute;
+  top: 24px;
+  right: -42px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 3px;
+  background: color-mix(in oklch, var(--mg-surface) 78%, transparent);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border: 1px solid var(--mg-border);
+  border-radius: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--mg-duration-moderate, 280ms) var(--mg-ease-standard, ease-out);
+}
+
+[data-mg-open] .mg-panel-satellite {
+  opacity: 0.5;
+  pointer-events: auto;
+}
+
+[data-mg-open] .mg-panel-satellite:hover,
+[data-mg-open] .mg-panel-satellite:focus-within {
+  opacity: 1;
+}
+
+@media (max-width: 520px) {
+  .mg-panel-satellite {
+    right: 12px;
+    top: 12px;
+  }
+}
+
+/* -- Button (same grammar as .mg-graph-control) ------------------------- */
+
+.mg-panel-satellite__button {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--mg-fg-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    background var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    transform var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+
+.mg-panel-satellite__button:hover,
+.mg-panel-satellite__button:focus-visible {
+  color: var(--mg-accent);
+  background: color-mix(in oklch, var(--mg-accent) 8%, transparent);
+  outline: none;
+}
+
+.mg-panel-satellite__button:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.mg-panel-satellite__button .mg-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+/* -- Icon · Theme Swap · diagonal rotates on hover --------------------- */
+
+/* Central hub ring — stays (4-fold rotational symmetry). */
+.mg-icon--theme-swap .mg-icon__hub {
+  stroke: currentColor;
+  stroke-width: 1.3;
+  fill: none;
+  opacity: 0.85;
+}
+
+/* Cardinal ticks — latent structure, intentionally muted. */
+.mg-icon--theme-swap .mg-icon__ticks path {
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-linecap: round;
+  opacity: 0.4;
+  fill: none;
+}
+
+/* Dashed arcs going from the active corners into the hub. */
+.mg-icon--theme-swap .mg-icon__arc {
+  stroke: var(--mg-accent);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-dasharray: 1 2;
+  fill: none;
+}
+
+/* Current-theme endpoints · hollow coral rings. */
+.mg-icon--theme-swap .mg-icon__endpoint {
+  stroke: var(--mg-accent);
+  stroke-width: 1.3;
+  fill: none;
+}
+
+/* Candidate theme positions · filled dots waiting to be promoted. */
+.mg-icon--theme-swap .mg-icon__candidate {
+  fill: currentColor;
+  opacity: 0.55;
+  stroke: none;
+}
+
+/* The whole composition rotates 90° on hover — the hub + ticks are
+ * 4-fold symmetric so they look identical, but the 4-corner set swaps
+ * diagonals, showing the active arcs + hollow endpoints move onto the
+ * previously-latent diagonal. Lines travelling from one end to the
+ * other, literally. */
+.mg-icon--theme-swap .mg-icon__swap-group {
+  transform-origin: center;
+  transform-box: view-box;
+  transition: transform var(--mg-duration-moderate, 280ms)
+    var(--mg-ease-expo-out, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.mg-panel-satellite__button:hover .mg-icon--theme-swap .mg-icon__swap-group,
+.mg-panel-satellite__button:focus-visible
+  .mg-icon--theme-swap
+  .mg-icon__swap-group,
+.mg-panel-title-action:hover .mg-icon--theme-swap .mg-icon__swap-group,
+.mg-panel-title-action:focus-visible
+  .mg-icon--theme-swap
+  .mg-icon__swap-group {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-panel-satellite,
+  .mg-panel-satellite__button,
+  .mg-icon--theme-swap .mg-icon__swap-group {
+    transition: none !important;
+  }
+}

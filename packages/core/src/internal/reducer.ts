@@ -89,8 +89,17 @@ export type Action =
       kind?: NodeKind;
       /** Route bucket — stored on the Node on first promotion, backfilled on re-commit. */
       route?: string;
+      /** Site bucket (one level above route) — same birth-immutable + backfill semantics as `route`. */
+      site?: string;
     }
-  | { type: 'togglePin'; paraId: ParagraphId; textContent: string; now: number; route?: string }
+  | {
+      type: 'togglePin';
+      paraId: ParagraphId;
+      textContent: string;
+      now: number;
+      route?: string;
+      site?: string;
+    }
   | { type: 'clear' }
   | { type: 'restore'; data: SerializedGraph }
   | { type: 'toggleShowPassages' }
@@ -124,7 +133,7 @@ function commitCase(
   action: Extract<Action, { type: 'commit' }>,
   config: MemoryGraphConfig,
 ): ReducerState {
-  const { paraId, dwellMs, textContent, now, kind, route } = action;
+  const { paraId, dwellMs, textContent, now, kind, route, site } = action;
   const { graph, previousStationId } = state;
 
   const intensityBuckets = pushIntensity(graph.intensityBuckets, dwellMs, now);
@@ -137,6 +146,7 @@ function commitCase(
     const passage: Passage = {
       firstAt: now,
       extract: truncate(textContent, EXTRACT_LEN_PASSAGE),
+      ...(site !== undefined ? { site } : {}),
     };
     passages.set(paraId, passage);
     return { ...state, graph: { ...graph, passages, intensityBuckets } };
@@ -156,6 +166,7 @@ function commitCase(
       // so old graphs upgrade without forcing consumers to clearPersisted().
       kind: existing.kind ?? kind ?? 'paragraph',
       ...(existing.route === undefined && route !== undefined ? { route } : {}),
+      ...(existing.site === undefined && site !== undefined ? { site } : {}),
     });
     if (previousStationId && previousStationId !== paraId) {
       nextEdges = [
@@ -173,6 +184,7 @@ function commitCase(
       extract: truncate(textContent, EXTRACT_LEN_STATION),
       kind: kind ?? 'paragraph',
       ...(route !== undefined ? { route } : {}),
+      ...(site !== undefined ? { site } : {}),
     });
     if (previousStationId && previousStationId !== paraId) {
       nextEdges = [

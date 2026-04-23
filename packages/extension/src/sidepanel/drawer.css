@@ -1,0 +1,136 @@
+/* ============================================================================
+ * Bottom drawer · hides IntensitySparkline + Footer behind a chevron
+ * handle at the panel's bottom edge. Graph gains ~70 vertical px.
+ *
+ * Animation : grid-template-rows from `auto 0fr` (closed — body
+ * collapsed) to `auto 1fr` (open — body expands to content height).
+ * Modern CSS grid trick · smooth content-aware reveal, no magic
+ * numbers. Chevron rotates 180° on open.
+ *
+ * Discoverability : subtle 3s opacity pulse on the chevron when closed,
+ * tiny peek of the drawer body (2px of border) always visible. The
+ * chevron itself uses the lib's coral accent on hover/focus.
+ * ==========================================================================*/
+
+.mgx-drawer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 25;
+  display: grid;
+  grid-template-rows: auto 0fr;
+  /* Slightly higher opacity than surface-96 so the drawer reads as a
+   * distinct surface even on dense themes (neon, plex-dark) where
+   * surface-96 blends into the panel bg. */
+  background: color-mix(in oklch, var(--mg-surface) 88%, var(--mg-bg));
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  border-top: 1px solid var(--mg-border);
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 -6px 24px color-mix(in oklch, var(--mg-fg) 6%, transparent);
+  /* Exit · clean retreat with the standard Stit'Claude ease. */
+  transition: grid-template-rows var(--mg-duration-moderate, 340ms)
+    var(--mg-ease-standard, cubic-bezier(0.2, 0, 0, 1));
+}
+
+/* Reveal · Stit'Claude spring-snappy easing gives the `0fr → 1fr` grid
+ * row a subtle overshoot — the body peeks a hair past its final size
+ * and settles in. Same token used by the lib's own motion system,
+ * so the drawer reveals with the same "physics" as the rest. */
+.mgx-drawer:hover,
+.mgx-drawer:focus-within {
+  grid-template-rows: auto 1fr;
+  transition: grid-template-rows var(--mg-duration-slow, 520ms)
+    var(--mg-ease-spring-snappy, cubic-bezier(0.3, 1.6, 0.5, 1));
+}
+
+/* -- Handle · chevron + peek ------------------------------------------- */
+
+.mgx-drawer__handle {
+  display: grid;
+  place-items: center;
+  height: 26px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  /* Use the accent at rest (rather than fg-subtle) so the chevron
+   * stays visibly present on all themes without being loud. The
+   * discoverability pulse animates opacity, not color. */
+  color: var(--mg-accent);
+  transition: color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+
+.mgx-drawer__handle:hover,
+.mgx-drawer__handle:focus-visible,
+.mgx-drawer:hover .mgx-drawer__handle,
+.mgx-drawer:focus-within .mgx-drawer__handle {
+  color: var(--mg-accent);
+  outline: none;
+}
+
+.mgx-drawer__chevron {
+  width: 26px;
+  height: 11px;
+  display: block;
+  transition: transform var(--mg-duration-moderate, 280ms)
+    var(--mg-ease-expo-out, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.mgx-drawer__chevron path {
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.mgx-drawer:hover .mgx-drawer__chevron,
+.mgx-drawer:focus-within .mgx-drawer__chevron {
+  transform: rotate(180deg);
+}
+
+/* Discoverability pulse · only when CLOSED + no focus · Rams #4. */
+.mgx-drawer:not(:hover):not(:focus-within) .mgx-drawer__chevron {
+  animation: mgx-drawer-chevron-pulse 3s var(--mg-ease-standard, ease-out) infinite;
+}
+
+@keyframes mgx-drawer-chevron-pulse {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 1; }
+}
+
+/* -- Body · collapsible content area -----------------------------------
+ *
+ * Zero horizontal padding · the lib's own primitives (`.mg-intensity`,
+ * `.mg-panel__footer`) already own their 20 px gutter. Nesting another
+ * padding here would stack them and the sparkline would stop short of
+ * the drawer edges. Pixel-clean = let the canonical child own the
+ * gutter, never double it.
+ *
+ * No `border-top` either · `.mg-intensity` draws its own hairline, and
+ * stacking two borders on top of each other (drawer border-top + body
+ * border-top + intensity border-top) was producing a visible 2–3 px
+ * line stack. One border only. */
+.mgx-drawer__body {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.mgx-drawer__body-inner {
+  padding: 0;
+}
+
+/* -- Reduced motion · drawer stays open, no hover animation ------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .mgx-drawer {
+    transition: none;
+    grid-template-rows: auto 1fr;
+  }
+  .mgx-drawer__chevron {
+    animation: none;
+    transform: rotate(180deg);
+  }
+}

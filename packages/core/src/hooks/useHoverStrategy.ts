@@ -19,12 +19,15 @@ export interface UseHoverStrategyOptions {
   kindInference?: KindInference;
   /** Abstract route bucket stamped on every committed node. */
   route?: string;
+  /** Abstract site bucket (one level above route). */
+  site?: string;
   onCommit: (
     paraId: ParagraphId,
     dwellMs: number,
     textContent: string,
     kind?: NodeKind,
     route?: string,
+    site?: string,
   ) => void;
 }
 
@@ -49,11 +52,14 @@ export function useHoverStrategy(
     inference = 'smart',
     kindInference = 'smart',
     route,
+    site,
   } = options;
   const onCommitRef = useRef(options.onCommit);
   onCommitRef.current = options.onCommit;
   const routeRef = useRef(route);
   routeRef.current = route;
+  const siteRef = useRef(site);
+  siteRef.current = site;
 
   useEffect(() => {
     const root = container ?? (typeof document !== 'undefined' ? document.body : null);
@@ -91,6 +97,7 @@ export function useHoverStrategy(
           el.textContent ?? '',
           kind,
           routeRef.current,
+          siteRef.current,
         );
         timers.delete(paraId);
       }, triggerMs);

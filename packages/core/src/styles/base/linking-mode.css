@@ -6,11 +6,28 @@
  * ==========================================================================*/
 
 /**
- * Global crosshair while picking a link target. Scoped to body so the cue
- * appears wherever the reader's mouse lands — the text, the panel, empty
- * space — consistent with the "linking" intent.
+ * Global crosshair while picking a link target. The universal `*`
+ * selector + `!important` is needed because host sites' own cursors on
+ * `<a>`, `<button>`, `.mg-annotation` etc. would otherwise win — CSS
+ * `cursor` isn't inherited the same way most properties are, every
+ * element uses its own explicit value. Without the force, the reader
+ * sees a hand on a link and can't tell they're mid-link-picking.
  */
-body[data-mg-linking] { cursor: crosshair; }
+body[data-mg-linking],
+body[data-mg-linking] * {
+  cursor: crosshair !important;
+}
+
+/* Annotations become the click target · `copy` cursor signals "the new
+ * link will land here" — distinct from the crosshair background. */
+body[data-mg-linking] .mg-annotation,
+body[data-mg-linking] .mg-annotation *,
+body[data-mg-linking] [data-mg-annotation-id],
+body[data-mg-linking] [data-mg-annotation-id] *,
+body[data-mg-linking] .mg-annotation-satellite,
+body[data-mg-linking] .mg-annotation-satellite * {
+  cursor: copy !important;
+}
 
 /* Existing annotations pulse once (600ms) when linking mode enters so the
  * reader can see the available link targets at a glance. */

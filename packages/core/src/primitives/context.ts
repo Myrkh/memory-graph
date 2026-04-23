@@ -68,7 +68,7 @@ export interface MemoryGraphContextValue {
   setZoneElement: (el: HTMLElement | null) => void;
 
   exportJson: (meta?: ExportMeta) => string;
-  clearPersisted: () => void;
+  clearPersisted: () => Promise<void>;
 
   open: boolean;
   openPanel: () => void;

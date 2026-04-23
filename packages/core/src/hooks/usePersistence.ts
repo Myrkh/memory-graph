@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { CURRENT_SCHEMA_VERSION, type GraphState, type SerializedGraph } from '../types.js';
-import { parseStoredPayload } from '../internal/persistence-migration.js';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { type GraphState, type SerializedGraph } from '../types.js';
+import { serializeGraph } from '../internal/serialize.js';
+import { createLocalStorageAdapter } from '../internal/local-storage-adapter.js';
+import type { PersistenceAdapter } from '../persistence-adapter.js';
 
 export interface ExportMeta {
   /** Absolute URL of the source document. Defaults to `window.location.href` when available. */
@@ -12,47 +14,35 @@ export interface ExportMeta {
 export interface UsePersistenceReturn {
   /** Serialize the current graph into the richer JSON format used by the vanilla export button. */
   exportJson(meta?: ExportMeta): string;
-  /** Remove the persisted snapshot from localStorage (does not touch the in-memory graph). */
-  clearPersisted(): void;
-}
-
-function serialize(state: GraphState): SerializedGraph {
-  return {
-    version: CURRENT_SCHEMA_VERSION,
-    nodes: [...state.nodes.entries()],
-    edges: state.edges.slice(),
-    passages: [...state.passages.entries()],
-    annotations: [...state.annotations.values()],
-    intensityBuckets: state.intensityBuckets.slice(),
-  };
-}
-
-function readStorage(): Storage | null {
-  if (typeof globalThis === 'undefined') return null;
-  const anyGlobal = globalThis as { localStorage?: Storage };
-  return anyGlobal.localStorage ?? null;
+  /** Remove the persisted snapshot (does not touch the in-memory graph). */
+  clearPersisted(): Promise<void>;
 }
 
 /**
- * Persists a graph to localStorage under `storageKey`, rehydrates it once
- * on mount, and **keeps tabs in sync** via the browser's native `storage`
- * event — any `setItem` on the same origin fires a `storage` event in
- * every OTHER tab, so we pick up peer writes and restore into the reducer.
+ * Persists a graph via a pluggable `PersistenceAdapter`. Default
+ * behaviour (backward-compatible with v0.2) : wrap `storageKey` in a
+ * `localStorage` adapter. Consumers can override with `adapter` to
+ * target `chrome.storage.local`, a custom sync engine, etc. — the lib
+ * stays runtime-agnostic.
  *
- * - Reads on mount: if a snapshot exists, calls `onRestore(data)`.
- * - Writes on every state change (after the initial mount read),
- *   skipping the write when localStorage already matches — breaks the
- *   intertab echo loop cleanly and avoids redundant serialization.
- * - On write failure (quota / privacy mode), calls `onPersistError` if
- *   provided so the consumer can surface a toast or downgrade a feature
- *   instead of failing silently.
- * - `showPassages` is intentionally NOT persisted, matching the vanilla reference.
+ * Lifecycle :
+ *   · mount · `adapter.read()` → `onRestore(data)` if present
+ *   · state change · serialize + compare with last-persisted ref →
+ *     `adapter.write(graph)` when changed
+ *   · external peer writes · `adapter.subscribe` → `onRestore(data)`,
+ *     but skips the callback when the incoming payload equals our own
+ *     last write (echo guard)
+ *
+ * `onPersistError` receives any error thrown by the adapter's
+ * async methods — consumers can surface a toast instead of losing
+ * state silently.
  */
 export function usePersistence(
   state: GraphState,
   storageKey: string,
   onRestore: (data: SerializedGraph) => void,
   onPersistError?: (err: Error) => void,
+  adapter?: PersistenceAdapter,
 ): UsePersistenceReturn {
   const onRestoreRef = useRef(onRestore);
   onRestoreRef.current = onRestore;
@@ -60,46 +50,79 @@ export function usePersistence(
   const onPersistErrorRef = useRef(onPersistError);
   onPersistErrorRef.current = onPersistError;
 
-  const hasRestoredRef = useRef(false);
+  // Stable adapter reference · default to localStorage keyed by storageKey.
+  const effectiveAdapter = useMemo<PersistenceAdapter>(
+    () => adapter ?? createLocalStorageAdapter(storageKey),
+    [adapter, storageKey],
+  );
+  const adapterRef = useRef(effectiveAdapter);
+  adapterRef.current = effectiveAdapter;
 
-  // Initial mount restore --------------------------------------------------
+  const hasRestoredRef = useRef(false);
+  /** Last payload we either wrote OR received — used to skip echo writes
+   * and echo restores. `null` means "we haven't sync'd yet". */
+  const lastPersistedRef = useRef<string | null>(null);
+
+  const dispatchError = useCallback((err: unknown) => {
+    const e = err instanceof Error ? err : new Error(String(err));
+    onPersistErrorRef.current?.(e);
+  }, []);
+
+  // Initial mount restore ------------------------------------------------
+  // Critical : `hasRestoredRef` must only flip AFTER the async read
+  // resolves. Otherwise the write effect below sees a truthy flag on
+  // mount, serializes the EMPTY `initialReducerState`, and clobbers
+  // whatever the peer context previously persisted — the classic
+  // "fresh mount wipes the shared storage" bug.
   useEffect(() => {
     if (hasRestoredRef.current) return;
-    hasRestoredRef.current = true;
-    const storage = readStorage();
-    if (!storage) return;
-    const raw = storage.getItem(storageKey);
-    const parsed = parseStoredPayload(raw);
-    if (parsed) onRestoreRef.current(parsed);
-  }, [storageKey]);
-
-  // Intertab sync · listen to peer writes on the same origin ---------------
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const onStorage = (e: StorageEvent): void => {
-      if (e.key !== storageKey || !e.newValue) return;
-      const parsed = parseStoredPayload(e.newValue);
-      if (parsed) onRestoreRef.current(parsed);
+    let cancelled = false;
+    adapterRef.current
+      .read()
+      .then((data) => {
+        if (cancelled) return;
+        if (data) {
+          lastPersistedRef.current = JSON.stringify(data);
+          onRestoreRef.current(data);
+        }
+        hasRestoredRef.current = true;
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        dispatchError(err);
+        // Unblock writes on error · the consumer will see their own
+        // data persist even if the first read crashed.
+        hasRestoredRef.current = true;
+      });
+    return () => {
+      cancelled = true;
     };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, [storageKey]);
+  }, [dispatchError]);
 
-  // Write on state change (guarded against redundant + echo writes) --------
+  // Subscribe to peer writes --------------------------------------------
+  useEffect(() => {
+    const unsubscribe = effectiveAdapter.subscribe((data) => {
+      if (!data) {
+        lastPersistedRef.current = null;
+        return;
+      }
+      const str = JSON.stringify(data);
+      if (str === lastPersistedRef.current) return; // our own echo
+      lastPersistedRef.current = str;
+      onRestoreRef.current(data);
+    });
+    return unsubscribe;
+  }, [effectiveAdapter]);
+
+  // Write on state change (guarded) -------------------------------------
   useEffect(() => {
     if (!hasRestoredRef.current) return;
-    const storage = readStorage();
-    if (!storage) return;
-    try {
-      const serialized = JSON.stringify(serialize(state));
-      if (storage.getItem(storageKey) === serialized) return;
-      storage.setItem(storageKey, serialized);
-    } catch (err) {
-      onPersistErrorRef.current?.(
-        err instanceof Error ? err : new Error(String(err)),
-      );
-    }
-  }, [state, storageKey]);
+    const serialized = serializeGraph(state);
+    const str = JSON.stringify(serialized);
+    if (str === lastPersistedRef.current) return; // no change vs last sync
+    lastPersistedRef.current = str;
+    adapterRef.current.write(serialized).catch(dispatchError);
+  }, [state, dispatchError]);
 
   const exportJson = useCallback(
     (meta?: ExportMeta): string => {
@@ -141,17 +164,24 @@ export function usePersistence(
     [state],
   );
 
-  const clearPersisted = useCallback(() => {
-    const storage = readStorage();
-    if (!storage) return;
+  const clearPersisted = useCallback(async () => {
     try {
-      storage.removeItem(storageKey);
+      lastPersistedRef.current = null;
+      // "Empty" graph write ; the adapter decides whether to delete or
+      // store an empty snapshot — the behaviour is equivalent for the
+      // reducer since both hydrate into an empty GraphState.
+      await adapterRef.current.write({
+        version: 2,
+        nodes: [],
+        edges: [],
+        passages: [],
+        annotations: [],
+        intensityBuckets: [],
+      });
     } catch (err) {
-      onPersistErrorRef.current?.(
-        err instanceof Error ? err : new Error(String(err)),
-      );
+      dispatchError(err);
     }
-  }, [storageKey]);
+  }, [dispatchError]);
 
   return { exportJson, clearPersisted };
 }

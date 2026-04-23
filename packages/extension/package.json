@@ -1,0 +1,32 @@
+{
+  "name": "@myrkh/memory-graph-extension",
+  "private": true,
+  "version": "0.3.0",
+  "description": "Chrome extension · memory-graph ambient across every site.",
+  "type": "module",
+  "scripts": {
+    "build:icons": "node scripts/build-icons.mjs",
+    "prebuild": "$npm_execpath run build:icons",
+    "build": "tsc --noEmit && vite build && vite build --config vite.content.config.ts",
+    "dev": "vite build --watch",
+    "dev:content": "vite build --config vite.content.config.ts --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@myrkh/memory-graph": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/chrome": "^0.0.287",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.1.0"
+  }
+}

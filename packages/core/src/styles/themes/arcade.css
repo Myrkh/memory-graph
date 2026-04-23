@@ -1,0 +1,205 @@
+/* ============================================================================
+ * @myrkh/memory-graph · "arcade" theme
+ *
+ * HOUSE     : Playful-Confident
+ * PANTHEON  : Teenage Engineering, Arc browser, Figma's own brand,
+ *             Panic (Playdate), Pentagram x MIT Media Lab
+ * TYPO      : Bricolage Grotesque (display, chunky) ·
+ *             Space Grotesk (body) · Departure Mono (data, retro CRT)
+ * ACCENT    : Sunny orange — warm, friendly, decisive.
+ * PERSONA   : « Outil de création avec du caractère. » Le thème qui
+ *             assume d'être différent : bordures plus épaisses,
+ *             rayons plus généreux, fond en grille pixel 16×16, mono
+ *             CRT d'arcade. Discipliné mais joueur.
+ *
+ * SIGNATURE : the graph viewport carries a real 16×16 px grid
+ * pattern built from two 1 px linear gradients — the reading attention
+ * nodes sit on a graph-paper background, Shigeru Ban-style. No
+ * skeuomorph, no cutesy, just honest structural character.
+ *
+ * Borders bump to 1.5 px. Radii bump to 12-16 px. The mono font is
+ * Departure Mono — Stripe's quietly-licensed retro typeface that
+ * carries CRT pixel DNA without being ironic about it. The whole
+ * theme reads as "competent builder's toolbox", not "kidcore".
+ * ==========================================================================*/
+
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+/* -- Light scheme (default · grille claire) ---------------------------- */
+
+[data-mg-theme='arcade'] {
+  color-scheme: light;
+
+  --mg-ink-1:  oklch(0.984 0.006 80);
+  --mg-ink-2:  oklch(0.962 0.008 78);
+  --mg-ink-3:  oklch(0.932 0.010 76);
+  --mg-ink-4:  oklch(0.885 0.011 72);
+  --mg-ink-5:  oklch(0.825 0.012 68);
+  --mg-ink-6:  oklch(0.690 0.013 60);
+  --mg-ink-7:  oklch(0.550 0.014 52);
+  --mg-ink-8:  oklch(0.425 0.014 48);
+  --mg-ink-9:  oklch(0.328 0.014 44);
+  --mg-ink-10: oklch(0.240 0.013 40);
+  --mg-ink-11: oklch(0.170 0.013 38);
+  --mg-ink-12: oklch(0.118 0.013 36);
+
+  /* Sunny orange · warm but not fiery. Teenage Engineering's OP-1
+   * orange button, not a fast-food brand. */
+  --mg-sunny-3:  oklch(0.968 0.035 65);
+  --mg-sunny-6:  oklch(0.810 0.130 58);
+  --mg-sunny-8:  oklch(0.730 0.175 52);
+  --mg-sunny-9:  oklch(0.655 0.205 48);
+  --mg-sunny-10: oklch(0.575 0.200 45);
+  --mg-sunny-11: oklch(0.480 0.175 42);
+
+  --mg-bg: var(--mg-ink-1);
+  --mg-surface: var(--mg-ink-2);
+  --mg-border: var(--mg-ink-5);
+  --mg-fg: var(--mg-ink-12);
+  --mg-fg-muted: var(--mg-ink-10);
+  --mg-fg-subtle: var(--mg-ink-8);
+  --mg-accent: var(--mg-sunny-9);
+  --mg-accent-hover: var(--mg-sunny-10);
+  --mg-accent-subtle: var(--mg-sunny-3);
+  --mg-ring: var(--mg-sunny-8);
+
+  --mg-font-display: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif;
+  --mg-font-serif: 'Space Grotesk', system-ui, sans-serif;
+  --mg-font-sans: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --mg-font-mono: 'Space Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --mg-duration-fast: 100ms;
+  --mg-duration-normal: 180ms;
+  --mg-duration-moderate: 300ms;
+  --mg-duration-slow: 480ms;
+  --mg-ease-standard: cubic-bezier(0.22, 0.1, 0.15, 1);
+  --mg-ease-decelerate: cubic-bezier(0.05, 0.75, 0.1, 1);
+  --mg-ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Bouncier springs than other themes — arcade accepts playful motion. */
+  --mg-ease-spring-smooth: cubic-bezier(0.45, 1.5, 0.55, 1);
+  --mg-ease-spring-snappy: cubic-bezier(0.3, 1.8, 0.5, 1);
+
+  --mg-radius-sm: 6px;
+  --mg-radius-md: 12px;
+  --mg-radius-lg: 16px;
+  --mg-radius-pill: 9999px;
+
+  font-optical-sizing: auto;
+  font-synthesis: none;
+}
+
+/* -- SIGNATURE : 16×16 graph-paper grid on the graph viewport ---------- */
+
+[data-mg-theme='arcade'] .mg-graph-wrap {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklch, var(--mg-fg) 6%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--mg-fg) 6%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 16px 16px;
+  background-position: 0 0;
+}
+
+/* Preview card reuses the same grid, scaled down to 8px so the pattern
+ * reads at miniature size (preview is 96px tall vs. the live viewport). */
+[data-mg-theme='arcade'] .mgx-shop-card__preview {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklch, var(--mg-fg) 7%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--mg-fg) 7%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 8px 8px;
+  background-position: 0 0;
+}
+
+/* Chunky borders — the "builder's toolbox" character. */
+[data-mg-theme='arcade'] .mg-panel__head,
+[data-mg-theme='arcade'] .mg-foot,
+[data-mg-theme='arcade'] .mg-intensity,
+[data-mg-theme='arcade'] .mg-deepest {
+  border-width: 1.5px;
+}
+
+/* Display titles are extra-chunky — Bricolage 800 + tight tracking. */
+[data-mg-theme='arcade'] .mg-panel__title,
+[data-mg-theme='arcade'] .mgx-shop-card__preview-title {
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  font-style: normal;
+}
+
+[data-mg-theme='arcade'] ::selection {
+  background: color-mix(in oklch, var(--mg-accent) 38%, transparent);
+  color: var(--mg-ink-1);
+}
+
+[data-mg-theme='arcade'][data-mg-scheme='dark'] ::selection,
+[data-mg-theme='arcade'] [data-mg-scheme='dark'] ::selection {
+  background: color-mix(in oklch, var(--mg-accent) 50%, transparent);
+  color: var(--mg-ink-12);
+}
+
+/* -- Dark scheme · midnight arcade ------------------------------------- */
+
+[data-mg-theme='arcade'][data-mg-scheme='dark'],
+[data-mg-theme='arcade'] [data-mg-scheme='dark'] {
+  color-scheme: dark;
+
+  --mg-ink-1:  oklch(0.138 0.016 280);
+  --mg-ink-2:  oklch(0.172 0.017 280);
+  --mg-ink-3:  oklch(0.208 0.018 278);
+  --mg-ink-4:  oklch(0.248 0.019 275);
+  --mg-ink-5:  oklch(0.295 0.020 272);
+  --mg-ink-6:  oklch(0.352 0.019 268);
+  --mg-ink-7:  oklch(0.432 0.017 260);
+  --mg-ink-8:  oklch(0.548 0.014 250);
+  --mg-ink-9:  oklch(0.672 0.011 238);
+  --mg-ink-10: oklch(0.785 0.009 225);
+  --mg-ink-11: oklch(0.880 0.008 210);
+  --mg-ink-12: oklch(0.962 0.010 88);
+
+  --mg-sunny-3:  oklch(0.262 0.075 48);
+  --mg-sunny-6:  oklch(0.440 0.155 48);
+  --mg-sunny-8:  oklch(0.585 0.200 50);
+  --mg-sunny-9:  oklch(0.705 0.215 52);
+  --mg-sunny-10: oklch(0.785 0.195 54);
+  --mg-sunny-11: oklch(0.855 0.155 58);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-mg-theme='arcade']:not([data-mg-scheme='light']) {
+    color-scheme: dark;
+
+    --mg-ink-1:  oklch(0.138 0.016 280);
+    --mg-ink-2:  oklch(0.172 0.017 280);
+    --mg-ink-3:  oklch(0.208 0.018 278);
+    --mg-ink-4:  oklch(0.248 0.019 275);
+    --mg-ink-5:  oklch(0.295 0.020 272);
+    --mg-ink-6:  oklch(0.352 0.019 268);
+    --mg-ink-7:  oklch(0.432 0.017 260);
+    --mg-ink-8:  oklch(0.548 0.014 250);
+    --mg-ink-9:  oklch(0.672 0.011 238);
+    --mg-ink-10: oklch(0.785 0.009 225);
+    --mg-ink-11: oklch(0.880 0.008 210);
+    --mg-ink-12: oklch(0.962 0.010 88);
+
+    --mg-sunny-3:  oklch(0.262 0.075 48);
+    --mg-sunny-6:  oklch(0.440 0.155 48);
+    --mg-sunny-8:  oklch(0.585 0.200 50);
+    --mg-sunny-9:  oklch(0.705 0.215 52);
+    --mg-sunny-10: oklch(0.785 0.195 54);
+    --mg-sunny-11: oklch(0.855 0.155 58);
+  }
+}

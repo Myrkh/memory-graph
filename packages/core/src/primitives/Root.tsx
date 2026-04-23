@@ -13,6 +13,7 @@ import {
   type MemoryGraphConfig,
   type ParagraphId,
 } from '../types.js';
+import type { PersistenceAdapter } from '../persistence-adapter.js';
 import { useMemoryGraphState } from '../hooks/useMemoryGraphState.js';
 import { usePersistence } from '../hooks/usePersistence.js';
 import { useAttentionTracker } from '../hooks/useAttentionTracker.js';
@@ -49,12 +50,24 @@ export interface RootProps {
    */
   route?: string;
   /**
+   * Abstract "site" bucket (one level above `route`). Stamped on every
+   * committed node — drives `<TypewriterTabs>` + per-site filtering.
+   * Usually origin (extension) or workspace id (SaaS).
+   */
+  site?: string;
+  /**
    * Called when persistence fails (localStorage quota exceeded, private-
    * mode sandbox, disabled storage). Lets the consumer surface a toast
    * or downgrade a feature instead of failing silently. Swallowed by
    * default, matching the vanilla reference.
    */
   onPersistError?: (err: Error) => void;
+  /**
+   * Pluggable persistence. Leave undefined for the default localStorage
+   * backing — Chrome extensions, Electron renderers, and any runtime
+   * with its own storage layer pass a custom adapter here.
+   */
+  persistenceAdapter?: PersistenceAdapter;
   className?: string;
   style?: CSSProperties;
   children: ReactNode;
@@ -83,7 +96,9 @@ export function Root(props: RootProps) {
     open: openProp,
     onOpenChange,
     route,
+    site,
     onPersistError,
+    persistenceAdapter,
     className,
     style,
     children,
@@ -109,12 +124,14 @@ export function Root(props: RootProps) {
     storageKey,
     actions.restore,
     onPersistError,
+    persistenceAdapter,
   );
 
   const { currentParaId } = useAttentionTracker(zoneElement, {
     config,
     onCommit: actions.commit,
     ...(route !== undefined ? { route } : {}),
+    ...(site !== undefined ? { site } : {}),
   });
 
   /* -- Panel open (controlled + uncontrolled) --------------------------- */

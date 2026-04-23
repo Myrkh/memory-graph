@@ -1,0 +1,142 @@
+/* ============================================================================
+ * Constellation view · the meta-scale `∑ all` visualisation.
+ *
+ * Sunflower phyllotaxis of super-nodes (one per site) connected by
+ * dashed coral arcs — same grammar as the graph's return-edges so the
+ * two visualisations read as one family at different scales.
+ * ==========================================================================*/
+
+.mg-constellation {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.mg-constellation--empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--mg-fg-muted);
+  font-family: var(--mg-font-serif);
+  font-size: 13px;
+  line-height: 1.5;
+  font-style: italic;
+  text-wrap: balance;
+}
+
+.mg-constellation__svg {
+  display: block;
+  /* Square SVG, capped at 440px, sized to fit whatever container we're
+   * inside. `aspect-ratio` + flex alignment centers the square both
+   * axes regardless of the flex line's dimensions. preserveAspectRatio
+   * default (xMidYMid meet) then centers the viewBox content inside. */
+  width: min(100%, 440px);
+  aspect-ratio: 1 / 1;
+  max-height: min(100%, 440px);
+}
+
+/* -- Arcs between sites ------------------------------------------------ */
+
+.mg-constellation__arc {
+  fill: none;
+  stroke: var(--mg-accent);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-dasharray: 3 3;
+  opacity: 0.45;
+  transition: opacity var(--mg-duration-normal, 200ms) var(--mg-ease-standard, ease-out);
+}
+
+.mg-constellation__star:hover ~ .mg-constellation__arcs .mg-constellation__arc,
+.mg-constellation__arcs:hover .mg-constellation__arc {
+  /* Low-opacity at rest, gentle rise on hover of the whole layer. */
+  opacity: 0.65;
+}
+
+/* -- Super-nodes ------------------------------------------------------- */
+
+.mg-constellation__star {
+  cursor: pointer;
+  opacity: 0;
+  animation: mg-constellation-star-in
+    var(--mg-duration-moderate, 280ms)
+    var(--mg-ease-expo-out, cubic-bezier(0.16, 1, 0.3, 1))
+    forwards;
+}
+
+@keyframes mg-constellation-star-in {
+  from { opacity: 0; transform: scale(0.2) translate(var(--tx, 0), var(--ty, 0)); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.mg-constellation__star-halo {
+  fill: none;
+  stroke: var(--mg-accent);
+  stroke-width: 1;
+  opacity: 0;
+  transition: opacity var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+
+.mg-constellation__star:hover .mg-constellation__star-halo,
+.mg-constellation__star:focus-visible .mg-constellation__star-halo {
+  opacity: 0.55;
+}
+
+.mg-constellation__star-disc {
+  fill: var(--mg-accent);
+  stroke: var(--mg-bg);
+  stroke-width: 2;
+  transition: transform var(--mg-duration-normal, 200ms) var(--mg-ease-spring-snappy, cubic-bezier(0.5, 1.6, 0.4, 1));
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.mg-constellation__star:hover .mg-constellation__star-disc,
+.mg-constellation__star:focus-visible .mg-constellation__star-disc {
+  transform: scale(1.12);
+}
+
+.mg-constellation__star-label {
+  font-family: var(--mg-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  fill: var(--mg-fg);
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: hanging;
+  pointer-events: none;
+}
+
+.mg-constellation__star-stats {
+  font-family: var(--mg-font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  fill: var(--mg-fg-subtle);
+  font-variant-numeric: tabular-nums;
+  text-anchor: middle;
+  dominant-baseline: hanging;
+  pointer-events: none;
+}
+
+.mg-constellation__star:focus-visible {
+  outline: none;
+}
+.mg-constellation__star:focus-visible .mg-constellation__star-halo {
+  stroke-dasharray: 2 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-constellation__star {
+    animation: none;
+    opacity: 1;
+  }
+  .mg-constellation__star-disc,
+  .mg-constellation__star-halo,
+  .mg-constellation__arc {
+    transition: none;
+  }
+}

@@ -16,12 +16,15 @@ export interface UseClickStrategyOptions {
   kindInference?: KindInference;
   /** Abstract route bucket stamped on every committed node. */
   route?: string;
+  /** Abstract site bucket (one level above route). */
+  site?: string;
   onCommit: (
     paraId: ParagraphId,
     dwellMs: number,
     textContent: string,
     kind?: NodeKind,
     route?: string,
+    site?: string,
   ) => void;
 }
 
@@ -39,11 +42,13 @@ export function useClickStrategy(
   container: HTMLElement | null,
   options: UseClickStrategyOptions,
 ): void {
-  const { commitDwellMs, inference = 'smart', kindInference = 'smart', route } = options;
+  const { commitDwellMs, inference = 'smart', kindInference = 'smart', route, site } = options;
   const onCommitRef = useRef(options.onCommit);
   onCommitRef.current = options.onCommit;
   const routeRef = useRef(route);
   routeRef.current = route;
+  const siteRef = useRef(site);
+  siteRef.current = site;
 
   useEffect(() => {
     const root = container ?? (typeof document !== 'undefined' ? document.body : null);
@@ -58,7 +63,14 @@ export function useClickStrategy(
       if (!paraId) return;
       const dwellMs = Number(el.dataset.mgDwell) || commitDwellMs;
       const kind = resolveKind(el, kindInference);
-      onCommitRef.current(paraId, dwellMs, el.textContent ?? '', kind, routeRef.current);
+      onCommitRef.current(
+        paraId,
+        dwellMs,
+        el.textContent ?? '',
+        kind,
+        routeRef.current,
+        siteRef.current,
+      );
     };
 
     root.addEventListener('click', onClick);

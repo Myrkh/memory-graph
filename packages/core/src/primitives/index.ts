@@ -68,5 +68,19 @@ export type { NoteEditorProps } from './NoteEditor.js';
 export { Paragraph } from './Paragraph.js';
 export type { ParagraphProps } from './Paragraph.js';
 
+export { StandardBody } from './StandardBody.js';
+export type { StandardBodyProps } from './StandardBody.js';
+
+export { TypewriterTabs } from './TypewriterTabs.js';
+export type { TypewriterTab, TypewriterTabsProps } from './TypewriterTabs.js';
+
+export { Constellation } from './Constellation.js';
+export type { ConstellationProps } from './Constellation.js';
+
+export { PanelSatellite } from './PanelSatellite.js';
+export type { PanelSatelliteProps } from './PanelSatellite.js';
+
+export { ThemeSwapIcon } from '../internal/theme-swap-icon.js';
+
 export { useMemoryGraphContext } from './context.js';
 export type { HoverState, MemoryGraphContextValue } from './context.js';

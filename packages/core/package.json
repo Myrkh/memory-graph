@@ -12,7 +12,12 @@
       "import": "./dist/index.js"
     },
     "./styles": "./dist/styles/base.css",
-    "./themes/stit-claude": "./dist/styles/themes/stit-claude.css"
+    "./themes/stit-claude": "./dist/styles/themes/stit-claude.css",
+    "./themes/plex": "./dist/styles/themes/plex.css",
+    "./themes/solaris": "./dist/styles/themes/solaris.css",
+    "./themes/obsidian": "./dist/styles/themes/obsidian.css",
+    "./themes/kyoto": "./dist/styles/themes/kyoto.css",
+    "./themes/arcade": "./dist/styles/themes/arcade.css"
   },
   "files": [
     "dist",

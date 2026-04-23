@@ -1,0 +1,159 @@
+/* ============================================================================
+ * Typewriter tabs · site / bucket switcher for multi-site memory-graph
+ * consumers (Chrome extension, future SaaS workspaces). Hairline
+ * squircles + dashed baseline + gliding coral bar on the active tile.
+ * Motion tokens align with the zoom icons (expo-out 280ms) so the whole
+ * component feels like one hand.
+ *
+ * Structure :
+ *   .mg-tabs                — flex row container with relative positioning
+ *     .mg-tabs__baseline    — dashed hairline across every tile bottom
+ *     .mg-tabs__tile        — 32×32 squircle button (active via data-attr)
+ *     .mg-tabs__tile--all   — the ∑ tile (mono sigma)
+ *     .mg-tabs__divider     — 1px hairline between last site and ∑
+ *     .mg-tabs__bar         — coral bar that slides below the active tile
+ * ==========================================================================*/
+
+.mg-tabs {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 8px 2px 10px;
+  border-bottom: 1px solid var(--mg-border);
+}
+
+.mg-tabs__baseline {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 6px;
+  border-top: 0.5px dashed var(--mg-border);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* -- Tile -------------------------------------------------------------- */
+
+.mg-tabs__tile {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--mg-border);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--mg-fg-muted);
+  transition:
+    color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    border-color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    background var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+
+.mg-tabs__tile:hover,
+.mg-tabs__tile:focus-visible {
+  color: var(--mg-accent);
+  border-color: color-mix(in oklch, var(--mg-accent) 40%, var(--mg-border));
+  outline: none;
+}
+
+.mg-tabs__tile[data-mg-tab-active='true'] {
+  color: var(--mg-fg);
+  background: color-mix(in oklch, var(--mg-accent) 5%, transparent);
+  border-color: color-mix(in oklch, var(--mg-accent) 25%, var(--mg-border));
+}
+
+.mg-tabs__tile:active:not([disabled]) {
+  transform: scale(0.96);
+}
+
+.mg-tabs__letter {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.mg-tabs__tile--all .mg-tabs__letter {
+  font-family: var(--mg-font-mono);
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* -- Divider between last site and ∑ ----------------------------------- */
+
+.mg-tabs__divider {
+  width: 1px;
+  align-self: center;
+  height: 20px;
+  background: var(--mg-border);
+  margin: 0 8px;
+}
+
+/* -- Hover tooltip · Stit'Claude italic serif, hairline, fade-in ------- */
+
+.mg-tabs__tip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-2px);
+  white-space: nowrap;
+  padding: 4px 9px;
+  font-family: var(--mg-font-serif);
+  font-style: italic;
+  font-size: 11.5px;
+  color: var(--mg-fg);
+  background: var(--mg-surface);
+  border: 1px solid var(--mg-border);
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+  transition:
+    opacity var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    transform var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+
+.mg-tabs__tile:hover .mg-tabs__tip,
+.mg-tabs__tile:focus-visible .mg-tabs__tip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  transition-delay: 250ms;
+}
+
+/* -- Coral gliding bar ------------------------------------------------- */
+
+.mg-tabs__bar {
+  position: absolute;
+  left: 0;
+  bottom: 4px;
+  width: 20px;
+  height: 2px;
+  background: var(--mg-accent);
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--mg-duration-moderate, 280ms)
+      var(--mg-ease-expo-out, cubic-bezier(0.16, 1, 0.3, 1)),
+    opacity var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+.mg-tabs__bar[data-mg-visible] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-tabs__tile,
+  .mg-tabs__bar {
+    transition: none;
+  }
+}

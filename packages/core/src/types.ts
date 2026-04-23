@@ -73,14 +73,12 @@ export interface Node {
   extract: string;
   /** Visual kind — drives the graph shape. Defaults to `paragraph` when omitted. */
   kind?: NodeKind;
-  /**
-   * Abstract "route" bucket the node belongs to — whatever the consumer
-   * passes via `<MemoryGraph.Root route="…">` at commit time. Agnostic of
-   * any routing library: can be a URL path, a tab id, a document id, a
-   * mode name, anything. Drives the 2D column layout in the graph when
-   * two or more unique routes are present in state.
-   */
+  /** Abstract "route" bucket passed via `<Root route="…">`. Birth-route
+   * immutable. Drives the 2D column layout when ≥ 2 unique routes. */
   route?: string;
+  /** Abstract "site" bucket — one level above route (origin or workspace).
+   * Filters `<Graph site="…">` + drives `<TypewriterTabs>`. */
+  site?: string;
 }
 
 /**
@@ -92,6 +90,9 @@ export interface Passage {
   firstAt: number;
   /** Short text excerpt (shorter than a station's — the vanilla uses 60 chars). */
   extract: string;
+  /** Same site semantics as `Node.site` — stamped at creation, lets
+   * `<Graph site="…">` show passages alongside stations in per-site views. */
+  site?: string;
 }
 
 /**
@@ -231,6 +232,8 @@ export interface PassageItem {
   visits: 0;
   pinned: false;
   order: -1;
+  /** Mirrors `Passage.site` so per-site filters can include passages. */
+  site?: string;
 }
 
 /**

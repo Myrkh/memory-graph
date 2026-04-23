@@ -1,0 +1,155 @@
+/* ============================================================================
+ * @myrkh/memory-graph · "obsidian" theme
+ *
+ * HOUSE     : Editorial-Noir
+ * PANTHEON  : Financier Display (NYT), Thames & Hudson monographs, private
+ *             library interiors (acajou), Blade Runner 2049 corporate noir
+ * TYPO      : Playfair Display (display) · Libre Baskerville (body) ·
+ *             IBM Plex Mono (data)
+ * ACCENT    : Cold ivory / bone white — the anti-coral.
+ * PERSONA   : « Mémoire d'un bibliophile dans une bibliothèque d'acajou. »
+ *             The accent isn't a pigment — it's LIGHT itself. Hairlines
+ *             nearly invisible. Serif italic everywhere it earns its
+ *             place. Dark-first, light pair kept honest for daylight use.
+ *
+ * SIGNATURE : the accent is not red, not orange, not blue — it's a warm
+ * bone ivory at the edge of perceptible warmth. Every other theme uses
+ * its accent to *color* things ; Obsidian uses it to *illuminate* them.
+ * The only other piece of chroma is a whisper of gold in the mid-ink
+ * steps so dark surfaces aren't flat grey.
+ *
+ * Hairlines live at ~4% opacity of `--mg-fg`. Scrollbars, borders,
+ * separators — all ghosts. Only the content is solid.
+ * ==========================================================================*/
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,800;0,900;1,400;1,700;1,900&display=swap');
+
+/* -- Dark scheme (DEFAULT for obsidian — it's the intended state) ------ */
+
+[data-mg-theme='obsidian'] {
+  color-scheme: dark;
+
+  /* Pure near-black with a whisper of violet warmth so it doesn't read
+   * as medical-monitor gray on OLED displays. */
+  --mg-ink-1:  oklch(0.085 0.008 280);
+  --mg-ink-2:  oklch(0.125 0.009 280);
+  --mg-ink-3:  oklch(0.162 0.010 278);
+  --mg-ink-4:  oklch(0.200 0.011 275);
+  --mg-ink-5:  oklch(0.245 0.012 272);
+  --mg-ink-6:  oklch(0.308 0.013 268);
+  --mg-ink-7:  oklch(0.395 0.013 262);
+  --mg-ink-8:  oklch(0.510 0.012 255);
+  --mg-ink-9:  oklch(0.635 0.010 245);
+  --mg-ink-10: oklch(0.760 0.008 230);
+  --mg-ink-11: oklch(0.868 0.008 200);
+  --mg-ink-12: oklch(0.960 0.015 90);
+
+  /* Ivory scale · cold bone white with a trace of warm gold. The
+   * accent IS this light, not a color. Narrow dynamic range, very
+   * little chroma swing — the "pigment" is luminance. */
+  --mg-ivory-3:  oklch(0.260 0.030 82);
+  --mg-ivory-6:  oklch(0.520 0.045 82);
+  --mg-ivory-8:  oklch(0.720 0.050 82);
+  --mg-ivory-9:  oklch(0.835 0.055 82);
+  --mg-ivory-10: oklch(0.900 0.050 82);
+  --mg-ivory-11: oklch(0.955 0.035 82);
+
+  --mg-bg: var(--mg-ink-1);
+  --mg-surface: var(--mg-ink-2);
+  /* Hairline at ~4% fg opacity — true Thames & Hudson monograph trim. */
+  --mg-border: color-mix(in oklch, var(--mg-ink-12) 9%, transparent);
+  --mg-fg: var(--mg-ink-12);
+  --mg-fg-muted: var(--mg-ink-10);
+  --mg-fg-subtle: var(--mg-ink-8);
+  --mg-accent: var(--mg-ivory-9);
+  --mg-accent-hover: var(--mg-ivory-10);
+  --mg-accent-subtle: var(--mg-ivory-3);
+  --mg-ring: var(--mg-ivory-8);
+
+  --mg-font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --mg-font-serif: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --mg-font-sans: 'Libre Baskerville', Georgia, serif;
+  --mg-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --mg-duration-fast: 150ms;
+  --mg-duration-normal: 240ms;
+  --mg-duration-moderate: 400ms;
+  --mg-duration-slow: 620ms;
+  --mg-ease-standard: cubic-bezier(0.22, 0.08, 0.18, 1);
+  --mg-ease-decelerate: cubic-bezier(0.05, 0.72, 0.1, 1);
+  --mg-ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --mg-ease-spring-smooth: cubic-bezier(0.5, 1.2, 0.55, 1);
+  --mg-ease-spring-snappy: cubic-bezier(0.4, 1.35, 0.55, 1);
+
+  --mg-radius-sm: 2px;
+  --mg-radius-md: 4px;
+  --mg-radius-lg: 8px;
+  --mg-radius-pill: 9999px;
+
+  font-optical-sizing: auto;
+  font-synthesis: none;
+}
+
+/* -- SIGNATURE : display titles with heavy Playfair italic ------------- */
+/*    Extended to the shop card preview so the gallery mini-panel reads
+ *    as a true miniature of the live title treatment. */
+
+[data-mg-theme='obsidian'] .mg-panel__title,
+[data-mg-theme='obsidian'] .mgx-shop-card__preview-title {
+  font-family: var(--mg-font-display);
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  /* A hair-thin top-to-bottom luminance sweep — almost invisible, but
+   * the title reads as EMBOSSED rather than painted. */
+  background: linear-gradient(
+    180deg,
+    var(--mg-ivory-11),
+    var(--mg-ivory-9)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Subtle vertical hairline at the right edge of the panel head — echoes
+ * the way private-library monographs split title blocks from content. */
+[data-mg-theme='obsidian'] .mgx-shop-card__preview {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--mg-ivory-9) 4%, transparent) 0%,
+    transparent 60%
+  );
+}
+
+[data-mg-theme='obsidian'] ::selection {
+  background: color-mix(in oklch, var(--mg-accent) 28%, transparent);
+  color: var(--mg-ink-1);
+}
+
+/* -- Light scheme (provided as pair, but obsidian wants dark) --------- */
+
+[data-mg-theme='obsidian'][data-mg-scheme='light'],
+[data-mg-theme='obsidian'] [data-mg-scheme='light'] {
+  color-scheme: light;
+
+  --mg-ink-1:  oklch(0.978 0.010 82);
+  --mg-ink-2:  oklch(0.955 0.012 82);
+  --mg-ink-3:  oklch(0.925 0.014 80);
+  --mg-ink-4:  oklch(0.880 0.015 78);
+  --mg-ink-5:  oklch(0.820 0.015 75);
+  --mg-ink-6:  oklch(0.680 0.014 70);
+  --mg-ink-7:  oklch(0.540 0.013 62);
+  --mg-ink-8:  oklch(0.420 0.012 55);
+  --mg-ink-9:  oklch(0.322 0.012 50);
+  --mg-ink-10: oklch(0.230 0.011 45);
+  --mg-ink-11: oklch(0.160 0.010 42);
+  --mg-ink-12: oklch(0.108 0.010 40);
+
+  --mg-ivory-3:  oklch(0.95 0.025 82);
+  --mg-ivory-6:  oklch(0.72 0.035 80);
+  --mg-ivory-8:  oklch(0.54 0.045 78);
+  --mg-ivory-9:  oklch(0.42 0.055 75);
+  --mg-ivory-10: oklch(0.34 0.055 72);
+  --mg-ivory-11: oklch(0.22 0.050 68);
+}

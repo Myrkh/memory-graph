@@ -1,0 +1,144 @@
+/* ============================================================================
+ * @myrkh/memory-graph · "plex" theme
+ *
+ * HOUSE     : Industrial-Pro
+ * PANTHEON  : Bloomberg Terminal, Siemens TIA Portal, LabVIEW, MATLAB
+ * TYPO      : IBM Plex Sans (body) · IBM Plex Mono (data) · IBM Plex Serif (display)
+ * ACCENT    : Amber signal · technical warmth, never decorative
+ * PERSONA   : Dense, technical, respectable. The reading-attention log
+ *             your SIL-2 certification tooling would carry.
+ *
+ * Light scheme stays neutral-paper so print-outs remain lisible; dark
+ * scheme drops into Bloomberg near-black (`#0B0D10`-ish in OKLCH) with
+ * amber surfacing just enough to read as *signal*, never decoration.
+ *
+ * Radii are tighter than Stit'Claude default (Braun-ish franks) because
+ * industrial tooling doesn't round — data is cornered, hard-edged.
+ * ==========================================================================*/
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/* -- Light scheme (default · paper) -------------------------------------- */
+
+[data-mg-theme='plex'] {
+  color-scheme: light;
+
+  --mg-ink-1:  oklch(0.988 0.002 250);
+  --mg-ink-2:  oklch(0.968 0.003 250);
+  --mg-ink-3:  oklch(0.938 0.004 250);
+  --mg-ink-4:  oklch(0.895 0.006 250);
+  --mg-ink-5:  oklch(0.842 0.007 250);
+  --mg-ink-6:  oklch(0.705 0.009 250);
+  --mg-ink-7:  oklch(0.565 0.011 250);
+  --mg-ink-8:  oklch(0.445 0.012 250);
+  --mg-ink-9:  oklch(0.350 0.013 250);
+  --mg-ink-10: oklch(0.255 0.014 250);
+  --mg-ink-11: oklch(0.180 0.014 250);
+  --mg-ink-12: oklch(0.125 0.015 250);
+
+  --mg-amber-3:  oklch(0.965 0.035 80);
+  --mg-amber-6:  oklch(0.860 0.115 80);
+  --mg-amber-8:  oklch(0.790 0.145 78);
+  --mg-amber-9:  oklch(0.712 0.158 75);
+  --mg-amber-10: oklch(0.635 0.150 72);
+  --mg-amber-11: oklch(0.540 0.135 70);
+
+  --mg-bg: var(--mg-ink-1);
+  --mg-surface: var(--mg-ink-3);
+  --mg-border: var(--mg-ink-5);
+  --mg-fg: var(--mg-ink-12);
+  --mg-fg-muted: var(--mg-ink-10);
+  --mg-fg-subtle: var(--mg-ink-8);
+  --mg-accent: var(--mg-amber-10);
+  --mg-accent-hover: var(--mg-amber-11);
+  --mg-accent-subtle: var(--mg-amber-3);
+  --mg-ring: var(--mg-amber-8);
+
+  --mg-font-display: 'IBM Plex Serif', Georgia, serif;
+  --mg-font-serif: 'IBM Plex Serif', Georgia, serif;
+  --mg-font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --mg-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --mg-duration-fast: 100ms;
+  --mg-duration-normal: 160ms;
+  --mg-duration-moderate: 260ms;
+  --mg-duration-slow: 420ms;
+  --mg-ease-standard: cubic-bezier(0.2, 0, 0.38, 0.9);
+  --mg-ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --mg-ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --mg-ease-spring-smooth: cubic-bezier(0.4, 1.2, 0.55, 1);
+  --mg-ease-spring-snappy: cubic-bezier(0.3, 1.4, 0.5, 1);
+
+  --mg-radius-sm: 2px;
+  --mg-radius-md: 4px;
+  --mg-radius-lg: 6px;
+  --mg-radius-pill: 9999px;
+
+  font-optical-sizing: auto;
+  font-synthesis: none;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-mg-theme='plex'] ::selection {
+  background: color-mix(in oklch, var(--mg-accent) 38%, transparent);
+  color: var(--mg-ink-1);
+}
+
+[data-mg-theme='plex'][data-mg-scheme='dark'] ::selection,
+[data-mg-theme='plex'] [data-mg-scheme='dark'] ::selection {
+  background: color-mix(in oklch, var(--mg-accent) 48%, transparent);
+  color: var(--mg-ink-12);
+}
+
+/* -- Dark scheme · Bloomberg near-black --------------------------------- */
+
+[data-mg-theme='plex'][data-mg-scheme='dark'],
+[data-mg-theme='plex'] [data-mg-scheme='dark'] {
+  color-scheme: dark;
+
+  --mg-ink-1:  oklch(0.128 0.012 250);
+  --mg-ink-2:  oklch(0.158 0.013 250);
+  --mg-ink-3:  oklch(0.192 0.013 250);
+  --mg-ink-4:  oklch(0.225 0.014 250);
+  --mg-ink-5:  oklch(0.270 0.014 250);
+  --mg-ink-6:  oklch(0.330 0.014 250);
+  --mg-ink-7:  oklch(0.410 0.013 250);
+  --mg-ink-8:  oklch(0.530 0.012 250);
+  --mg-ink-9:  oklch(0.655 0.010 250);
+  --mg-ink-10: oklch(0.775 0.008 250);
+  --mg-ink-11: oklch(0.880 0.007 250);
+  --mg-ink-12: oklch(0.962 0.005 250);
+
+  --mg-amber-3:  oklch(0.245 0.055 78);
+  --mg-amber-6:  oklch(0.420 0.120 78);
+  --mg-amber-8:  oklch(0.590 0.155 76);
+  --mg-amber-9:  oklch(0.715 0.165 75);
+  --mg-amber-10: oklch(0.790 0.158 75);
+  --mg-amber-11: oklch(0.870 0.125 78);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-mg-theme='plex']:not([data-mg-scheme='light']) {
+    color-scheme: dark;
+
+    --mg-ink-1:  oklch(0.128 0.012 250);
+    --mg-ink-2:  oklch(0.158 0.013 250);
+    --mg-ink-3:  oklch(0.192 0.013 250);
+    --mg-ink-4:  oklch(0.225 0.014 250);
+    --mg-ink-5:  oklch(0.270 0.014 250);
+    --mg-ink-6:  oklch(0.330 0.014 250);
+    --mg-ink-7:  oklch(0.410 0.013 250);
+    --mg-ink-8:  oklch(0.530 0.012 250);
+    --mg-ink-9:  oklch(0.655 0.010 250);
+    --mg-ink-10: oklch(0.775 0.008 250);
+    --mg-ink-11: oklch(0.880 0.007 250);
+    --mg-ink-12: oklch(0.962 0.005 250);
+
+    --mg-amber-3:  oklch(0.245 0.055 78);
+    --mg-amber-6:  oklch(0.420 0.120 78);
+    --mg-amber-8:  oklch(0.590 0.155 76);
+    --mg-amber-9:  oklch(0.715 0.165 75);
+    --mg-amber-10: oklch(0.790 0.158 75);
+    --mg-amber-11: oklch(0.870 0.125 78);
+  }
+}

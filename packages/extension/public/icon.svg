@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- memory-graph extension icon · same visual grammar as the lib :
+       2 stations (coral circle + coral rounded-square) connected by a
+       hairline forward edge and a dashed coral return arc. Scales
+       cleanly 48 → 128. -->
+  <rect width="128" height="128" rx="28" fill="oklch(0.99 0.005 90)"/>
+  <g transform="translate(24 24)">
+    <line x1="10" y1="12" x2="70" y2="64" stroke="#222" stroke-width="3.2" stroke-opacity="0.35"/>
+    <path d="M 70 64 Q 100 38 10 12" fill="none" stroke="#ee624e" stroke-width="4" stroke-linecap="round" stroke-dasharray="7 5"/>
+    <circle cx="10" cy="12" r="10" fill="#ee624e" stroke="#ffffff" stroke-width="3.5"/>
+    <rect x="58" y="52" width="24" height="24" rx="3" fill="#ee624e" stroke="#ffffff" stroke-width="3.5"/>
+  </g>
+</svg>

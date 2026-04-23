@@ -53,6 +53,49 @@
 }
 .mg-panel__title em { color: var(--mg-accent); }
 
+/* Title-actions slot · hosts AnnotationsTrackToggle + CloseButton when
+ * `<StandardBody>` is used. Tight hairline gap, aligned to title baseline. */
+.mg-panel__title-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Generic icon-button slot for the TitleRow · shares the hairline-pill
+ * grammar of `.mg-panel__close` + `.mg-annotations-track-toggle` so
+ * multiple consumer-provided actions (theme shop, privacy toggle, …)
+ * read as one family inside the title row. 26×26 circle, coral hover. */
+.mg-panel-title-action {
+  background: transparent;
+  border: 1px solid var(--mg-border);
+  color: var(--mg-fg-muted);
+  border-radius: 999px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition:
+    color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    border-color var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out),
+    background var(--mg-duration-fast, 120ms) var(--mg-ease-standard, ease-out);
+}
+.mg-panel-title-action:hover,
+.mg-panel-title-action:focus-visible {
+  color: var(--mg-accent);
+  border-color: var(--mg-accent);
+  outline: none;
+}
+.mg-panel-title-action:active:not(:disabled) {
+  transform: scale(0.94);
+}
+.mg-panel-title-action .mg-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
 .mg-panel__close {
   background: transparent;
   border: 1px solid var(--mg-border);
@@ -127,6 +170,12 @@
   line-height: 1.4;
   font-style: italic;
   display: none;
+  /* Single-line row · the word-trim in DeepestIndicator caps words,
+   * this caps pixels as a defense in depth so a single very long
+   * word (URL, hash, token) can't force a line-wrap. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .mg-deepest[data-mg-visible] { display: block; }
 .mg-deepest__k {

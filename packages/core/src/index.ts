@@ -56,6 +56,13 @@ export type {
 
 export { useFocusTrap } from './hooks/useFocusTrap.js';
 
+/* Runtime-agnostic helpers — for non-React consumers (workers, SSR, Electron) */
+export { applyCommit } from './apply-commit.js';
+export type { CommitInput } from './apply-commit.js';
+export { serializeGraph, deserializeGraph } from './internal/serialize.js';
+export type { PersistenceAdapter } from './persistence-adapter.js';
+export { createLocalStorageAdapter } from './internal/local-storage-adapter.js';
+
 /* Primitives — named exports + compound namespace ------------------------- */
 import * as MemoryGraph from './primitives/index.js';
 export { MemoryGraph };

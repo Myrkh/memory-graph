@@ -23,32 +23,35 @@ export interface GraphProps {
   jumpDelayMs?: number;
   /** Called in addition to the default jump behavior with the clicked id. */
   onNodeClick?: (paraId: ParagraphId) => void;
-  /**
-   * Escape hatch for per-node custom rendering. Return a ReactNode to
-   * replace the default kind shape, or `null` to fall back. Rendered
-   * inside the node's `<g transform>` wrapper (use local 0,0 coords).
-   * Pulse, pinned ring, highlight ring and order label stay library-
-   * managed. Use this to give a specific tracked element (theme toggle,
-   * KPI card) a custom look without polluting `NodeKind` with site-
-   * specific values.
-   */
+  /** Per-node SVG escape hatch. Return `null` to fall back to the default
+   * kind shape. Pulse, pinned ring, highlight ring + order label stay
+   * library-managed. Useful to avoid polluting `NodeKind` with
+   * consumer-specific values (theme toggles, KPI tiles). */
   renderNode?: (item: GraphItem, ctx: RenderNodeContext) => ReactNode | null;
-  /** Transform a raw route string into the column label. Default: strip leading slash + uppercase. */
+  /** Column-label formatter. Default: strip leading slash + uppercase. */
   renderRouteLabel?: (route: string) => string;
+  /** Filter the view to this site. Undefined = show all (default). */
+  site?: string;
 }
 
-const defaultRouteLabel = (route: string): string =>
-  route.replace(/^\/+/, '').replace(/\//g, ' · ').toUpperCase() || 'HOME';
+const ROUTE_LABEL_MAX_CHARS = 16;
 
-/**
- * SVG rendering of the reading graph: stations + optional passages,
- * forward/return edges, and minute axis. Clicking a node scrolls the
- * corresponding paragraph into view and triggers a flash.
- *
- * When 2+ unique routes accumulate in state, switches to a 2D column
- * layout — one column per route, laid out in the chronological order
- * routes were first visited. The graph wrap gains horizontal scroll.
- */
+/** Takes the last meaningful path segment, uppercases, truncates to
+ * avoid column-label collisions on deep URLs. Override via the
+ * `renderRouteLabel` prop for custom semantics. */
+const defaultRouteLabel = (route: string): string => {
+  const segments = route.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+  const last = segments[segments.length - 1];
+  if (!last) return 'HOME';
+  const upper = last.toUpperCase().replace(/[-_]/g, ' ');
+  return upper.length > ROUTE_LABEL_MAX_CHARS
+    ? `${upper.slice(0, ROUTE_LABEL_MAX_CHARS - 1)}…`
+    : upper;
+};
+
+/** SVG reading graph. Click-to-scroll on nodes. Switches to 2D columns
+ * when ≥ 2 unique routes accumulate, one column per route in
+ * chronological first-visit order ; graph wrap gains horizontal scroll. */
 export function Graph(props: GraphProps) {
   const {
     className,
@@ -57,6 +60,7 @@ export function Graph(props: GraphProps) {
     onNodeClick,
     renderNode,
     renderRouteLabel = defaultRouteLabel,
+    site,
   } = props;
   const {
     config,
@@ -98,8 +102,8 @@ export function Graph(props: GraphProps) {
   );
 
   const layout = useMemo<GraphLayout | null>(
-    () => layoutGraph(items, svgWidth, config),
-    [items, svgWidth, config],
+    () => layoutGraph(items, svgWidth, config, site !== undefined ? { site } : undefined),
+    [items, svgWidth, config, site],
   );
 
   const { zoom, canZoomIn, canZoomOut, zoomIn, zoomOut, fit } = useGraphZoom(

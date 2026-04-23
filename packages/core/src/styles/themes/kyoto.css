@@ -1,0 +1,206 @@
+/* ============================================================================
+ * @myrkh/memory-graph · "kyoto" theme
+ *
+ * HOUSE     : Japanese-Refined
+ * PANTHEON  : Shiro Kuramata, MUJI, Kenya Hara, tea-ceremony interiors
+ *             (wabi-sabi), Edo-period woodblock prints
+ * TYPO      : Noto Serif JP (display + body, variable weight) ·
+ *             Source Code Pro (mono) — 2 fonts only, per Stit'Claude cap.
+ * ACCENT    : Sacred vermillion (shu-iro 朱色) — shrine torii red.
+ * PERSONA   : « Salon de thé dans un temple. » Washi paper, ink,
+ *             vermillon discret mais présent. Les espaces respirent.
+ *             Le mono a un letter-spacing plus lâche que dans les
+ *             autres thèmes, discipline japonaise.
+ *
+ * SIGNATURE : surfaces carry a *real* washi paper texture built from
+ * two layered repeating gradients at asymmetric angles. Under direct
+ * light (high contrast) the fiber disappears ; under low light (dark
+ * scheme) it becomes clearly visible, just like actual washi.
+ *
+ * Muted text sits on a celadon-green (seiji-iro 青磁色) scale instead
+ * of neutral grey — so secondary information reads as ink on paper,
+ * not as "dimmed chrome".
+ * ==========================================================================*/
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&family=Source+Code+Pro:wght@400;500;600&display=swap');
+
+/* -- Light scheme (default · washi paper) ------------------------------ */
+
+[data-mg-theme='kyoto'] {
+  color-scheme: light;
+
+  /* Washi paper scale · very warm, very tight dynamic range at the
+   * light end so fiber overlay stays subtle. */
+  --mg-ink-1:  oklch(0.983 0.008 88);
+  --mg-ink-2:  oklch(0.962 0.011 85);
+  --mg-ink-3:  oklch(0.935 0.013 82);
+  --mg-ink-4:  oklch(0.895 0.014 78);
+  --mg-ink-5:  oklch(0.842 0.014 72);
+  --mg-ink-6:  oklch(0.705 0.012 65);
+  --mg-ink-7:  oklch(0.558 0.010 58);
+  --mg-ink-8:  oklch(0.425 0.010 52);
+  --mg-ink-9:  oklch(0.325 0.010 48);
+  --mg-ink-10: oklch(0.232 0.010 45);
+  --mg-ink-11: oklch(0.165 0.012 42);
+  --mg-ink-12: oklch(0.115 0.013 40);
+
+  /* Vermillion scale · shu-iro · saturated enough to read as pigment,
+   * not bright enough to scream. Closer to red than orange. */
+  --mg-shu-3:  oklch(0.955 0.040 30);
+  --mg-shu-6:  oklch(0.775 0.140 28);
+  --mg-shu-8:  oklch(0.680 0.180 26);
+  --mg-shu-9:  oklch(0.580 0.205 24);
+  --mg-shu-10: oklch(0.495 0.195 22);
+  --mg-shu-11: oklch(0.405 0.170 20);
+
+  /* Celadon (seiji-iro) · green-muted grey for secondary text. Unique
+   * to this theme — replaces the neutral grey of every other theme. */
+  --mg-celadon-7: oklch(0.545 0.025 155);
+  --mg-celadon-9: oklch(0.362 0.022 152);
+
+  --mg-bg: var(--mg-ink-1);
+  --mg-surface: var(--mg-ink-2);
+  --mg-border: var(--mg-ink-5);
+  --mg-fg: var(--mg-ink-12);
+  --mg-fg-muted: var(--mg-celadon-9);
+  --mg-fg-subtle: var(--mg-celadon-7);
+  --mg-accent: var(--mg-shu-9);
+  --mg-accent-hover: var(--mg-shu-10);
+  --mg-accent-subtle: var(--mg-shu-3);
+  --mg-ring: var(--mg-shu-8);
+
+  /* Single serif family for display + body (weights carry the role
+   * distinction : 900 for display, 500/600 for body). Sans falls back
+   * to the system Japanese stack — no extra font download. */
+  --mg-font-display: 'Noto Serif JP', 'Yu Mincho', Georgia, serif;
+  --mg-font-serif: 'Noto Serif JP', 'Yu Mincho', Georgia, serif;
+  --mg-font-sans: 'Hiragino Sans', 'Yu Gothic', 'Noto Serif JP', system-ui, sans-serif;
+  --mg-font-mono: 'Source Code Pro', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --mg-duration-fast: 160ms;
+  --mg-duration-normal: 260ms;
+  --mg-duration-moderate: 420ms;
+  --mg-duration-slow: 680ms;
+  --mg-ease-standard: cubic-bezier(0.22, 0.06, 0.18, 1);
+  --mg-ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --mg-ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --mg-ease-spring-smooth: cubic-bezier(0.5, 1.15, 0.6, 1);
+  --mg-ease-spring-snappy: cubic-bezier(0.45, 1.3, 0.55, 1);
+
+  --mg-radius-sm: 3px;
+  --mg-radius-md: 6px;
+  --mg-radius-lg: 10px;
+  --mg-radius-pill: 9999px;
+
+  font-optical-sizing: auto;
+  font-synthesis: none;
+}
+
+/* -- SIGNATURE : washi paper fiber, two asymmetric layers -------------- */
+/*    The preview card reuses the same fiber so the gallery miniature
+ *    reads as a real washi sample. */
+
+[data-mg-theme='kyoto'] .mgx-panel,
+[data-mg-theme='kyoto'] .mg-panel,
+[data-mg-theme='kyoto'] .mgx-shop-card__preview {
+  background-image:
+    repeating-linear-gradient(
+      107deg,
+      transparent 0 2px,
+      color-mix(in oklch, var(--mg-fg) 2.2%, transparent) 2px 3px
+    ),
+    repeating-linear-gradient(
+      22deg,
+      transparent 0 3px,
+      color-mix(in oklch, var(--mg-fg) 1.8%, transparent) 3px 4px
+    );
+}
+
+/* Preview title carries the display serif weight — Noto Serif JP 900. */
+[data-mg-theme='kyoto'] .mgx-shop-card__preview-title {
+  font-weight: 900;
+}
+[data-mg-theme='kyoto'] .mgx-shop-card__preview-title em {
+  font-weight: 900;
+}
+
+/* Mono letter-spacing loosened — Japanese discipline, space as value. */
+[data-mg-theme='kyoto'] .mg-stat__k,
+[data-mg-theme='kyoto'] .mg-intensity__k,
+[data-mg-theme='kyoto'] .mg-deepest__k {
+  letter-spacing: 0.20em;
+}
+
+[data-mg-theme='kyoto'] .mg-panel__title em {
+  font-weight: 900;
+}
+
+[data-mg-theme='kyoto'] ::selection {
+  background: color-mix(in oklch, var(--mg-accent) 32%, transparent);
+  color: var(--mg-ink-1);
+}
+
+[data-mg-theme='kyoto'][data-mg-scheme='dark'] ::selection,
+[data-mg-theme='kyoto'] [data-mg-scheme='dark'] ::selection {
+  background: color-mix(in oklch, var(--mg-accent) 44%, transparent);
+  color: var(--mg-ink-12);
+}
+
+/* -- Dark scheme · sumi ink on warm slate ------------------------------ */
+
+[data-mg-theme='kyoto'][data-mg-scheme='dark'],
+[data-mg-theme='kyoto'] [data-mg-scheme='dark'] {
+  color-scheme: dark;
+
+  --mg-ink-1:  oklch(0.155 0.012 45);
+  --mg-ink-2:  oklch(0.188 0.013 45);
+  --mg-ink-3:  oklch(0.225 0.013 45);
+  --mg-ink-4:  oklch(0.268 0.013 45);
+  --mg-ink-5:  oklch(0.315 0.013 48);
+  --mg-ink-6:  oklch(0.372 0.013 52);
+  --mg-ink-7:  oklch(0.455 0.012 56);
+  --mg-ink-8:  oklch(0.568 0.011 62);
+  --mg-ink-9:  oklch(0.680 0.009 68);
+  --mg-ink-10: oklch(0.788 0.008 74);
+  --mg-ink-11: oklch(0.880 0.008 80);
+  --mg-ink-12: oklch(0.968 0.008 86);
+
+  --mg-shu-3:  oklch(0.285 0.068 26);
+  --mg-shu-6:  oklch(0.460 0.150 26);
+  --mg-shu-8:  oklch(0.600 0.195 26);
+  --mg-shu-9:  oklch(0.700 0.195 28);
+  --mg-shu-10: oklch(0.775 0.175 30);
+  --mg-shu-11: oklch(0.850 0.135 32);
+
+  --mg-celadon-7: oklch(0.660 0.025 155);
+  --mg-celadon-9: oklch(0.780 0.022 152);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-mg-theme='kyoto']:not([data-mg-scheme='light']) {
+    color-scheme: dark;
+
+    --mg-ink-1:  oklch(0.155 0.012 45);
+    --mg-ink-2:  oklch(0.188 0.013 45);
+    --mg-ink-3:  oklch(0.225 0.013 45);
+    --mg-ink-4:  oklch(0.268 0.013 45);
+    --mg-ink-5:  oklch(0.315 0.013 48);
+    --mg-ink-6:  oklch(0.372 0.013 52);
+    --mg-ink-7:  oklch(0.455 0.012 56);
+    --mg-ink-8:  oklch(0.568 0.011 62);
+    --mg-ink-9:  oklch(0.680 0.009 68);
+    --mg-ink-10: oklch(0.788 0.008 74);
+    --mg-ink-11: oklch(0.880 0.008 80);
+    --mg-ink-12: oklch(0.968 0.008 86);
+
+    --mg-shu-3:  oklch(0.285 0.068 26);
+    --mg-shu-6:  oklch(0.460 0.150 26);
+    --mg-shu-8:  oklch(0.600 0.195 26);
+    --mg-shu-9:  oklch(0.700 0.195 28);
+    --mg-shu-10: oklch(0.775 0.175 30);
+    --mg-shu-11: oklch(0.850 0.135 32);
+
+    --mg-celadon-7: oklch(0.660 0.025 155);
+    --mg-celadon-9: oklch(0.780 0.022 152);
+  }
+}

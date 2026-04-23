@@ -21,6 +21,7 @@ export interface UseAttentionTrackerOptions {
     textContent: string,
     kind?: NodeKind,
     route?: string,
+    site?: string,
   ) => void;
   /** Default dwell for hover strategy, overridable per-element via `data-mg-dwell`. Default 1500. */
   hoverDwellMs?: number;
@@ -57,6 +58,13 @@ export interface UseAttentionTrackerOptions {
    * present in state.
    */
   route?: string;
+  /**
+   * Abstract "site" bucket stamped on every committed node — one level
+   * above `route`. Site is the unit `<TypewriterTabs>` switches between ;
+   * route is the column inside a site. Usually origin (Chrome extension)
+   * or workspace id (SaaS). Birth-site immutable once stamped.
+   */
+  site?: string;
 }
 
 export interface UseAttentionTrackerReturn {
@@ -94,14 +102,20 @@ export function useAttentionTracker(
     strategyInference = 'smart',
     kindInference = 'smart',
     route,
+    site,
   } = options;
+
+  const routeSite = {
+    ...(route !== undefined ? { route } : {}),
+    ...(site !== undefined ? { site } : {}),
+  };
 
   const viewportOpts = {
     config,
     onCommit,
     inference: strategyInference,
     kindInference,
-    ...(route !== undefined ? { route } : {}),
+    ...routeSite,
   };
   const hoverOpts = {
     triggerDwellMs: hoverDwellMs,
@@ -109,14 +123,14 @@ export function useAttentionTracker(
     onCommit,
     inference: strategyInference,
     kindInference,
-    ...(route !== undefined ? { route } : {}),
+    ...routeSite,
   };
   const clickOpts = {
     commitDwellMs: config.DWELL_MS,
     onCommit,
     inference: strategyInference,
     kindInference,
-    ...(route !== undefined ? { route } : {}),
+    ...routeSite,
   };
   const focusOpts = {
     triggerDwellMs: focusDwellMs,
@@ -124,7 +138,7 @@ export function useAttentionTracker(
     onCommit,
     inference: strategyInference,
     kindInference,
-    ...(route !== undefined ? { route } : {}),
+    ...routeSite,
   };
 
   const { currentParaId } = useViewportStrategy(container, viewportOpts);
